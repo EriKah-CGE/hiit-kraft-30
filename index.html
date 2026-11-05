@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HIIT Kraft 30</title>
+<style>
+:root{--bg:#121417;--card:#1c2026;--fg:#f2f3f5;--mute:#9aa3ad;--work:#e4572e;--rest:#3a86ff;--warm:#f4b942;--cool:#4cc38a;--accent:var(--work)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-user-select:none;user-select:none}
+body.work{--accent:var(--work)} body.rest{--accent:var(--rest)} body.warm{--accent:var(--warm)} body.cool{--accent:var(--cool)} body.fin{--accent:#c94bd1}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 8px;font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+header b{color:var(--fg);font-weight:600}
+#progress{height:6px;background:#2a2f37;margin:0 16px;border-radius:3px;overflow:hidden}
+#progressBar{height:100%;width:0;background:var(--accent);transition:width .4s linear,background .3s}
+.view{display:none;flex:1;flex-direction:column;min-height:0}
+.view.active{display:flex}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 16px 10px;gap:6px;overflow:auto;min-height:0}
+#phase{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;text-align:center}
+#name{font-size:25px;font-weight:700;text-align:center;line-height:1.15}
+#hint{font-size:13px;color:var(--mute);text-align:center;max-width:420px;line-height:1.3}
+#how{width:100%;max-width:440px;background:var(--card);border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.35;color:var(--fg);display:none;-webkit-user-select:text;user-select:text}
+#how.on{display:block}
+#how div{margin:3px 0}
+#how b{color:var(--accent);font-weight:700;margin-right:4px}
+#how .more{color:var(--rest);font-size:12px;margin-left:6px}
+#how a{display:inline-block;margin-top:6px;color:var(--rest);font-size:13px;text-decoration:none}
+#fig{width:min(48vw,190px);flex:none;aspect-ratio:1;background:var(--card);border-radius:22px;overflow:hidden;touch-action:none;cursor:grab}
+#fig canvas{width:100%!important;height:100%!important;display:block}
+#figHint{font-size:12px;color:var(--mute);margin-top:-2px}
+#time{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent);transition:color .3s}
+#target{font-size:15px;color:var(--fg);text-align:center}
+#wbox{display:none;align-items:center;gap:10px}
+#wbox.on{display:flex}
+.wb{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;background:#2a2f37;color:var(--fg);border:0;padding:0}
+#wval{font-size:18px;font-weight:700;min-width:110px;text-align:center}
+#last{font-size:14px;color:var(--mute);text-align:center;min-height:18px}
+#next{font-size:15px;color:var(--mute);text-align:center;min-height:18px}
+#repBox{display:none;align-items:center;gap:14px}
+#repBox.on{display:flex}
+.rb{width:64px;height:64px;border-radius:50%;font-size:34px;font-weight:700;background:#2a2f37;color:var(--fg);border:0}
+#reps{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;min-width:120px;text-align:center;line-height:1;color:var(--accent)}
+#plus{font-size:18px;font-weight:700;color:var(--cool);min-height:22px;text-align:center}
+#banner{display:none;background:#2a2f37;border-radius:12px;padding:10px 12px;font-size:14px;max-width:420px;text-align:center;line-height:1.35}
+#banner.on{display:block}
+#banner button{margin-top:8px;padding:10px 14px;font-size:15px}
+.controls{display:flex;gap:10px;padding:10px 16px 14px;justify-content:center;align-items:stretch}
+button{border:0;border-radius:14px;padding:16px 16px;font-size:17px;font-weight:600;color:var(--fg);background:#2a2f37;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .3s}
+button.primary{background:var(--accent);flex:1;max-width:260px}
+button.ghost{background:transparent;color:var(--mute);font-weight:500}
+button:active{transform:scale(.97)}
+details{margin:0 16px 20px;background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
+summary{cursor:pointer;font-weight:600;color:var(--mute);list-style:none}
+summary::-webkit-details-marker{display:none}
+details ol{padding-left:20px;margin-top:6px;color:var(--mute)}
+details li{margin:4px 0}
+details h4{margin-top:12px;color:var(--fg);font-size:14px}
+details p{color:var(--mute);margin-top:8px;line-height:1.35}
+/* Start */
+.start{flex:1;display:flex;flex-direction:column;padding:16px;gap:14px;overflow:auto}
+.card{background:var(--card);border-radius:16px;padding:14px 16px}
+.card h2{font-size:20px;margin-bottom:6px}
+.card p{color:var(--mute);font-size:14px;line-height:1.4}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.chip{padding:10px 14px;border-radius:12px;background:#2a2f37;font-size:15px;color:var(--mute)}
+.chip.sel{background:var(--accent);color:var(--fg)}
+.big{font-size:19px;padding:18px}
+.start button{flex:none;max-width:none}
+/* History */
+.hist{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sess{background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
+.sess .h{display:flex;justify-content:space-between;font-weight:600}
+.sess .h span:last-child{color:var(--cool)}
+.sess .d{color:var(--mute);margin-top:6px;line-height:1.5;font-variant-numeric:tabular-nums}
+.sess .d i{color:var(--cool);font-style:normal}
+.sess .d s{color:var(--work);text-decoration:none}
+#confirmDel{display:none;color:var(--work);font-size:14px;padding:8px 0}
+</style>
+</head>
+<body class="warm">
+<header><span><b>HIIT Kraft 30</b></span><span id="meta"></span></header>
+<div id="progress"><div id="progressBar"></div></div>
+
+<!-- START -->
+<div id="viewStart" class="view active">
+  <div class="start">
+    <div class="card">
+      <h2 id="stTitle">Nächste Einheit</h2>
+      <p id="stInfo"></p>
+      <div class="row">
+        <div class="chip" id="chipA">Tag A</div><div class="chip" id="chipB">Tag B</div>
+      </div>
+      <div class="row">
+        <div class="chip" data-w="1">Woche 1</div><div class="chip" data-w="2">Woche 2</div><div class="chip" data-w="3">Woche 3+</div>
+      </div>
+    </div>
+    <button id="btnStartSession" class="primary big">Einheit starten</button>
+    <button id="btnResume" class="big" style="display:none">Angefangene Einheit fortsetzen</button>
+    <button id="btnHistory">Verlauf und Protokoll</button>
+    <details>
+      <summary>Plan anzeigen</summary>
+      <div id="plan"></div>
+      <p>Startgewichte Woche 1: Split Squat und Ausfallschritte 2 × 10 kg, einbeiniges Kreuzheben 2 × 7,5 kg, Floor Press und Rudern 2 × 12,5 kg, Schulterdrücken 2 × 8 kg, einarmiges Rudern und Goblet 15 kg, Hüftbrücke 10 kg, Thruster 2 × 8 kg. Die App schlägt ab Woche 2 die höheren Werte vor und merkt sich, was du zuletzt genommen hast.</p>
+      <p>Paare im Wechsel: Satz A1 bis zur Reserve, 25 s Wechsel, Satz A2, 25 s Wechsel, dann die nächste Runde. Gewicht: 2 × 15 kg, wo nichts anderes steht. Wenn alle Sätze die Obergrenze erreichen, bietet die App die nächste Stufe an (3 s exzentrisch, 1,5er-Wiederholungen, Rest-Pause).</p>
+      <p>Ernährung: 130–180 g Protein pro Tag, Defizit etwa 300–400 kcal, Zielgewicht minus 0,25–0,5 kg pro Woche im Wochenschnitt.</p>
+    </details>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="viewMain" class="view">
+  <main>
+    <div id="phase"></div>
+    <div id="name"></div>
+    <div id="hint"></div>
+    <div id="how"></div>
+    <div id="fig"></div>
+    <div id="figHint">Figur mit dem Finger drehen</div>
+    <div id="target"></div>
+    <div id="wbox"><button class="wb" id="wMinus">−</button><span id="wval"></span><button class="wb" id="wPlus">+</button></div>
+    <div id="last"></div>
+    <div id="time"></div>
+    <div id="repBox"><button class="rb" id="rMinus">−</button><div id="reps">0</div><button class="rb" id="rPlus">+</button></div>
+    <div id="plus"></div>
+    <div id="banner"></div>
+    <div id="next"></div>
+  </main>
+  <div class="controls">
+    <button id="prev">Zurück</button>
+    <button id="mainBtn" class="primary">Start</button>
+    <button id="skip">Weiter</button>
+  </div>
+  <div class="controls" style="padding-top:0"><button id="btnAbort" class="ghost">Einheit abbrechen</button></div>
+</div>
+
+<!-- HISTORY -->
+<div id="viewHistory" class="view">
+  <div class="hist" id="histList"></div>
+  <div class="controls">
+    <button id="btnBack">Zurück</button>
+    <button id="btnCopy" class="primary">Protokoll kopieren</button>
+    <button id="btnDel" class="ghost">Löschen</button>
+  </div>
+  <div id="confirmDel" style="text-align:center">Wirklich den ganzen Verlauf löschen? <button id="btnDelYes" style="padding:8px 12px;font-size:14px;margin-left:8px">Ja, löschen</button></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="rig.js"></script>
+<script>
+// ---------- Posen: [Kopf, Schulter, Hüfte, Ellb1, Hand1, Ellb2, Hand2, Knie1, Fuß1, Knie2, Fuß2] ----------
+const N_LEGS=[[103,150],[106,186],[97,150],[94,186]];
+const N=[[100,36],[100,62],[100,112],[105,88],[107,113],[95,88],[97,113],...N_LEGS];
+const RACK=[[100,36],[100,62],[100,112],[110,90],[108,66],[106,92],[104,68],...N_LEGS];
+const SQR=[[94,64],[92,90],[78,130],[104,112],[104,90],[100,114],[100,92],[110,154],[106,186],[104,154],[94,186]];
+const LU=[[100,42],[100,68],[100,120],[105,96],[107,121],[95,96],[97,121],[112,152],[112,186],[82,172],[66,186]];
+const HI=[[150,86],[130,94],[92,118],[131,126],[132,158],[127,126],[128,158],[98,152],[104,186],[92,152],[94,186]];
+const RO=[[150,86],[130,94],[92,118],[116,102],[134,112],[112,104],[130,114],[98,152],[104,186],[92,152],[94,186]];
+const PU_HI=[[160,118],[140,128],[95,140],[141,156],[142,184],[137,156],[138,184],[64,150],[36,182],[62,154],[32,184]];
+const PU_LO=[[160,152],[142,160],[95,164],[124,174],[142,184],[120,176],[138,184],[64,170],[36,182],[62,172],[32,184]];
+const FPu=[[40,170],[62,168],[116,168],[62,136],[62,108],[66,136],[66,108],[140,138],[160,186],[136,140],[156,186]];
+const FPd=[[40,170],[62,168],[116,168],[78,182],[76,152],[82,182],[80,152],[140,138],[160,186],[136,140],[156,186]];
+const SPu=[[100,36],[100,62],[100,112],[106,44],[106,16],[98,44],[98,16],...N_LEGS];
+const BU_SQ=[[92,70],[90,96],[76,134],[108,130],[118,176],[104,132],[114,178],[110,156],[106,186],[104,156],[94,186]];
+const HKa=[[100,36],[100,62],[100,112],[112,82],[120,66],[90,88],[80,104],[120,120],[120,152],[97,150],[94,186]];
+const HKb=[[100,36],[100,62],[100,112],[90,88],[80,104],[112,82],[120,66],[103,150],[106,186],[118,122],[118,154]];
+const SQA=[[94,64],[92,90],[78,130],[114,104],[138,100],[110,106],[134,102],[110,154],[106,186],[104,154],[94,186]];
+const GOBa=[[100,36],[100,62],[100,112],[110,86],[112,72],[106,88],[108,74],...N_LEGS];
+const GOBb=[[94,64],[92,90],[78,130],[106,112],[106,96],[102,114],[102,98],[110,154],[106,186],[104,154],[94,186]];
+const GOBh=[[97,50],[96,76],[89,121],[108,99],[109,84],[104,101],[105,86],[106,152],[106,186],[100,152],[94,186]];
+const WKa=[[100,36],[100,62],[100,112],[108,86],[112,106],[92,88],[88,110],[110,150],[116,186],[92,152],[84,186]];
+const WKb=[[100,36],[100,62],[100,112],[92,88],[88,110],[108,86],[112,106],[92,152],[84,186],[110,150],[116,186]];
+const HFa=[[102,64],[102,90],[100,140],[112,118],[108,140],[94,118],[92,140],[136,146],[136,186],[86,182],[56,186]];
+const HFb=[[108,66],[108,92],[108,142],[118,120],[114,142],[100,120],[98,142],[138,146],[136,186],[86,182],[56,186]];
+const CHa=[[100,36],[100,62],[100,112],[86,86],[80,112],[84,88],[78,114],...N_LEGS];
+const CHb=[[100,36],[100,62],[100,112],[80,84],[70,106],[78,86],[68,108],...N_LEGS];
+const SPLIT_HI=[[100,36],[100,62],[100,112],[105,88],[107,113],[95,88],[97,113],[118,148],[124,186],[82,150],[68,186]];
+const SPLIT_LO=[[100,54],[100,80],[100,130],[105,106],[107,131],[95,106],[97,131],[122,158],[124,186],[84,178],[68,186]];
+const SLRDL=[[150,86],[130,94],[92,118],[131,126],[132,158],[127,126],[128,158],[96,152],[98,186],[62,108],[30,96]];
+const ROW1a=[[150,88],[130,96],[92,122],[140,120],[146,144],[126,128],[124,160],[142,152],[152,186],[80,160],[62,186]];
+const ROW1b=[[150,88],[130,96],[92,122],[140,120],[146,144],[112,104],[128,118],[142,152],[152,186],[80,160],[62,186]];
+const DBa=[[40,172],[62,170],[116,168],[62,140],[62,112],[66,140],[66,112],[116,138],[146,138],[112,140],[142,140]];
+const DBb=[[40,172],[62,170],[116,168],[40,160],[18,152],[66,140],[66,112],[150,160],[184,164],[112,140],[142,140]];
+const BRa=[[40,172],[62,170],[116,168],[88,180],[112,160],[90,182],[114,162],[140,138],[160,186],[150,152],[186,160]];
+const BRb=[[40,172],[62,170],[110,132],[84,164],[106,124],[86,166],[108,126],[140,130],[160,186],[150,120],[188,112]];
+const BR2a=[[40,172],[62,170],[116,168],[86,182],[110,184],[90,184],[114,184],[140,138],[160,186],[136,140],[156,186]];
+const BR2b=[[40,172],[62,170],[110,134],[86,182],[110,184],[90,184],[114,184],[140,130],[160,186],[136,132],[156,186]];
+const SPa=[[60,116],[62,140],[118,160],[56,184],[82,184],[92,150],[118,158],[150,172],[182,184],[148,174],[180,186]];
+const SPb=[[60,117],[62,141],[120,158],[56,184],[82,184],[92,150],[118,157],[150,172],[182,184],[148,174],[180,186]];
+
+// ---------- Übungen ----------
+// db: Liste von Punktindizes für Hanteln, oder 'mid' (eine Hantel zwischen den Händen), oder []
+const EX={
+  kniehebe:{name:'Kniehebelauf',hint:'Auf der Stelle, Knie hüfthoch, Arme locker mitnehmen',poses:[HKa,HKb],db:[],dur:1.0},
+  sqa:{name:'Kniebeugen + Armkreisen',hint:'Ohne Gewicht, tief runter, Arme oben weit kreisen',poses:[SPu,SQA],db:[],dur:2.4},
+  bridge2:{name:'Hüftbrücke + Katze-Kuh',hint:'Beide Füße am Boden, Hüfte hoch, oben kurz halten; danach im Vierfüßler Rücken rund und hohl',poses:[BR2a,BR2b],db:[],dur:2.4},
+  probe:{name:'Probesätze',hint:'Leichte Probesätze der ersten beiden Übungen, locker',poses:[SPLIT_HI,SPLIT_LO],db:[4,6],dur:2.4},
+  splitsquat:{name:'Split Squat',hint:'Hanteln seitlich, ein Bein vorn, hinteres Knie fast bis zum Boden; erst alle Wdh. links, dann rechts',poses:[SPLIT_HI,SPLIT_LO],db:[4,6],dur:2.4,range:[8,20],side:'je Bein',stages:true},
+  pushup:{name:'Liegestütze',hint:'Hände am Boden, Körper eine Linie, Brust fast bis zum Boden',poses:[PU_HI,PU_LO],db:[],dur:2.2,range:[6,25],stages:true},
+  slrdl:{name:'Einbeiniges Kreuzheben',hint:'Beide Hanteln, Standbein leicht gebeugt, freies Bein nach hinten, Rücken gerade; erst links, dann rechts',poses:[N,SLRDL],db:[4,6],dur:2.8,range:[8,20],side:'je Bein',stages:true},
+  floorpress:{name:'Floor Press',hint:'Rückenlage, Ellbogen tippen den Boden, oben voll strecken',poses:[FPd,FPu],db:[4,6],dur:2.2,range:[8,25],stages:true},
+  row1:{name:'Einarmiges Rudern',hint:'Ausfallschritt, freie Hand auf dem Knie, 15 kg, Ellbogen eng zur Hüfte; erst links, dann rechts',poses:[ROW1a,ROW1b],db:[6],dur:2.0,range:[8,20],side:'je Arm',stages:true},
+  deadbug:{name:'Dead Bug',hint:'Rückenlage, unterer Rücken bleibt am Boden, gegenüberliegende Hand und Fuß langsam ausstrecken',poses:[DBa,DBb],db:[],dur:3.0,range:[8,12],side:'je Seite',stages:false},
+  goblet:{name:'Goblet Squat',hint:'Eine 15er vor der Brust, 3 s absenken, tief, Rücken lang',poses:[GOBa,GOBb,GOBh,GOBb],db:'mid',dur:4.0,range:[8,20],stages:true},
+  press:{name:'Schulterdrücken stehend',hint:'Bauch fest, nicht ins Hohlkreuz, oben voll strecken; Gewicht nach Bedarf unter 15 kg',poses:[RACK,SPu],db:[4,6],dur:2.2,range:[8,20],stages:true},
+  bridge1:{name:'Einbeinige Hüftbrücke',hint:'Rückenlage, eine Hantel auf der Hüfte, ein Fuß am Boden, Hüfte hoch und oben 1 s halten; erst links, dann rechts',poses:[BRa,BRb],db:'mid',dur:2.2,range:[10,25],side:'je Bein',stages:true},
+  row:{name:'Rudern vorgebeugt',hint:'Beide Hanteln, Oberkörper fast waagerecht, oben 1 s halten',poses:[HI,RO],db:[4,6],dur:2.2,range:[8,20],stages:true},
+  lunge:{name:'Ausfallschritte rückwärts',hint:'Hanteln hängend, großer Schritt zurück, hinteres Knie kurz über den Boden, im Wechsel',poses:[N,LU],db:[4,6],dur:2.2,range:[8,15],side:'je Bein',stages:true},
+  sideplank:{name:'Seitstütz',hint:'Unterarm am Boden, Hüfte hoch, Körper eine Linie; erst links, dann rechts',poses:[SPa,SPb],db:[],dur:3.0,range:[20,45],side:'je Seite',unit:'s',stages:false},
+  thruster:{name:'Thruster',hint:'Kniebeuge direkt in Schulterdrücken, 10 bis 12 kg',poses:[SQR,SPu],db:[4,6],dur:2.0},
+  burpee:{name:'Burpee ohne Sprung',hint:'Hände runter, Füße zurück, Liegestütz, Füße vor, aufstehen',poses:[N,BU_SQ,PU_LO,BU_SQ],db:[],dur:3.6},
+  walk:{name:'Lockeres Gehen',hint:'Auf der Stelle, Atmung runterfahren',poses:[WKa,WKb],db:[],dur:1.6},
+  hipflex:{name:'Hüftbeuger dehnen',hint:'Kniestand, Becken nach vorn, nach 30 s Seite wechseln',poses:[HFa,HFb],db:[],dur:4},
+  chest:{name:'Brust dehnen',hint:'Hände hinter dem Rücken fassen, Brust öffnen',poses:[CHa,CHb],db:[],dur:4}
+};
+
+// ---------- Ausführung in drei Zeilen + Videosuche ----------
+const HOW={
+  kniehebe:{start:'Aufrecht stehen, Füße hüftbreit.',move:'Abwechselnd ein Knie bis Hüfthöhe heben, zügig wie Laufen auf der Stelle.',watch:'Oberkörper aufrecht, Arme schwingen mit.',yt:'high knees exercise'},
+  sqa:{start:'Füße schulterbreit, Arme über dem Kopf.',move:'In die Hocke, Arme dabei nach vorn; beim Hochkommen Arme in großen Kreisen nach hinten.',watch:'Fersen bleiben am Boden, Knie zeigen in Richtung Fußspitzen.',yt:'bodyweight squat arm circles warm up'},
+  bridge2:{start:'Rückenlage, Füße aufgestellt, Arme neben dem Körper.',move:'Hüfte anheben, bis Schulter, Hüfte und Knie eine Linie bilden, 1 s halten, senken. Danach im Vierfüßler Rücken abwechselnd rund und hohl machen.',watch:'Po oben anspannen, nicht ins Hohlkreuz drücken.',yt:'glute bridge cat cow warm up'},
+  probe:{start:'Wie die Übung selbst, nur mit leichtem Gewicht oder ohne.',move:'Je 5–6 lockere Wiederholungen der ersten beiden Übungen.',watch:'Nur eingrooven, nicht anstrengen.',yt:'warm up sets strength training'},
+  splitsquat:{start:'Eine Hantel in jeder Hand seitlich hängend. Schrittstellung: ein Fuß einen großen Schritt vor dem anderen, hintere Ferse in der Luft.',move:'Gerade nach unten, bis das hintere Knie fast den Boden berührt, dann wieder hoch. Die Füße bleiben an ihrem Platz.',watch:'Oberkörper aufrecht, vorderes Knie über dem Fuß. Erst alle Wdh. mit links vorn, dann rechts.',yt:'dumbbell split squat form'},
+  pushup:{start:'Stütz: Hände etwas breiter als die Schultern, Körper gerade von Kopf bis Ferse.',move:'Brust bis kurz über den Boden senken, hochdrücken.',watch:'Ellbogen etwa 45 Grad zum Körper, Hüfte nicht durchhängen lassen. Zu schwer: Knie am Boden.',yt:'push up proper form'},
+  slrdl:{start:'Eine Hantel in jeder Hand, Stand auf einem Bein, Standbein leicht gebeugt.',move:'Oberkörper nach vorn kippen und das freie Bein nach hinten strecken; die Hanteln gleiten am Schienbein nach unten bis etwa Kniehöhe. Über die Hüfte wieder aufrichten.',watch:'Rücken gerade, Hüfte nicht zur Seite aufdrehen. Wackelig: Fußspitze des freien Beins leicht am Boden lassen. Erst links, dann rechts.',yt:'single leg romanian deadlift dumbbell'},
+  floorpress:{start:'Rückenlage, Füße aufgestellt, Hanteln über der Brust, Arme gestreckt.',move:'Hanteln absenken, bis die Oberarme den Boden berühren, kurz stoppen, wieder hochdrücken.',watch:'Ellbogen etwa 45 Grad zum Körper, Handgelenke gerade über den Ellbogen.',yt:'dumbbell floor press'},
+  row1:{start:'Schrittstellung, Oberkörper nach vorn geneigt, freie Hand auf dem vorderen Knie abgestützt, Hantel hängt in der anderen Hand.',move:'Hantel zur Hüfte ziehen, Ellbogen eng am Körper nach hinten, oben 1 s halten, langsam senken.',watch:'Schulter nicht zum Ohr ziehen, Rücken gerade. Erst alle Wdh. links, dann rechts.',yt:'one arm dumbbell row knee support'},
+  deadbug:{start:'Rückenlage, Arme senkrecht nach oben, Beine angehoben, Knie im rechten Winkel über der Hüfte.',move:'Rechten Arm hinter den Kopf und linkes Bein lang ausstrecken, knapp über dem Boden, zurück, dann die andere Seite.',watch:'Unterer Rücken bleibt die ganze Zeit fest am Boden. Langsam, nicht schwingen.',yt:'dead bug exercise form'},
+  goblet:{start:'Eine Hantel senkrecht mit beiden Händen vor der Brust, Füße etwas breiter als die Hüfte.',move:'3 s langsam in die tiefe Hocke, Ellbogen innen an den Knien vorbei, dann zügig hoch.',watch:'Fersen am Boden, Brust raus, Rücken lang.',yt:'goblet squat form'},
+  press:{start:'Hanteln auf Schulterhöhe, Handflächen nach vorn oder zueinander, Bauch und Po angespannt.',move:'Hanteln über den Kopf drücken bis die Arme gestreckt sind, kontrolliert zurück zu den Schultern.',watch:'Kein Hohlkreuz, Kopf bleibt gerade.',yt:'standing dumbbell shoulder press'},
+  bridge1:{start:'Rückenlage, ein Fuß aufgestellt, das andere Bein gestreckt in der Luft, eine Hantel mit beiden Händen auf der Hüfte halten.',move:'Hüfte anheben, bis Schulter, Hüfte und Knie eine Linie bilden, 1 s halten, senken.',watch:'Mit der Ferse drücken, Po oben anspannen. Erst links, dann rechts.',yt:'single leg glute bridge dumbbell'},
+  row:{start:'Eine Hantel in jeder Hand, Knie leicht gebeugt, Oberkörper fast waagerecht nach vorn geneigt, Rücken gerade.',move:'Beide Hanteln zum Bauch ziehen, Ellbogen nach hinten, oben 1 s halten, langsam senken.',watch:'Rücken bleibt gerade, kein Schwung aus der Hüfte.',yt:'bent over dumbbell row form'},
+  lunge:{start:'Aufrecht stehen, Hanteln seitlich hängend.',move:'Großer Schritt nach hinten, hinteres Knie fast bis zum Boden, über die vordere Ferse zurück in den Stand, dann das andere Bein.',watch:'Oberkörper aufrecht, vorderes Knie über dem Fuß.',yt:'dumbbell reverse lunge form'},
+  sideplank:{start:'Seitlage, Unterarm unter der Schulter, Füße übereinander.',move:'Hüfte anheben, bis der Körper eine gerade Linie bildet, und halten.',watch:'Hüfte nicht absinken lassen, Blick geradeaus. Zu schwer: unteres Knie am Boden.',yt:'side plank form'},
+  thruster:{start:'Hanteln auf Schulterhöhe, Füße schulterbreit.',move:'In die Hocke; beim Hochkommen die Hanteln in einem Zug über den Kopf drücken, zurück zu den Schultern und direkt die nächste.',watch:'Fersen am Boden, Bauch fest.',yt:'dumbbell thruster form'},
+  burpee:{start:'Aufrecht stehen.',move:'In die Hocke, Hände auf den Boden, Füße nach hinten in den Stütz, ein Liegestütz, Füße wieder nach vorn, aufstehen.',watch:'Kein Sprung; sauber statt schnell.',yt:'burpee no jump'},
+  walk:{start:'Aufrecht stehen.',move:'Locker auf der Stelle gehen, Arme schwingen.',watch:'Ruhig durch die Nase atmen.',yt:'cool down walking in place'},
+  hipflex:{start:'Kniestand, ein Fuß vorn aufgestellt, hinteres Knie am Boden.',move:'Becken nach vorn schieben, bis es vorn in der Hüfte des hinteren Beins zieht, halten.',watch:'Oberkörper aufrecht, Po anspannen. 30 s je Seite.',yt:'kneeling hip flexor stretch'},
+  chest:{start:'Aufrecht stehen, Hände hinter dem Rücken verschränkt.',move:'Arme nach hinten-oben heben, Brust öffnen, halten.',watch:'Schultern nach hinten-unten, nicht ins Hohlkreuz.',yt:'standing chest stretch'}
+};
+let howOpen=false,howKey=null;
+function howHTML(k){howKey=k;
+  const h=HOW[k]; if(!h)return '';
+  const q=encodeURIComponent(h.yt);
+  if(!howOpen)return `<div><b>Bewegung</b> ${h.move} <span class="more">mehr</span></div>`;
+  return `<div><b>Start</b> ${h.start}</div><div><b>Bewegung</b> ${h.move}</div><div><b>Achte auf</b> ${h.watch}</div><a href="https://www.youtube.com/results?search_query=${q}">Video zur Übung (YouTube-Suche)</a> <span class="more">weniger</span>`;
+}
+
+// ---------- Gewichte: n = Anzahl Hanteln, start = Woche 1, w2 = ab Woche 2 ----------
+const WT={splitsquat:{n:2,start:10,w2:15},slrdl:{n:2,start:7.5,w2:10},floorpress:{n:2,start:12.5,w2:15},row1:{n:1,start:15,w2:15},goblet:{n:1,start:15,w2:15},press:{n:2,start:8,w2:10},bridge1:{n:1,start:10,w2:15},row:{n:2,start:12.5,w2:15},lunge:{n:2,start:10,w2:15},thruster:{n:2,start:8,w2:10}};
+const WMAX=15;
+function wtDefault(k,week){const w=WT[k];if(!w)return null;if(store.weights&&store.weights[k]!=null)return store.weights[k];return week>=2?w.w2:w.start;}
+function wtText(k,v){const w=WT[k];if(!w||v==null)return '';return (w.n===2?'2 × ':'')+String(v).replace('.',',')+' kg';}
+const STAGES=['Standard','3 s exzentrisch + 1 s Pause unten','1,5er-Wiederholungen','Rest-Pause im letzten Satz'];
+const DAYS={
+  A:[['splitsquat','pushup'],['slrdl','floorpress'],['row1','deadbug']],
+  B:[['goblet','press'],['bridge1','row'],['lunge','sideplank']]
+};
+const WEEK={
+  1:{rounds:2,rir:'3–4 Wdh. in Reserve',fin:{kind:'walk',dur:180}},
+  2:{rounds:3,rir:'2–3 Wdh. in Reserve',fin:{kind:'amrap',dur:120,label:'Finisher, locker'}},
+  3:{rounds:3,rir:'1–2 in Reserve, letzter Oberkörper-Satz 0–1',fin:{kind:'amrap',dur:180,label:'Finisher-Score'}}
+};
+const REST_SEC=25;
+
+
+// ---------- Speicher ----------
+const KEY='hiit30.v2';
+let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null};
+try{const s=localStorage.getItem(KEY);if(s)store=Object.assign(store,JSON.parse(s));}catch(e){}
+if(!store.weights)store.weights={};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+const $=id=>document.getElementById(id);
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const fmtDate=d=>{const x=new Date(d);return x.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});};
+
+function autoWeek(){return Math.min(3,Math.floor(store.sessions.length/3)+1);}
+function nextDay(){const l=store.sessions[store.sessions.length-1];return l&&l.day==='A'?'B':'A';}
+function stageOf(k){return store.stages[k]||0;}
+function lastSessionLike(day,exKey,stage){
+  for(let i=store.sessions.length-1;i>=0;i--){const s=store.sessions[i];if(s.day===day&&s.sets[exKey]&&(s.stage[exKey]||0)===stage)return s;}
+  return null;
+}
+
+// ---------- Session ----------
+let sel={day:'A',week:1};
+let S=null; // aktuelle Session
+let steps=[],idx=0,remaining=0,running=false,endAt=0,tick=null,lastBeep=-1,wakeLock=null,audio=null,setStart=0,repVal=0;
+
+function buildSteps(day,week){
+  const W=WEEK[week],pairs=DAYS[day],st=[];
+  const warm=['kniehebe','sqa','bridge2','probe'];
+  warm.forEach((k,i)=>st.push({kind:'timed',type:'warm',dur:60,ex:k,phase:`Aufwärmen ${i+1}/4`,exLabel:k==='probe'?'Probesätze: '+EX[pairs[0][0]].name+', '+EX[pairs[0][1]].name:null,figEx:k==='probe'?pairs[0][0]:k}));
+  pairs.forEach((pair,pi)=>{
+    for(let r=1;r<=W.rounds;r++){
+      pair.forEach((k,si)=>{
+        st.push({kind:'set',type:'work',ex:k,pair:pi+1,round:r,slot:si,setIndex:r-1,phase:`Paar ${pi+1} · Runde ${r}/${W.rounds} · ${String.fromCharCode(65+pi)}${si+1}`});
+        st.push({kind:'rest',type:'rest',dur:REST_SEC,phase:'Wechsel'});
+      });
+    }
+  });
+  if(W.fin.kind==='walk')st.push({kind:'timed',type:'cool',dur:W.fin.dur,ex:'walk',phase:'Statt Finisher (Woche 1)'});
+  else st.push({kind:'finisher',type:'fin',dur:W.fin.dur,phase:W.fin.label});
+  st.push({kind:'timed',type:'cool',dur:60,ex:'hipflex',phase:'Ausklang 1/2'});
+  st.push({kind:'timed',type:'cool',dur:30,ex:'chest',phase:'Ausklang 2/2'});
+  st.push({kind:'end',type:'cool'});
+  // 'next' für Wechsel-Schritte setzen
+  st.forEach((s,i)=>{ if(s.kind==='rest'){const n=st[i+1]; s.next=n; } });
+  return st;
+}
+
+function startSession(resume){
+  if(!resume){
+    S={date:new Date().toISOString(),day:sel.day,week:sel.week,sets:{},stage:{},wts:{},finisher:null,plus:0};
+    DAYS[sel.day].flat().forEach(k=>{S.stage[k]=stageOf(k);});
+    idx=0;
+  }else{ idx=S.idx||0; }
+  steps=buildSteps(S.day,S.week);
+  S.idx=idx; store.cur=S; save();
+  showView('viewMain');
+  remaining=steps[idx].dur||0; running=false;
+  render();
+  if(!resume)start();
+}
+function abortSession(){ pause(); store.cur=null; save(); S=null; showView('viewStart'); renderStart(); }
+
+// ---------- Rendering ----------
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));}
+function elapsed(){ return S&&S.startedAt?(Date.now()-S.startedAt)/1000:0; }
+
+function render(){
+  const s=steps[idx];
+  document.body.className=s.type;
+  $('progressBar').style.width=(idx/(steps.length-1)*100)+'%';
+  $('meta').innerHTML=`Tag ${S.day} · Woche ${S.week} · Schritt ${idx+1}/${steps.length}`;
+  $('repBox').classList.remove('on'); $('banner').classList.remove('on'); $('how').classList.remove('on'); $('how').innerHTML=''; $('wbox').classList.remove('on'); $('plus').textContent=''; $('last').textContent=''; $('target').textContent=''; $('next').textContent='';
+  $('prev').style.display=''; $('skip').style.display='';
+  const setFig=(k)=>{ if(typeof THREE==='undefined'||typeof Rig==='undefined'){$('fig').innerHTML='<div style="padding:20px;color:#9aa3ad;font-size:13px">3D-Figur konnte nicht geladen werden (Internet?)</div>';return;} if(!$('fig').dataset.init){Rig.init($('fig'));$('fig').dataset.init='1';} Rig.show(k); };
+  const setHow=(k)=>{ $('how').innerHTML=howHTML(k); $('how').classList.add('on'); };
+
+  if(s.kind==='timed'){
+    const ex=EX[s.ex];
+    $('phase').textContent=s.phase; $('name').textContent=s.exLabel||ex.name; $('hint').textContent='';
+    setFig(s.figEx||s.ex); setHow(s.ex); $('time').textContent=fmt(remaining);
+    $('mainBtn').textContent=running?'Pause':'Fortsetzen';
+    const n=steps[idx+1]; if(n&&n.kind==='set')$('next').textContent='Danach: '+EX[n.ex].name;
+  }
+  else if(s.kind==='rest'){
+    const n=s.next;
+    $('phase').textContent='Wechsel · '+fmt(remaining);
+    if(n.kind==='set'){const ex=EX[n.ex];$('name').textContent='Gleich: '+ex.name;$('hint').textContent='';setFig(n.ex);setHow(n.ex);$('target').textContent=targetText(n);}
+    else if(n.kind==='finisher'){$('name').textContent='Gleich: Finisher';$('hint').textContent='5 Thruster + 5 Burpees = 1 Runde, so viele Runden wie möglich';setFig('thruster');setHow('thruster');}
+    else {$('name').textContent='Gleich: '+EX[n.ex].name;$('hint').textContent='';setFig(n.ex);setHow(n.ex);}
+    $('time').textContent=fmt(remaining);
+    $('plus').textContent=S.lastPlus||'';
+    $('mainBtn').textContent=running?'Pause':'Fortsetzen';
+  }
+  else if(s.kind==='set'){
+    const ex=EX[s.ex],stg=S.stage[s.ex]||0;
+    $('phase').textContent=s.phase; $('name').textContent=ex.name; $('hint').textContent=(ex.stages&&stg?'Stufe: '+STAGES[stg]:'');
+    setFig(s.ex); setHow(s.ex);
+    $('target').textContent=targetText(s)+' · '+WEEK[S.week].rir;
+    const last=lastSessionLike(S.day,s.ex,stg);
+    const lastSets=last?last.sets[s.ex]:null;
+    const lastWt=last&&last.wts?last.wts[s.ex]:null;
+    $('last').textContent=lastSets?'Letztes Mal: '+lastSets.map(v=>v==null?'–':v).join(' · ')+(ex.unit==='s'?' s':'')+(lastWt!=null?' ('+wtText(s.ex,lastWt)+')':''):'Erstes Mal mit dieser Übung';
+    if(WT[s.ex]){ if(S.wts[s.ex]==null)S.wts[s.ex]=wtDefault(s.ex,S.week); wtVal=S.wts[s.ex]; $('wval').textContent=wtText(s.ex,wtVal); $('wbox').classList.add('on'); }
+    $('time').textContent='';
+    const logged=(S.sets[s.ex]||[])[s.setIndex];
+    repVal=logged!=null?logged:(lastSets&&lastSets[s.setIndex]!=null?lastSets[s.setIndex]:ex.range[0]);
+    $('reps').textContent=repVal; $('repBox').classList.add('on');
+    $('mainBtn').textContent='Satz fertig';
+    // Stufen-Banner
+    const atTop=lastSets&&lastSets.length>=WEEK[S.week].rounds&&lastSets.every(v=>v!=null&&v>=ex.range[1])&&!S.sets[s.ex];
+    const canWtUp=!!WT[s.ex]&&lastWt!=null&&lastWt<WMAX;
+    if(atTop&&canWtUp&&(S.wts[s.ex]==null||S.wts[s.ex]<=lastWt)){
+      const nw=Math.min(WMAX,lastWt+2.5);
+      $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]}). Erst Gewicht erhöhen: <b>${wtText(s.ex,nw)}</b>.<br><button id="wtUp">Gewicht übernehmen</button>`;
+      $('banner').classList.add('on');
+      $('wtUp').onclick=()=>{S.wts[s.ex]=nw;store.weights[s.ex]=nw;save();render();};
+    } else if(ex.stages&&atTop&&!canWtUp&&stg<STAGES.length-1){
+      $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]})${WT[s.ex]?' mit maximalem Gewicht':''}. Nächste Stufe: <b>${STAGES[stg+1]}</b>. Danach wieder am unteren Ende des Bereichs starten.<br><button id="stageUp">Stufe übernehmen</button>`;
+      $('banner').classList.add('on');
+      $('stageUp').onclick=()=>{store.stages[s.ex]=stg+1;S.stage[s.ex]=stg+1;save();render();};
+    }
+    setStart=Date.now();
+    if(!running)$('time').textContent='';
+  }
+  else if(s.kind==='finisher'){
+    $('phase').textContent=s.phase; $('name').textContent='5 Thruster + 5 Burpees';
+    $('hint').textContent='So viele Runden wie möglich. Jede volle Runde mit + zählen.';
+    setFig('thruster'); $('how').innerHTML='<div><b>Thruster</b> '+HOW.thruster.move+'</div><div><b>Burpee</b> '+HOW.burpee.move+'</div>'; $('how').classList.add('on');
+    $('time').textContent=fmt(remaining);
+    const lastFin=[...store.sessions].reverse().find(x=>x.finisher&&x.finisher.kind==='amrap');
+    $('last').textContent=lastFin?'Letzter Score: '+lastFin.finisher.rounds+' Runden'+(lastFin.finisher.w!=null?' ('+wtText('thruster',lastFin.finisher.w)+')':''):'';
+    if(!S.finisher)S.finisher={kind:'amrap',dur:s.dur,rounds:0,w:wtDefault('thruster',S.week)};
+    repVal=S.finisher.rounds; $('reps').textContent=repVal; $('repBox').classList.add('on');
+    $('target').textContent='Runden';
+    wtVal=S.finisher.w; $('wval').textContent=wtText('thruster',wtVal); $('wbox').classList.add('on');
+    $('mainBtn').textContent=running?'Pause':'Fortsetzen';
+  }
+  else if(s.kind==='end'){
+    $('phase').textContent='Fertig'; $('name').textContent='Einheit geschafft';
+    const n=Object.values(S.sets).reduce((a,v)=>a+v.filter(x=>x!=null).length,0);
+    let t=`${n} Sätze protokolliert · ${S.plus} Plus gegenüber letztem Tag ${S.day}`;
+    if(S.finisher&&S.finisher.kind==='amrap')t+=` · Finisher ${S.finisher.rounds} Runden`;
+    $('hint').textContent=t; setFig('walk'); $('time').textContent='';
+    $('target').textContent='Nächste Einheit frühestens übermorgen: Tag '+(S.day==='A'?'B':'A');
+    $('mainBtn').textContent='Speichern und schließen'; $('skip').style.display='none';
+  }
+}
+function targetText(s){const ex=EX[s.ex];return `Ziel ${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'s':'Wdh.'}${ex.side?' '+ex.side:''}`;}
+
+// ---------- Ton ----------
+function beep(freq,ms,vol){
+  try{
+    if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
+    if(audio.state==='suspended')audio.resume();
+    const o=audio.createOscillator(),g=audio.createGain();
+    o.type='sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol||.5,audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+ms/1000);
+    o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+ms/1000);
+  }catch(e){}
+}
+function switchSound(kind){
+  if(kind==='set'||kind==='finisher'){beep(880,120);setTimeout(()=>beep(1320,260),140);} else beep(660,220);
+  if(navigator.vibrate)try{navigator.vibrate(kind==='set'?[120,60,120]:120);}catch(e){}
+}
+async function requestWake(){try{if('wakeLock' in navigator)wakeLock=await navigator.wakeLock.request('screen');}catch(e){}}
+function releaseWake(){try{wakeLock&&wakeLock.release();}catch(e){}wakeLock=null;}
+
+// ---------- Ablauf ----------
+function start(){
+  running=true; if(!S.startedAt)S.startedAt=Date.now();
+  const s=steps[idx];
+  if(s.dur){endAt=performance.now()+remaining*1000;}
+  lastBeep=-1; beep(880,80,.2); requestWake();
+  clearInterval(tick); tick=setInterval(loop,100); render();
+}
+function pause(){running=false;clearInterval(tick);releaseWake();if(S)render();}
+function loop(){
+  const s=steps[idx];
+  if(s.kind==='end'){ pause(); return; }
+  if(s.kind==='set'){ $('time').textContent='Satzzeit '+fmt((Date.now()-setStart)/1000); $('time').style.fontSize='22px'; return; }
+  $('time').style.fontSize='';
+  remaining=(endAt-performance.now())/1000;
+  const sec=Math.ceil(remaining);
+  if(sec<=3&&sec>0&&sec!==lastBeep){lastBeep=sec;beep(1000,90,.35);}
+  if(remaining<=0){advance(true);return;}
+  $('time').textContent=fmt(remaining);
+  if(s.kind==='rest')$('phase').textContent='Wechsel · '+fmt(remaining);
+}
+function advance(auto){
+  const s=steps[idx];
+  if(s.kind==='finisher'&&S.finisher)S.finisher.rounds=repVal;
+  if(idx>=steps.length-1)return;
+  idx++; S.idx=idx; save();
+  const n=steps[idx];
+  remaining=n.dur||0; endAt=performance.now()+remaining*1000; lastBeep=-1;
+  if(auto)switchSound(n.kind);
+  $('time').style.fontSize='';
+  if(n.kind==='set'){ setStart=Date.now(); }
+  if(n.kind==='end'){ pause(); }
+  render();
+}
+function finishSet(){
+  const s=steps[idx],ex=EX[s.ex],stg=S.stage[s.ex]||0;
+  if(!S.sets[s.ex])S.sets[s.ex]=[];
+  S.sets[s.ex][s.setIndex]=repVal;
+  const last=lastSessionLike(S.day,s.ex,stg);
+  const lv=last&&last.sets[s.ex]?last.sets[s.ex][s.setIndex]:null;
+  const lw=last&&last.wts?last.wts[s.ex]:null, cw=S.wts[s.ex];
+  if(WT[s.ex]&&cw!=null)store.weights[s.ex]=cw;
+  if(lv!=null){
+    if(lw!=null&&cw!=null&&cw>lw){ if(repVal>=lv-2){S.plus++;S.lastPlus=`Plus: mehr Gewicht (${wtText(s.ex,cw)})`;} else S.lastPlus=`Mehr Gewicht, ${repVal-lv} Wdh.`; }
+    else if(lw!=null&&cw!=null&&cw<lw){S.lastPlus=`Weniger Gewicht als letztes Mal (${wtText(s.ex,lw)})`;}
+    else if(repVal>lv){S.plus++;S.lastPlus=`Plus: +${repVal-lv} gegenüber letztem Mal`;}
+    else if(repVal===lv)S.lastPlus='Gleich wie letztes Mal';
+    else S.lastPlus=`${repVal-lv} gegenüber letztem Mal`;
+  } else S.lastPlus='Erster Wert gespeichert';
+  advance(true);
+  if(!running)start();
+}
+function endSession(){
+  pause();
+  delete S.idx; delete S.lastPlus;
+  store.sessions.push(S); store.cur=null; save(); S=null;
+  showView('viewStart'); renderStart();
+}
+
+// ---------- Buttons ----------
+$('mainBtn').addEventListener('click',()=>{
+  const s=steps[idx];
+  if(s.kind==='set')return finishSet();
+  if(s.kind==='end')return endSession();
+  running?pause():start();
+});
+$('skip').addEventListener('click',()=>{ if(steps[idx].kind==='end')return; advance(false); if(!running&&steps[idx].kind!=='set'&&steps[idx].kind!=='end')start(); });
+$('prev').addEventListener('click',()=>{ if(idx===0)return; idx--; S.idx=idx; const s=steps[idx]; remaining=s.dur||0; endAt=performance.now()+remaining*1000; if(s.kind==='set')setStart=Date.now(); render(); });
+$('rPlus').addEventListener('click',()=>{repVal++;$('reps').textContent=repVal;});
+$('rMinus').addEventListener('click',()=>{if(repVal>0)repVal--;$('reps').textContent=repVal;});
+function wtChange(d){
+  const st=steps[idx]; const k=st.kind==='finisher'?'thruster':st.ex; if(!WT[k])return;
+  wtVal=Math.max(0,Math.min(WMAX,(wtVal||0)+d)); $('wval').textContent=wtText(k,wtVal);
+  if(st.kind==='finisher'){S.finisher.w=wtVal;} else {S.wts[k]=wtVal;}
+  store.weights[k]=wtVal; save();
+}
+$('wPlus').addEventListener('click',()=>wtChange(2.5));
+$('wMinus').addEventListener('click',()=>wtChange(-2.5));
+$('btnAbort').addEventListener('click',abortSession);
+$('how').addEventListener('click',e=>{if(e.target.tagName==='A')return;howOpen=!howOpen;if(howKey)$('how').innerHTML=howHTML(howKey);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)requestWake();});
+
+// ---------- Startansicht ----------
+function renderStart(){
+  if(!store.overrideWeek)sel.week=autoWeek(); else sel.week=store.overrideWeek;
+  if(!sel.dayManual)sel.day=nextDay();
+  const W=WEEK[sel.week];
+  $('chipA').classList.toggle('sel',sel.day==='A'); $('chipB').classList.toggle('sel',sel.day==='B');
+  document.querySelectorAll('[data-w]').forEach(c=>c.classList.toggle('sel',+c.dataset.w===sel.week));
+  const n=store.sessions.length;
+  $('stInfo').textContent=`${n} Einheiten bisher. Woche ${sel.week}${sel.week===3?'+':''}: ${W.rounds} Runden pro Paar, Satzende bei ${W.rir}. ${W.fin.kind==='walk'?'Kein Finisher, stattdessen 3 min Gehen.':'Finisher '+fmt(W.fin.dur)+' AMRAP.'}`;
+  $('btnResume').style.display=store.cur?'':'none';
+  $('meta').innerHTML=n?`Zuletzt: ${fmtDate(store.sessions[n-1].date)} · Tag ${store.sessions[n-1].day}`:'Noch keine Einheit';
+  document.body.className='warm'; $('progressBar').style.width='0';
+}
+$('chipA').onclick=()=>{sel.day='A';sel.dayManual=true;renderStart();};
+$('chipB').onclick=()=>{sel.day='B';sel.dayManual=true;renderStart();};
+document.querySelectorAll('[data-w]').forEach(c=>c.onclick=()=>{store.overrideWeek=+c.dataset.w;save();renderStart();});
+$('btnStartSession').onclick=()=>{startSession(false);};
+$('btnResume').onclick=()=>{S=store.cur;startSession(true);};
+$('btnHistory').onclick=()=>{renderHistory();showView('viewHistory');};
+$('btnBack').onclick=()=>{showView('viewStart');renderStart();};
+
+// ---------- Verlauf ----------
+function sessionText(s,html){
+  const lines=[];
+  DAYS[s.day].flat().forEach(k=>{
+    const v=s.sets[k]; if(!v)return;
+    const prev=(()=>{const i=store.sessions.indexOf(s);for(let j=i-1;j>=0;j--){const p=store.sessions[j];if(p.day===s.day&&p.sets[k]&&(p.stage[k]||0)===(s.stage[k]||0))return p.sets[k];}return null;})();
+    const vals=v.map((x,i)=>{if(x==null)return '–';if(!html||!prev||prev[i]==null)return String(x);return x>prev[i]?`<i>${x}</i>`:x<prev[i]?`<s>${x}</s>`:String(x);});
+    lines.push(`${EX[k].name}${(s.stage[k]||0)?' (Stufe '+s.stage[k]+')':''}: ${vals.join(' · ')}${EX[k].unit==='s'?' s':''}${s.wts&&s.wts[k]!=null?' @ '+wtText(k,s.wts[k]):''}`);
+  });
+  if(s.finisher&&s.finisher.kind==='amrap')lines.push(`Finisher: ${s.finisher.rounds} Runden in ${fmt(s.finisher.dur)}${s.finisher.w!=null?' @ '+wtText('thruster',s.finisher.w):''}`);
+  return lines;
+}
+function renderHistory(){
+  const L=$('histList'); L.innerHTML=''; $('confirmDel').style.display='none';
+  if(!store.sessions.length){L.innerHTML='<div class="sess">Noch keine Einheit gespeichert.</div>';return;}
+  [...store.sessions].reverse().forEach(s=>{
+    const d=document.createElement('div');d.className='sess';
+    d.innerHTML=`<div class="h"><span>${fmtDate(s.date)} · Tag ${s.day} · Woche ${s.week}</span><span>${s.plus} Plus</span></div><div class="d">${sessionText(s,true).join('<br>')}</div>`;
+    L.appendChild(d);
+  });
+}
+$('btnCopy').onclick=()=>{
+  const txt=store.sessions.map(s=>`${new Date(s.date).toLocaleDateString('de-DE')} Tag ${s.day} Woche ${s.week} (${s.plus} Plus)\n  `+sessionText(s,false).join('\n  ')).join('\n\n');
+  try{navigator.clipboard.writeText(txt).then(()=>{$('btnCopy').textContent='Kopiert';setTimeout(()=>$('btnCopy').textContent='Protokoll kopieren',1500);}).catch(()=>{$('btnCopy').textContent='Kopieren nicht möglich';});}catch(e){$('btnCopy').textContent='Kopieren nicht möglich';}
+};
+$('btnDel').onclick=()=>{$('confirmDel').style.display='block';};
+$('btnDelYes').onclick=()=>{store.sessions=[];store.stages={};store.weights={};store.overrideWeek=null;store.cur=null;save();renderHistory();renderStart();};
+
+// ---------- Planübersicht ----------
+(function(){
+  let h='';
+  ['A','B'].forEach(d=>{
+    h+=`<h4>Tag ${d}</h4><ol>`+DAYS[d].map((p,i)=>`<li>${String.fromCharCode(65+i)}1 ${EX[p[0]].name} (${EX[p[0]].range.join('–')}${EX[p[0]].unit==='s'?' s':''}${EX[p[0]].side?' '+EX[p[0]].side:''}) / ${String.fromCharCode(65+i)}2 ${EX[p[1]].name} (${EX[p[1]].range.join('–')}${EX[p[1]].unit==='s'?' s':''}${EX[p[1]].side?' '+EX[p[1]].side:''})</li>`).join('')+'</ol>';
+  });
+  h+='<h4>Ablauf</h4><ol><li>Aufwärmen 4 × 60 s</li><li>3 Paare, je 2–3 Runden, 25 s Wechsel</li><li>Finisher: 5 Thruster + 5 Burpees, AMRAP (ab Woche 2)</li><li>Ausklang 90 s</li></ol>';
+  h+='<h4>Einstieg</h4><ol><li>Woche 1: 2 Runden, 3–4 in Reserve, kein Finisher</li><li>Woche 2: 3 Runden, 2–3 in Reserve, Finisher 2 min locker</li><li>Ab Woche 3: 3 Runden, 1–2 in Reserve, Finisher 3 min</li></ol>';
+  $('plan').innerHTML=h;
+})();
+
+renderStart();
+</script>
+</body>
+</html>
