@@ -76,6 +76,42 @@ details p{color:var(--mute);margin-top:8px;line-height:1.35}
 .sess .d i{color:var(--cool);font-style:normal}
 .sess .d s{color:var(--work);text-decoration:none}
 #confirmDel{display:none;color:var(--work);font-size:14px;padding:8px 0}
+
+/* ---------- Breite Bildschirme (PC) ---------- */
+@media (min-width: 820px){
+  header{font-size:18px;padding:16px 32px 10px}
+  #progress{margin:0 32px}
+  main{display:grid;grid-template-columns:minmax(380px,520px) minmax(380px,560px);grid-template-areas:
+    "phase phase" "name name" "fig target" "fig wbox" "fig last" "fig time" "fig reps" "fig plus" "fighint banner" "how banner" "hint next";
+    column-gap:40px;row-gap:10px;justify-content:center;align-content:center;align-items:center;justify-items:center;padding:12px 32px}
+  #phase{grid-area:phase;font-size:16px}
+  #name{grid-area:name;font-size:40px}
+  #hint{grid-area:hint;font-size:15px}
+  #how{grid-area:how;font-size:16px;max-width:none;padding:12px 16px}
+  #fig{grid-area:fig;width:min(44vh,440px);align-self:center}
+  #figHint{grid-area:fighint;font-size:14px}
+  #target{grid-area:target;font-size:20px}
+  #wbox{grid-area:wbox}
+  .wb{width:52px;height:52px;font-size:28px}
+  #wval{font-size:24px;min-width:150px}
+  #last{grid-area:last;font-size:18px}
+  #time{grid-area:time;font-size:120px}
+  #repBox{grid-area:reps;gap:24px}
+  .rb{width:88px;height:88px;font-size:44px}
+  #reps{font-size:104px;min-width:170px}
+  #plus{grid-area:plus;font-size:22px}
+  #banner{grid-area:banner;font-size:16px;max-width:none}
+  #next{grid-area:next;font-size:18px}
+  .controls{padding:14px 32px 12px}
+  .controls button{font-size:21px;padding:20px 28px}
+  button.primary{max-width:360px}
+  .start{max-width:760px;width:100%;margin:0 auto;padding:28px 24px;gap:18px}
+  .card h2{font-size:26px}.card p{font-size:17px}.chip{font-size:17px;padding:12px 18px}
+  .big{font-size:22px;padding:22px}
+  details{max-width:760px;width:100%;margin:0 auto 24px;font-size:16px}
+  .hist{max-width:760px;width:100%;margin:0 auto}.sess{font-size:16px}
+  #viewHistory .controls{padding-bottom:8px}
+}
 </style>
 </head>
 <body class="warm">
