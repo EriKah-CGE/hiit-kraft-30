@@ -85,7 +85,33 @@ const Rig=(function(){
       {t:2,pose:Object.assign({},{legR:{fwd:-35,knee:100},legL:{fwd:100,knee:60}},arms({abd:18,elbow:80}))}]},
     chest:{az:-45,frames:[
       {t:2,pose:arms({fwd:-35,abd:8})},
-      {t:2,pose:arms({fwd:-55,abd:4})}]}
+      {t:2,pose:arms({fwd:-55,abd:4})}]},
+    kneepushup:{el:36,az:65,frames:[
+      {t:1,pose:{root:{rx:60},armL:{fwd:70,abd:10},armR:{fwd:70,abd:10},legL:{fwd:0,knee:95},legR:{fwd:0,knee:95}}},
+      {t:1,pose:{root:{rx:76},armL:{fwd:18,abd:35,elbow:95},armR:{fwd:18,abd:35,elbow:95},legL:{fwd:0,knee:95},legR:{fwd:0,knee:95}}}]},
+    rdl:{el:20,az:80,db:'both',frames:[
+      {t:1.4,pose:legs({knee:10})},
+      {t:1.4,pose:Object.assign({},legs({fwd:15,knee:20}),{torso:{fwd:75},head:{fwd:-35}},arms({fwd:80,abd:10}))}]},
+    squatbw:{az:35,frames:[
+      {t:1,pose:arms({fwd:20,abd:10})},
+      {t:1,pose:Object.assign({},SQ_DEEP,arms({fwd:90,abd:10}))}]},
+    bridge2w:{el:32,az:60,db:'one',frames:[
+      {t:1,pose:Object.assign({},LIE,FEET_PLANTED,arms({fwd:0,abd:12,elbow:60}))},
+      {t:1,pose:Object.assign({},{root:{rx:-110}},legs({fwd:0,knee:110}),arms({fwd:0,abd:12,elbow:60}))},
+      {t:.5,pose:Object.assign({},{root:{rx:-110}},legs({fwd:0,knee:110}),arms({fwd:0,abd:12,elbow:60}))}]},
+    lungebw:{az:60,frames:[
+      {t:.8,pose:arms({abd:12,elbow:90})},
+      {t:.9,pose:{legR:{fwd:-20,knee:95,ankle:50},legL:{fwd:70,knee:75},torso:{fwd:8},armL:{abd:12,elbow:90},armR:{abd:12,elbow:90}}},
+      {t:.8,pose:arms({abd:12,elbow:90})},
+      {t:.9,pose:{legL:{fwd:-20,knee:95,ankle:50},legR:{fwd:70,knee:75},torso:{fwd:8},armL:{abd:12,elbow:90},armR:{abd:12,elbow:90}}}]},
+    sideplankknee:{el:26,az:10,frames:[
+      {t:1.5,pose:{root:{rz:60},armR:{abd:60,elbow:90,rot:0},armL:{abd:0,fwd:0},legL:{abd:0,fwd:40,knee:90},legR:{abd:0}}},
+      {t:1.5,pose:{root:{rz:66},armR:{abd:60,elbow:90,rot:0},armL:{abd:0,fwd:0},legL:{abd:0,fwd:40,knee:90},legR:{abd:0}}}]},
+    deadbuglegs:{el:40,az:45,frames:[
+      {t:1.2,pose:Object.assign({},LIE,arms({fwd:0,abd:14}),legs({fwd:90,knee:90}))},
+      {t:1.2,pose:Object.assign({},LIE,arms({fwd:0,abd:14}),{legL:{fwd:15,knee:5},legR:{fwd:90,knee:90}})},
+      {t:1.2,pose:Object.assign({},LIE,arms({fwd:0,abd:14}),legs({fwd:90,knee:90}))},
+      {t:1.2,pose:Object.assign({},LIE,arms({fwd:0,abd:14}),{legR:{fwd:15,knee:5},legL:{fwd:90,knee:90}})}]},
   };
   EXS.probe=EXS.splitsquat;
 
@@ -159,8 +185,9 @@ const Rig=(function(){
     J.dbL.visible=mode==='both'||mode==='L';J.dbR.visible=mode==='both'||mode==='R';dbOne.visible=mode==='one';
     if(mode==='one'){const a=new THREE.Vector3(),b=new THREE.Vector3();J.handL.getWorldPosition(a);J.handR.getWorldPosition(b);dbOne.position.copy(a).add(b).multiplyScalar(.5);dbOne.rotation.set(Math.PI/2,0,0);}
   }
+  let cycleOverride=null;
   function lerpPose(ex,time){
-    const fr=ex.frames,n=fr.length;const total=fr.reduce((a,f)=>a+f.t,0);let tt=time%total;
+    const fr=ex.frames,n=fr.length;const total=fr.reduce((a,f)=>a+f.t,0);if(cycleOverride)time=time*total/cycleOverride;let tt=time%total;
     let i=0;while(tt>fr[(i+1)%n].t&&i<n){tt-=fr[(i+1)%n].t;i++;}
     const A=flat(fr[i%n].pose),B=flat(fr[(i+1)%n].pose),u=tt/fr[(i+1)%n].t,e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
     return A.map((a,k)=>a+(B[k]-a)*e);
@@ -195,5 +222,6 @@ const Rig=(function(){
   function resize(){const w=container.clientWidth||200;renderer.setSize(w,w,false);camera.aspect=1;camera.updateProjectionMatrix();}
   function show(key){const ex=EXS[key];if(!ex)return;if(cur!==ex){cur=ex;t0=performance.now();az=ex.az;}}
   function turn(d){az+=d;}
-  return {init,show,resize,turn,has:k=>!!EXS[k],_setAz:a=>{az=a;},_J:()=>J};
+  function setCycle(sec){cycleOverride=sec||null;}
+  return {init,show,resize,turn,setCycle,has:k=>!!EXS[k],_setAz:a=>{az=a;},_J:()=>J};
 })();
