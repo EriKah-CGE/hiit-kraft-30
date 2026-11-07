@@ -1,8 +1,10 @@
 // ---------- Voice: Zuhören mit Aktivierungswort "Coach", Sprachausgabe ----------
 const Voice=(function(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const FAST=['pause','resume','skip','prev','hard','easy','remaining','whatNow','how','louder','quieter','musicOn','musicOff','nextTrack','abort'];
+  let handledIdx=-1;
   let rec=null,active=false,speaking=false,awaiting=0,handlers={},cfg={tts:'browser',elKey:'',elVoice:'',onStatus:null},restartTimer=null,lastHeard='';
-  const WAKE=/\b(coach|couch|kotsch|koutsch|kohtsch|kutsch|coatch)\b/i;
+  const WAKE=/\b(coach|couch|kotsch|koutsch|kohtsch|kutsch|coatch|cotch|koch|kosch|coach's)\b/i;
 
   const NUM={null:0,'null':0,'eins':1,'ein':1,'eine':1,'zwei':2,'zwo':2,'drei':3,'vier':4,'fünf':5,'sechs':6,'sieben':7,'acht':8,'neun':9,'zehn':10,'elf':11,'zwölf':12,'dreizehn':13,'vierzehn':14,'fünfzehn':15,'sechzehn':16,'siebzehn':17,'achtzehn':18,'neunzehn':19,'zwanzig':20,'dreißig':30,'vierzig':40,'fünfzig':50};
   function parseNumber(t){
@@ -21,11 +23,23 @@ const Voice=(function(){
   function start(){
     if(!SR||active)return;
     active=true;
-    rec=new SR();rec.lang='de-DE';rec.continuous=true;rec.interimResults=false;rec.maxAlternatives=1;
+    rec=new SR();rec.lang='de-DE';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=3;
     rec.onresult=e=>{
       for(let i=e.resultIndex;i<e.results.length;i++){
-        if(!e.results[i].isFinal)continue;
-        const t=e.results[i][0].transcript.trim();
+        const res=e.results[i];
+        // Alternative mit Aktivierungswort bevorzugen
+        let t=res[0].transcript.trim();
+        for(let a=0;a<res.length;a++){if(WAKE.test(res[a].transcript)){t=res[a].transcript.trim();break;}}
+        if(!res.isFinal){
+          // Schnellpfad: eindeutige lokale Befehle schon im Zwischenergebnis ausführen
+          if(handledIdx===i)continue;
+          const m=t.match(WAKE);if(!m)continue;
+          const cmd=t.slice(m.index+m[0].length).replace(/^[,.:!?\s]+/,'').trim();
+          const c=cmd?classify(cmd):null;
+          if(c&&FAST.includes(c.name)){handledIdx=i;awaiting=0;status('„'+cmd+'"');handlers.onCommand&&handlers.onCommand(cmd,parseNumber(cmd));}
+          continue;
+        }
+        if(handledIdx===i){handledIdx=-1;continue;}
         lastHeard=t;
         handle(t);
       }
@@ -46,38 +60,40 @@ const Voice=(function(){
     } else if(awaiting&&Date.now()<awaiting){cmd=text.trim();}
     else return;
     awaiting=0;
-    status('„'+cmd+'"');
+    status(classify(cmd)?'„'+cmd+'"':'an Claude: „'+cmd+'"');
     handlers.onCommand&&handlers.onCommand(cmd,parseNumber(cmd));
   }
 
   // Befehle lokal zuordnen; gibt {name,n} oder null zurück
   function classify(cmd){
-    const c=cmd.toLowerCase();
+    const c=' '+cmd.toLowerCase().replace(/[.,!?]/g,' ').replace(/\s+/g,' ').trim()+' ';
     const n=parseNumber(c);
-    if(/\b(fertig|geschafft|done|erledigt)\b/.test(c))return {name:'finish',n};
-    // Musikbefehle vor pause/weiter prüfen, sonst greifen "Musik pause" oder "Lied weiter" falsch
-    if(/\b(nächstes lied|nächster song|lied weiter|song weiter)\b/.test(c))return {name:'nextTrack'};
-    if(/\b(musik aus|musik stopp|musik pause)\b/.test(c))return {name:'musicOff'};
-    if(/\b(musik an|musik weiter)\b/.test(c))return {name:'musicOn'};
-    if(/\b(pause|stopp|stop|anhalten|warte)\b/.test(c))return {name:'pause'};
-    if(/\b(weiter|los|start|fortsetzen|go)\b/.test(c))return {name:'resume'};
-    if(/\b(zu hart|zu schwer|schaff ich nicht|zu viel|zu anstrengend)\b/.test(c))return {name:'hard'};
-    if(/\b(zu leicht|zu einfach)\b/.test(c))return {name:'easy'};
-    if(/\b(leichter|weniger gewicht|runter)\b/.test(c))return {name:'lighter'};
-    if(/\b(schwerer|mehr gewicht|hoch)\b/.test(c))return {name:'heavier'};
-    // \b greift nicht vor Umlauten (ASCII-Wortgrenze), daher "überspringen" separat
-    if(/(^|\s)überspringen\b/.test(c)||/\b(skip|nächste|weiter zur nächsten|auslassen)\b/.test(c))return {name:'skip'};
-    if(/\b(zurück)\b/.test(c))return {name:'prev'};
-    if(/\b(plus)\b/.test(c)&&n!=null)return {name:'addReps',n};
-    if(/\b(minus)\b/.test(c)&&n!=null)return {name:'addReps',n:-n};
-    if(/\b(lauter)\b/.test(c))return {name:'louder'};
-    if(/\b(leiser)\b/.test(c))return {name:'quieter'};
-    if(/\bmusik\b/.test(c))return {name:'musicOn'};
-    if(/\b(wie lange|wie viel zeit|restzeit)\b/.test(c))return {name:'remaining'};
-    if(/\b(was ist dran|welche übung|was kommt|was jetzt)\b/.test(c))return {name:'whatNow'};
-    if(/\b(wie geht|wie mache ich|ausführung|technik|worauf)\b/.test(c))return {name:'how'};
-    if(/\b(abbrechen|aufhören|schluss für heute)\b/.test(c))return {name:'abort'};
-    if(/^\d+$/.test(c.trim())||(n!=null&&c.trim().split(/\s+/).length<=2))return {name:'finish',n};
+    const has=re=>re.test(c);
+    // Feste Fragen, die lokal beantwortet werden
+    if(has(/ (wie lange|wie viel zeit|restzeit|wie lang noch) /))return {name:'remaining'};
+    if(has(/ (was ist dran|welche übung|was kommt|was jetzt|was mache ich jetzt) /))return {name:'whatNow'};
+    if(has(/ (wie geht das|wie geht die übung|wie mache ich das|ausführung|zeig mir die ausführung) /))return {name:'how'};
+    // Alle anderen Fragen und längeren Sätze gehen an Claude
+    if(has(/^ (wie|was|warum|wieso|weshalb|wann|wo|wohin|welche|welcher|welches|soll|sollte|kann|könnte|muss|darf|ist|sind|hab|habe|bin|mein|meine|mir|mich|ich) /)&&!has(/^ ich bin fertig /))return null;
+    if(c.trim().split(' ').length>6)return null;
+    if(has(/ (fertig|geschafft|done|erledigt) /))return {name:'finish',n};
+    if(has(/ (musik aus|musik stopp|musik pause|musik anhalten) /))return {name:'musicOff'};
+    if(has(/ (nächstes lied|nächster song|lied weiter|song weiter|anderes lied) /))return {name:'nextTrack'};
+    if(has(/ (musik an|musik weiter|musik) /))return {name:'musicOn'};
+    if(has(/ (lauter) /))return {name:'louder'};
+    if(has(/ (leiser) /))return {name:'quieter'};
+    if(has(/ (pause|stopp|stop|anhalten|warte|moment) /))return {name:'pause'};
+    if(has(/ (zu hart|zu schwer|schaff ich nicht|zu viel|zu anstrengend) /))return {name:'hard'};
+    if(has(/ (zu leicht|zu einfach) /))return {name:'easy'};
+    if(has(/ (leichter|weniger gewicht|gewicht runter|gewicht weniger) /))return {name:'lighter'};
+    if(has(/ (schwerer|mehr gewicht|gewicht hoch|gewicht rauf) /))return {name:'heavier'};
+    if(has(/ (überspringen|skip|auslassen|nächste übung) /))return {name:'skip'};
+    if(has(/ (zurück) /))return {name:'prev'};
+    if(has(/ (weiter|los|start|fortsetzen|go|weitermachen) /))return {name:'resume'};
+    if(has(/ (plus) /)&&n!=null)return {name:'addReps',n};
+    if(has(/ (minus) /)&&n!=null)return {name:'addReps',n:-n};
+    if(has(/ (abbrechen|aufhören|schluss für heute) /))return {name:'abort'};
+    if(n!=null&&c.trim().split(' ').length<=2)return {name:'finish',n};
     return null;
   }
 

@@ -2,7 +2,7 @@
 // Key und Modell kommen aus den Einstellungen der App (localStorage). Ohne Key greifen lokale Regeln.
 const Coach=(function(){
   const API='https://api.anthropic.com/v1/messages';
-  let cfg={apiKey:'',model:'claude-sonnet-5-5'};
+  let cfg={apiKey:'',model:'claude-sonnet-5-5',fastModel:'claude-haiku-5-5'};
   function configure(c){cfg=Object.assign(cfg,c||{});}
   function ready(){return !!(cfg.apiKey&&cfg.apiKey.length>10);}
 
@@ -22,9 +22,9 @@ Gib deine Antwort immer über das Tool "antwort" zurück.`;
     progression:{type:'object',properties:{say:S_STR,changes:{type:'object',additionalProperties:{type:'object',properties:{weight:S_NUM,stage:S_NUM}}},note:S_STR},required:['say']}
   };
   let lastRaw='';
-  async function call(messages,maxTokens,kind){
+  async function call(messages,maxTokens,kind,model){
     if(!ready())throw new Error('Kein API-Schlüssel');
-    const body={model:cfg.model||'claude-sonnet-5-5',max_tokens:Math.max(maxTokens||0,1200),system:SYSTEM,messages};
+    const body={model:model||cfg.model||'claude-sonnet-5-5',max_tokens:Math.max(maxTokens||0,1200),system:SYSTEM,messages};
     if(kind&&SCHEMAS[kind]){
       body.tools=[{name:'antwort',description:'Gibt die Antwort des Coaches strukturiert zurück.',input_schema:SCHEMAS[kind]}];
       body.tool_choice={type:'auto'};
@@ -78,8 +78,16 @@ ${JSON.stringify(ctx)}`;
   async function ask(text,ctx){
     const prompt=`Der Nutzer sagt während des Trainings: "${text}"
 Aktueller Zustand: ${JSON.stringify(ctx)}
-Antworte mit {"say":"...","actions":[...]}. Erlaubte actions: {"type":"weight","ex":"<key>","delta":-2.5|2.5}, {"type":"variant","ex":"<key>"} (wechselt auf die leichtere Variante), {"type":"skipSet"}, {"type":"skipPair"}, {"type":"rounds","n":2|3}, {"type":"finisher","on":true|false}, {"type":"pause"}, {"type":"resume"}, {"type":"abort","reason":"schmerz"|"zeit"|"zu_hart"|"sonstiges"}. Leeres Array, wenn nur eine Antwort nötig ist (z. B. Technikfrage). Bei Schmerz in Gelenk oder Rücken: variant oder skipSet, nie weitermachen lassen. Keine Aktion, die der Nutzer nicht sinngemäß gewollt hat.`;
-    const j=await call([{role:'user',content:prompt}],500,'ask');
+Antworte kurz (max. 2 Sätze) über das Tool mit {"say":"...","actions":[...]}. Erlaubte actions: {"type":"weight","ex":"<key>","delta":-2.5|2.5}, {"type":"variant","ex":"<key>"} (wechselt auf die leichtere Variante), {"type":"skipSet"}, {"type":"skipPair"}, {"type":"rounds","n":2|3}, {"type":"finisher","on":true|false}, {"type":"pause"}, {"type":"resume"}, {"type":"abort","reason":"schmerz"|"zeit"|"zu_hart"|"sonstiges"}. Leeres Array, wenn nur eine Antwort nötig ist (z. B. Technikfrage). Bei Schmerz in Gelenk oder Rücken: variant oder skipSet, nie weitermachen lassen. Keine Aktion, die der Nutzer nicht sinngemäß gewollt hat.`;
+    let j;
+    try{j=await call([{role:'user',content:prompt}],500,'ask',cfg.fastModel||cfg.model);}
+    catch(e){
+      // Antwort ohne Format: Text trotzdem vorlesen, keine Aktionen
+      if(/JSON/.test(e.message)&&lastRaw)return {say:lastRaw.replace(/\s+/g,' ').trim().slice(0,400),actions:[]};
+      // schnelles Modell nicht verfügbar: mit dem Hauptmodell erneut
+      if(/API 4(00|04)/.test(e.message)&&cfg.fastModel&&cfg.fastModel!==cfg.model){j=await call([{role:'user',content:prompt}],500,'ask',cfg.model);}
+      else throw e;
+    }
     const acts=Array.isArray(j.actions)?j.actions.filter(a=>a&&typeof a.type==='string').slice(0,4):[];
     return {say:String(j.say||'').slice(0,400),actions:acts};
   }
