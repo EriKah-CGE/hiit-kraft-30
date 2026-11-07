@@ -10,24 +10,42 @@ const Coach=(function(){
 Plan: Tag A und Tag B, je 3 Übungspaare, 2-3 Runden, Sätze nach Wiederholungsbereich bis zur angegebenen Reserve, 25 s Wechsel, Finisher-AMRAP (5 Thruster + 5 Burpees). Progression: erst Wiederholungen, dann Gewicht +2,5 kg, bei 15 kg dann Stufen (3 s exzentrisch, 1,5er, Rest-Pause).
 Sicherheit: Bei Schmerz (stechend, Gelenk, Wirbelsäule) immer die Übung tauschen oder streichen, nie durchziehen lassen. Bei Rückenbeschwerden einbeiniges Kreuzheben und vorgebeugtes Rudern vermeiden (Alternative: Hüftbrücke, einarmiges Rudern abgestützt, Dead Bug).
 Antworte knapp, direkt, auf Deutsch, ohne Floskeln, ohne Emojis. "say"-Texte werden vorgelesen: maximal 2 kurze Sätze, keine Listen, keine Zahlen in Klammern.
-Antworte ausschließlich mit einem JSON-Objekt, ohne Markdown, ohne Text davor oder danach.`;
+Gib deine Antwort immer über das Tool "antwort" zurück.`;
 
-  async function call(messages,maxTokens){
+  // Antwort wird über einen erzwungenen Tool-Aufruf mit festem Schema geholt, damit immer gültiges JSON kommt.
+  const S_NUM={type:'number'},S_STR={type:'string'},S_BOOL={type:'boolean'};
+  const SCHEMAS={
+    test:{type:'object',properties:{ok:S_BOOL,say:S_STR},required:['ok']},
+    plan:{type:'object',properties:{say:S_STR,rounds:S_NUM,weightDelta:S_NUM,rirShift:S_NUM,finisher:S_BOOL,finisherSec:S_NUM,swaps:{type:'object',additionalProperties:S_STR},skipPairs:{type:'array',items:S_NUM}},required:['say']},
+    ask:{type:'object',properties:{say:S_STR,actions:{type:'array',items:{type:'object',properties:{type:S_STR,ex:S_STR,delta:S_NUM,n:S_NUM,on:S_BOOL,reason:S_STR},required:['type']}}},required:['say','actions']},
+    summary:{type:'object',properties:{say:S_STR,next:{type:'object',properties:{weights:{type:'object',additionalProperties:S_NUM},note:S_STR}}},required:['say']},
+    progression:{type:'object',properties:{say:S_STR,changes:{type:'object',additionalProperties:{type:'object',properties:{weight:S_NUM,stage:S_NUM}}},note:S_STR},required:['say']}
+  };
+  let lastRaw='';
+  async function call(messages,maxTokens,kind){
     if(!ready())throw new Error('Kein API-Schlüssel');
-    const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:cfg.model||'claude-sonnet-5-5',max_tokens:maxTokens||700,system:SYSTEM,messages})});
+    const body={model:cfg.model||'claude-sonnet-5-5',max_tokens:Math.max(maxTokens||0,1200),system:SYSTEM,messages};
+    if(kind&&SCHEMAS[kind]){
+      body.tools=[{name:'antwort',description:'Gibt die Antwort des Coaches strukturiert zurück.',input_schema:SCHEMAS[kind]}];
+      body.tool_choice={type:'tool',name:'antwort'};
+    }
+    const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});
     if(!r.ok){const t=await r.text().catch(()=>'');throw new Error('API '+r.status+(t?': '+t.slice(0,160):''));}
     const j=await r.json();
+    const tu=(j.content||[]).find(c=>c.type==='tool_use');
+    if(tu&&tu.input&&typeof tu.input==='object'){lastRaw=JSON.stringify(tu.input);return tu.input;}
     const txt=(j.content||[]).map(c=>c.text||'').join('');
+    lastRaw=txt;
+    if(j.stop_reason==='max_tokens')throw new Error('Antwort abgeschnitten');
     return parseJSON(txt);
   }
   function parseJSON(txt){
     const m=txt.match(/\{[\s\S]*\}/);
-    if(!m)throw new Error('Keine JSON-Antwort');
+    if(!m){console.warn('Coach-Antwort ohne JSON:',txt);throw new Error('Keine JSON-Antwort');}
     return JSON.parse(m[0]);
   }
   async function test(){
-    const j=await call([{role:'user',content:'Verbindungstest. Antworte mit {"ok":true,"say":"Verbindung steht."}'}],60);
+    const j=await call([{role:'user',content:'Verbindungstest. Rufe das Tool mit ok=true und say="Verbindung steht." auf.'}],200,'test');
     return !!j.ok;
   }
 
@@ -40,7 +58,7 @@ Regeln: rounds 2 oder 3. weightDelta nur -5, -2.5 oder 0 (gilt für alle Hantel�
 Antwortformat: {"say":"...","rounds":3,"weightDelta":0,"rirShift":0,"finisher":true,"finisherSec":180,"swaps":{},"skipPairs":[]}
 Daten:
 ${JSON.stringify(ctx)}`;
-    const j=await call([{role:'user',content:prompt}],500);
+    const j=await call([{role:'user',content:prompt}],500,'plan');
     return sanitizeAdjust(j);
   }
   function sanitizeAdjust(j){
@@ -61,7 +79,7 @@ ${JSON.stringify(ctx)}`;
     const prompt=`Der Nutzer sagt während des Trainings: "${text}"
 Aktueller Zustand: ${JSON.stringify(ctx)}
 Antworte mit {"say":"...","actions":[...]}. Erlaubte actions: {"type":"weight","ex":"<key>","delta":-2.5|2.5}, {"type":"variant","ex":"<key>"} (wechselt auf die leichtere Variante), {"type":"skipSet"}, {"type":"skipPair"}, {"type":"rounds","n":2|3}, {"type":"finisher","on":true|false}, {"type":"pause"}, {"type":"resume"}, {"type":"abort","reason":"schmerz"|"zeit"|"zu_hart"|"sonstiges"}. Leeres Array, wenn nur eine Antwort nötig ist (z. B. Technikfrage). Bei Schmerz in Gelenk oder Rücken: variant oder skipSet, nie weitermachen lassen. Keine Aktion, die der Nutzer nicht sinngemäß gewollt hat.`;
-    const j=await call([{role:'user',content:prompt}],500);
+    const j=await call([{role:'user',content:prompt}],500,'ask');
     const acts=Array.isArray(j.actions)?j.actions.filter(a=>a&&typeof a.type==='string').slice(0,4):[];
     return {say:String(j.say||'').slice(0,400),actions:acts};
   }
@@ -73,7 +91,7 @@ Antworte mit {"say":"...","actions":[...]}. Erlaubte actions: {"type":"weight","
 Antwortformat: {"say":"...","next":{"weights":{},"note":"ein Satz für den Startbildschirm der nächsten Einheit"}}
 Einheit: ${JSON.stringify(session)}
 Letzte Einheiten (kompakt): ${JSON.stringify(history)}`;
-    const j=await call([{role:'user',content:prompt}],500);
+    const j=await call([{role:'user',content:prompt}],500,'summary');
     const w={};if(j.next&&j.next.weights&&typeof j.next.weights==='object')for(const k in j.next.weights){const v=+j.next.weights[k];if(v>=0&&v<=15&&Math.abs(v*2-Math.round(v*2))<1e-9)w[k]=v;}
     return {say:String(j.say||'').slice(0,400),next:{weights:w,note:String((j.next&&j.next.note)||'').slice(0,240)}};
   }
@@ -85,7 +103,7 @@ Letzte Einheiten (kompakt): ${JSON.stringify(history)}`;
 Antwortformat: {"say":"...","changes":{"<ex>":{"weight":12.5,"stage":1}},"note":"..."}
 Stufen jetzt: ${JSON.stringify(stages)} Gewichte jetzt: ${JSON.stringify(weights)}
 Einheiten: ${JSON.stringify(sessions)}`;
-    const j=await call([{role:'user',content:prompt}],900);
+    const j=await call([{role:'user',content:prompt}],900,'progression');
     const ch={};if(j.changes&&typeof j.changes==='object')for(const k in j.changes){const c=j.changes[k]||{};const o={};if(c.weight!=null&&+c.weight>=0&&+c.weight<=15)o.weight=+c.weight;if(c.stage!=null&&[0,1,2,3].includes(+c.stage))o.stage=+c.stage;if(Object.keys(o).length)ch[k]=o;}
     return {say:String(j.say||'').slice(0,600),changes:ch,note:String(j.note||'').slice(0,240)};
   }
@@ -105,5 +123,5 @@ Einheiten: ${JSON.stringify(sessions)}`;
     return {say:'Dafür brauche ich den API-Schlüssel in den Einstellungen. Feste Befehle gehen auch so: fertig, Pause, weiter, zu hart, leichter, überspringen.',actions:[]};
   }
 
-  return {configure,ready,test,planAdjust,ask,summary,progression,localAdjust,localAnswer};
+  return {lastRaw:()=>lastRaw,configure,ready,test,planAdjust,ask,summary,progression,localAdjust,localAnswer};
 })();
