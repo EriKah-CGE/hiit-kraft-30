@@ -105,6 +105,25 @@ const Voice=(function(){
   }
   if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
 
+  async function elevenAudio(text){
+    const key=(cfg.elKey||'').trim(),vid=(cfg.elVoice||'').trim()||'nPczCjzI2devNBz1zQrb';
+    const r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+encodeURIComponent(vid)+'?output_format=mp3_22050_32',{method:'POST',headers:{'xi-api-key':key,'content-type':'application/json'},body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.5,similarity_boost:.75}})});
+    if(!r.ok){
+      let msg='Fehler '+r.status;
+      try{const j=await r.json();const d=j.detail||j;msg+=': '+(d.message||d.status||JSON.stringify(d)).slice(0,160);}catch(e){}
+      if(r.status===401)msg+=' (Schlüssel ungültig oder ohne Berechtigung „Text to Speech")';
+      if(r.status===404||r.status===400&&/voice/i.test(msg))msg+=' (Voice-ID prüfen)';
+      throw new Error(msg);
+    }
+    return r.blob();
+  }
+  // Test aus den Einstellungen: spielt einen Satz ab und gibt eine Meldung zurück
+  async function testTts(key,voiceId){
+    const prev={elKey:cfg.elKey,elVoice:cfg.elVoice};cfg.elKey=key;cfg.elVoice=voiceId;
+    try{const b=await elevenAudio('Hier ist dein Coach. So klinge ich im Training.');const a=new Audio(URL.createObjectURL(b));await a.play();return 'ElevenLabs funktioniert.';}
+    catch(e){return 'ElevenLabs: '+e.message;}
+    finally{cfg.elKey=prev.elKey;cfg.elVoice=prev.elVoice;}
+  }
   function speak(text){
     if(!text)return Promise.resolve();
     return new Promise(async resolve=>{
@@ -113,10 +132,10 @@ const Voice=(function(){
       const done=()=>{speaking=false;handlers.onSpeakEnd&&handlers.onSpeakEnd();if(active){clearTimeout(restartTimer);restartTimer=setTimeout(()=>{try{rec.start();}catch(e){}},400);}resolve();};
       if(cfg.tts==='elevenlabs'&&cfg.elKey){
         try{
-          const vid=cfg.elVoice||'21m00Tcm4TlvDq8ikWAM';
-          const r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+vid+'?output_format=mp3_22050_32',{method:'POST',headers:{'xi-api-key':cfg.elKey,'content-type':'application/json'},body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.5,similarity_boost:.75}})});
-          if(r.ok){const b=await r.blob();const a=new Audio(URL.createObjectURL(b));a.onended=done;a.onerror=done;a.play().catch(done);return;}
-        }catch(e){}
+          const blob=await elevenAudio(text);
+          const a=new Audio(URL.createObjectURL(blob));a.onended=done;a.onerror=done;
+          try{await a.play();return;}catch(e){status('ElevenLabs: Wiedergabe blockiert ('+e.message+'), Browser-Stimme');}
+        }catch(e){status('ElevenLabs: '+e.message+' – Browser-Stimme');}
       }
       if(!window.speechSynthesis){done();return;}
       try{
@@ -130,5 +149,5 @@ const Voice=(function(){
 
   function configure(c){cfg=Object.assign(cfg,c||{});}
   function on(h){handlers=Object.assign(handlers,h||{});}
-  return {supported,start,stop,speak,classify,parseNumber,configure,on,isActive:()=>active,isSpeaking:()=>speaking,lastHeard:()=>lastHeard};
+  return {testTts,supported,start,stop,speak,classify,parseNumber,configure,on,isActive:()=>active,isSpeaking:()=>speaking,lastHeard:()=>lastHeard};
 })();

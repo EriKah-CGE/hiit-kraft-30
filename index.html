@@ -298,7 +298,8 @@ summary::-webkit-details-marker{display:none}
       <label class="t"><input type="checkbox" data-s="announce"> Ansagen</label>
       <label class="f">Stimme<select data-s="tts"><option value="browser">Browser</option><option value="elevenlabs">ElevenLabs</option></select></label>
       <label class="f">ElevenLabs-Schlüssel<input type="password" data-s="elKey" autocomplete="off"></label>
-      <label class="f">ElevenLabs Voice-ID<input type="text" data-s="elVoice" autocomplete="off" placeholder="leer = Standardstimme"></label>
+      <label class="f">ElevenLabs Voice-ID<input type="text" data-s="elVoice" autocomplete="off" placeholder="leer = nPczCjzI2devNBz1zQrb (Brian)"></label>
+      <div class="row"><button type="button" id="ttsTest">Stimme testen</button> <span class="line" id="ttsTestOut"></span></div>
     </div>
     <div class="card">
       <h3>Spotify</h3>
@@ -1499,6 +1500,7 @@ if(new URLSearchParams(location.search).get('code')){
     renderSettings();showView('viewSettings');$('spLine').textContent='Bei Spotify angemeldet.';
   }).catch(e=>{renderSettings();showView('viewSettings');$('spLine').textContent=e.message;$('spLine').classList.add('err');});
 }
+document.getElementById('ttsTest').addEventListener('click',async()=>{const o=document.getElementById('ttsTestOut');o.textContent='teste …';const k=document.querySelector('[data-s="elKey"]').value,v=document.querySelector('[data-s="elVoice"]').value;o.textContent=k.trim()?await Voice.testTts(k,v):'Kein ElevenLabs-Schlüssel eingetragen.';});
 </script>
 </body>
 </html>
