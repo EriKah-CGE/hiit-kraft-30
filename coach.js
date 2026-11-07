@@ -27,7 +27,7 @@ Gib deine Antwort immer über das Tool "antwort" zurück.`;
     const body={model:cfg.model||'claude-sonnet-5-5',max_tokens:Math.max(maxTokens||0,1200),system:SYSTEM,messages};
     if(kind&&SCHEMAS[kind]){
       body.tools=[{name:'antwort',description:'Gibt die Antwort des Coaches strukturiert zurück.',input_schema:SCHEMAS[kind]}];
-      body.tool_choice={type:'tool',name:'antwort'};
+      body.tool_choice={type:'auto'};
     }
     const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});
     if(!r.ok){const t=await r.text().catch(()=>'');throw new Error('API '+r.status+(t?': '+t.slice(0,160):''));}
