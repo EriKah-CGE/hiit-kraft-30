@@ -55,21 +55,24 @@ const Voice=(function(){
     const c=cmd.toLowerCase();
     const n=parseNumber(c);
     if(/\b(fertig|geschafft|done|erledigt)\b/.test(c))return {name:'finish',n};
+    // Musikbefehle vor pause/weiter prüfen, sonst greifen "Musik pause" oder "Lied weiter" falsch
+    if(/\b(nächstes lied|nächster song|lied weiter|song weiter)\b/.test(c))return {name:'nextTrack'};
+    if(/\b(musik aus|musik stopp|musik pause)\b/.test(c))return {name:'musicOff'};
+    if(/\b(musik an|musik weiter)\b/.test(c))return {name:'musicOn'};
     if(/\b(pause|stopp|stop|anhalten|warte)\b/.test(c))return {name:'pause'};
     if(/\b(weiter|los|start|fortsetzen|go)\b/.test(c))return {name:'resume'};
     if(/\b(zu hart|zu schwer|schaff ich nicht|zu viel|zu anstrengend)\b/.test(c))return {name:'hard'};
     if(/\b(zu leicht|zu einfach)\b/.test(c))return {name:'easy'};
     if(/\b(leichter|weniger gewicht|runter)\b/.test(c))return {name:'lighter'};
     if(/\b(schwerer|mehr gewicht|hoch)\b/.test(c))return {name:'heavier'};
-    if(/\b(überspringen|skip|nächste|weiter zur nächsten|auslassen)\b/.test(c))return {name:'skip'};
+    // \b greift nicht vor Umlauten (ASCII-Wortgrenze), daher "überspringen" separat
+    if(/(^|\s)überspringen\b/.test(c)||/\b(skip|nächste|weiter zur nächsten|auslassen)\b/.test(c))return {name:'skip'};
     if(/\b(zurück)\b/.test(c))return {name:'prev'};
     if(/\b(plus)\b/.test(c)&&n!=null)return {name:'addReps',n};
     if(/\b(minus)\b/.test(c)&&n!=null)return {name:'addReps',n:-n};
     if(/\b(lauter)\b/.test(c))return {name:'louder'};
     if(/\b(leiser)\b/.test(c))return {name:'quieter'};
-    if(/\b(musik aus|musik stopp|musik pause)\b/.test(c))return {name:'musicOff'};
-    if(/\b(musik an|musik weiter|musik)\b/.test(c))return {name:'musicOn'};
-    if(/\b(nächstes lied|nächster song|lied weiter|song weiter)\b/.test(c))return {name:'nextTrack'};
+    if(/\bmusik\b/.test(c))return {name:'musicOn'};
     if(/\b(wie lange|wie viel zeit|restzeit)\b/.test(c))return {name:'remaining'};
     if(/\b(was ist dran|welche übung|was kommt|was jetzt)\b/.test(c))return {name:'whatNow'};
     if(/\b(wie geht|wie mache ich|ausführung|technik|worauf)\b/.test(c))return {name:'how'};

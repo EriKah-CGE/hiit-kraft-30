@@ -10,8 +10,9 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-user-select:none;user-select:none}
 body.work{--accent:var(--work)} body.rest{--accent:var(--rest)} body.warm{--accent:var(--warm)} body.cool{--accent:var(--cool)} body.fin{--accent:#c94bd1}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 8px;font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px 8px;font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
 header b{color:var(--fg);font-weight:600}
+#meta{text-align:right}
 #progress{height:6px;background:#2a2f37;margin:0 16px;border-radius:3px;overflow:hidden}
 #progressBar{height:100%;width:0;background:var(--accent);transition:width .4s linear,background .3s}
 .view{display:none;flex:1;flex-direction:column;min-height:0}
@@ -30,6 +31,9 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 #fig canvas{width:100%!important;height:100%!important;display:block}
 #figHint{font-size:12px;color:var(--mute);margin-top:-2px}
 #time{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent);transition:color .3s}
+#time:empty{display:none}
+#lines{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--mute);text-align:center}
+#lines div:empty{display:none}
 #target{font-size:15px;color:var(--fg);text-align:center}
 #wbox{display:none;align-items:center;gap:10px}
 #wbox.on{display:flex}
@@ -41,49 +45,96 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 #repBox.on{display:flex}
 .rb{width:64px;height:64px;border-radius:50%;font-size:34px;font-weight:700;background:#2a2f37;color:var(--fg);border:0}
 #reps{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;min-width:120px;text-align:center;line-height:1;color:var(--accent)}
+#feelBox{display:none;gap:8px}
+#feelBox.on{display:flex}
+#feelBox button{padding:10px 14px;font-size:15px;border-radius:12px}
+#feelBox button.sel{background:var(--accent)}
+#hardPanel{display:none;flex-wrap:wrap;gap:8px;justify-content:center;max-width:440px;background:var(--card);border-radius:14px;padding:10px}
+#hardPanel.on{display:flex}
+#hardPanel button{padding:10px 12px;font-size:14px}
 #plus{font-size:18px;font-weight:700;color:var(--cool);min-height:22px;text-align:center}
-#banner{display:none;background:#2a2f37;border-radius:12px;padding:10px 12px;font-size:14px;max-width:420px;text-align:center;line-height:1.35}
+#banner{display:none;background:#2a2f37;border-radius:12px;padding:10px 12px;font-size:14px;max-width:440px;text-align:center;line-height:1.35}
 #banner.on{display:block}
-#banner button{margin-top:8px;padding:10px 14px;font-size:15px}
+#banner button{margin:8px 4px 0;padding:10px 14px;font-size:15px}
 .controls{display:flex;gap:10px;padding:10px 16px 14px;justify-content:center;align-items:stretch}
 button{border:0;border-radius:14px;padding:16px 16px;font-size:17px;font-weight:600;color:var(--fg);background:#2a2f37;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .3s}
 button.primary{background:var(--accent);flex:1;max-width:260px}
 button.ghost{background:transparent;color:var(--mute);font-weight:500}
+button.small{padding:9px 12px;font-size:14px;border-radius:10px}
+button:disabled{opacity:.5;cursor:default}
 button:active{transform:scale(.97)}
-details{margin:0 16px 20px;background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
+input[type=text],input[type=password],input[type=number],select,textarea{background:#2a2f37;color:var(--fg);border:0;border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;-webkit-user-select:text;user-select:text;min-width:0}
+textarea{resize:vertical;min-height:54px}
+#coachOut{font-size:14px;color:var(--fg);text-align:center;padding:0 16px 6px;line-height:1.35}
+#coachOut:empty{display:none}
+#coachOut.err{color:var(--work)}
+.coachRow{display:flex;gap:8px;padding:0 16px 12px;justify-content:center}
+.coachRow input{flex:1;max-width:520px}
+.coachRow button{padding:10px 14px;font-size:15px}
+.start details,#explainMobile{margin:0 16px 20px;background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
 summary{cursor:pointer;font-weight:600;color:var(--mute);list-style:none}
 summary::-webkit-details-marker{display:none}
-details ol{padding-left:20px;margin-top:6px;color:var(--mute)}
-details li{margin:4px 0}
-details h4{margin-top:12px;color:var(--fg);font-size:14px}
-details p{color:var(--mute);margin-top:8px;line-height:1.35}
+.start details ol{padding-left:20px;margin-top:6px;color:var(--mute)}
+.start details li{margin:4px 0}
+.start details h4{margin-top:12px;color:var(--fg);font-size:14px}
+.start details p{color:var(--mute);margin-top:8px;line-height:1.35}
+.xt{margin-top:6px}
+.xt summary{color:var(--fg);font-weight:600;font-size:inherit}
+.xt p{color:var(--mute);margin:4px 0 6px;line-height:1.35;-webkit-user-select:text;user-select:text}
+#explainMobile{width:100%;max-width:440px;margin:6px 0 0}
+#explainPanel{display:none}
 /* Start */
 .start{flex:1;display:flex;flex-direction:column;padding:16px;gap:14px;overflow:auto}
 .card{background:var(--card);border-radius:16px;padding:14px 16px}
 .card h2{font-size:20px;margin-bottom:6px}
+.card h3{font-size:16px;margin-bottom:6px}
 .card p{color:var(--mute);font-size:14px;line-height:1.4}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.chip{padding:10px 14px;border-radius:12px;background:#2a2f37;font-size:15px;color:var(--mute)}
+.card .say{color:var(--fg)}
+.card ul{padding-left:20px;color:var(--mute);font-size:14px;margin-top:6px;line-height:1.45}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.row .lbl{color:var(--mute);font-size:14px;min-width:96px}
+.chip{padding:10px 14px;border-radius:12px;background:#2a2f37;font-size:15px;color:var(--mute);cursor:pointer}
 .chip.sel{background:var(--accent);color:var(--fg)}
+.ci .chip{padding:8px 12px;font-size:14px}
 .big{font-size:19px;padding:18px}
 .start button{flex:none;max-width:none}
-/* History */
+.line{font-size:14px;color:var(--mute);margin-top:8px;line-height:1.35}
+.line.err{color:var(--work)}
+/* Einstellungen */
+.set label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mute);margin-top:10px}
+.set label.t{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:10px;cursor:pointer}
+.set label.t input{width:20px;height:20px;accent-color:var(--cool)}
+.set .res{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.set .res button{text-align:left;font-size:14px;padding:9px 12px;font-weight:500}
+.set code{font-size:13px;color:var(--fg);word-break:break-all;-webkit-user-select:text;user-select:text}
+.set input[type=range]{width:100%;accent-color:var(--cool)}
+/* Verlauf */
 .hist{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
 .sess{background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
-.sess .h{display:flex;justify-content:space-between;font-weight:600}
+.sess .h{display:flex;justify-content:space-between;font-weight:600;gap:10px}
 .sess .h span:last-child{color:var(--cool)}
+.sess .h span.ab{color:var(--work)}
 .sess .d{color:var(--mute);margin-top:6px;line-height:1.5;font-variant-numeric:tabular-nums}
 .sess .d i{color:var(--cool);font-style:normal}
 .sess .d s{color:var(--work);text-decoration:none}
+.sess .d em{color:var(--work);font-style:normal}
 #confirmDel{display:none;color:var(--work);font-size:14px;padding:8px 0}
+/* Dialog */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.overlay.on{display:flex}
+.dlg{background:var(--card);border-radius:16px;padding:16px;max-width:460px;width:100%;display:flex;flex-direction:column;gap:10px}
+.dlg h2{font-size:20px}
+.dlg .row{margin-top:0}
+.intro ol{padding-left:22px;color:var(--fg);line-height:1.5;font-size:15px}
+.intro li{margin:6px 0}
 
 /* ---------- Breite Bildschirme (PC) ---------- */
 @media (min-width: 820px){
   header{font-size:18px;padding:16px 32px 10px}
   #progress{margin:0 32px}
   main{display:grid;grid-template-columns:minmax(380px,520px) minmax(380px,560px);grid-template-areas:
-    "phase phase" "name name" "fig target" "fig wbox" "fig last" "fig time" "fig reps" "fig plus" "fighint banner" "how banner" "hint next";
-    column-gap:40px;row-gap:10px;justify-content:center;align-content:center;align-items:center;justify-items:center;padding:12px 32px}
+    "phase phase" "name name" "fig target" "fig wbox" "fig last" "fig time" "fig lines" "fig reps" "fig feel" "fig hard" "fig plus" "fighint banner" "how banner" "hint next";
+    column-gap:40px;row-gap:10px;justify-content:center;align-content:safe center;align-items:center;justify-items:center;padding:12px 32px}
   #phase{grid-area:phase;font-size:16px}
   #name{grid-area:name;font-size:40px}
   #hint{grid-area:hint;font-size:15px}
@@ -96,30 +147,61 @@ details p{color:var(--mute);margin-top:8px;line-height:1.35}
   #wval{font-size:24px;min-width:150px}
   #last{grid-area:last;font-size:18px}
   #time{grid-area:time;font-size:120px}
+  #lines{grid-area:lines;font-size:15px}
   #repBox{grid-area:reps;gap:24px}
   .rb{width:88px;height:88px;font-size:44px}
   #reps{font-size:104px;min-width:170px}
+  #feelBox{grid-area:feel}
+  #feelBox button{font-size:17px;padding:12px 18px}
+  #hardPanel{grid-area:hard;max-width:520px}
   #plus{grid-area:plus;font-size:22px}
   #banner{grid-area:banner;font-size:16px;max-width:none}
   #next{grid-area:next;font-size:18px}
+  #explainMobile,.xpm{display:none}
   .controls{padding:14px 32px 12px}
   .controls button{font-size:21px;padding:20px 28px}
   button.primary{max-width:360px}
+  .start button.primary{max-width:none}
+  #coachOut{font-size:17px}
+  .coachRow input{font-size:16px}
   .start{max-width:760px;width:100%;margin:0 auto;padding:28px 24px;gap:18px}
   .card h2{font-size:26px}.card p{font-size:17px}.chip{font-size:17px;padding:12px 18px}
+  .ci .chip{font-size:15px;padding:9px 14px}
   .big{font-size:22px;padding:22px}
-  details{max-width:760px;width:100%;margin:0 auto 24px;font-size:16px}
+  .start details{max-width:760px;width:100%;margin:0 auto 24px;font-size:16px}
   .hist{max-width:760px;width:100%;margin:0 auto}.sess{font-size:16px}
   #viewHistory .controls{padding-bottom:8px}
+  body.xp #explainPanel{display:block;position:fixed;right:16px;bottom:16px;width:250px;max-height:60vh;overflow:auto;background:var(--card);border-radius:14px;padding:10px 12px;font-size:13px;z-index:5;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+  #explainPanel .xh{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--fg);cursor:pointer}
+  #explainPanel .xh span{color:var(--mute);font-weight:500;font-size:12px}
+  #explainPanel.min .xb{display:none}
 }
+@media (min-width: 1500px){ main{padding-right:290px} }
 </style>
 </head>
 <body class="warm">
-<header><span><b>HIIT Kraft 30</b></span><span id="meta"></span></header>
+<header><span><b>HIIT Kraft 30</b> <span id="metaL"></span></span><span id="meta"></span></header>
 <div id="progress"><div id="progressBar"></div></div>
 
+<!-- ERSTER START -->
+<div id="viewIntro" class="view">
+  <div class="start intro">
+    <div class="card">
+      <h2>So läuft eine Einheit</h2>
+      <ol>
+        <li>Eine Einheit dauert etwa 30 Minuten: Aufwärmen, drei Übungspaare im Wechsel, Finisher und Ausklang.</li>
+        <li>Pro Satz machst du so viele Wiederholungen, bis nur noch die angezeigte Reserve übrig wäre, und trägst die Zahl mit + und − ein.</li>
+        <li>Nach jedem Satz gibst du mit Leicht, Passt oder Zu hart Rückmeldung; bei Zu hart bietet die App weniger Gewicht, eine leichtere Variante oder das Überspringen an.</li>
+        <li>Jeder Satz wird mit dem letzten Mal verglichen, und sobald alle Sätze die Obergrenze erreichen, schlägt die App mehr Gewicht oder die nächste Stufe vor.</li>
+        <li>Claude-Coach, Sprachsteuerung und Spotify lassen sich in den Einstellungen verbinden, ohne sie läuft alles lokal im Browser.</li>
+      </ol>
+    </div>
+    <button id="btnIntroOk" class="primary big">Verstanden</button>
+  </div>
+</div>
+
 <!-- START -->
-<div id="viewStart" class="view active">
+<div id="viewStart" class="view">
   <div class="start">
     <div class="card">
       <h2 id="stTitle">Nächste Einheit</h2>
@@ -130,17 +212,39 @@ details p{color:var(--mute);margin-top:8px;line-height:1.35}
       <div class="row">
         <div class="chip" data-w="1">Woche 1</div><div class="chip" data-w="2">Woche 2</div><div class="chip" data-w="3">Woche 3+</div>
       </div>
+      <div class="row">
+        <span class="lbl">Heute</span><div class="chip" id="chipNormal">Normal</div><div class="chip" id="chipLight">Leichter</div>
+      </div>
+      <p class="line" id="lightInfo"></p>
     </div>
+    <div class="card" id="coachCard" style="display:none"><h3>Coach</h3><p class="say" id="coachNote"></p></div>
+    <div class="card" id="painCard" style="display:none"><h3>Hinweis Schmerz</h3><p class="say" id="painText"></p><div class="row" id="painRow"></div></div>
+    <div class="card" id="progCard" style="display:none">
+      <h3>Progressionscheck</h3>
+      <p id="progInfo"></p>
+      <div id="progBody"></div>
+      <div class="row" id="progRow"></div>
+    </div>
+    <div class="card ci" id="checkinCard" style="display:none">
+      <h3>Check-in</h3>
+      <div class="row"><span class="lbl">Schlaf</span><span id="ciSleep" class="row" style="margin:0;gap:6px"></span></div>
+      <div class="row"><span class="lbl">Muskelkater</span><span id="ciSore" class="row" style="margin:0;gap:6px"></span></div>
+      <div class="row"><span class="lbl">Energie</span><span id="ciEnergy" class="row" style="margin:0;gap:6px"></span></div>
+      <div class="row"><span class="lbl">Zeit</span><span id="ciTime" class="row" style="margin:0;gap:6px"></span></div>
+      <div class="row"><input type="text" id="ciText" placeholder="Sonst noch was? (optional)" style="flex:1"></div>
+    </div>
+    <p class="line err" id="startErr" style="display:none"></p>
     <button id="btnStartSession" class="primary big">Einheit starten</button>
     <button id="btnResume" class="big" style="display:none">Angefangene Einheit fortsetzen</button>
-    <button id="btnHistory">Verlauf und Protokoll</button>
+    <div class="row" style="margin-top:0"><button id="btnHistory" style="flex:1">Verlauf und Protokoll</button><button id="btnSettings" style="flex:1">Einstellungen</button></div>
     <details>
       <summary>Plan anzeigen</summary>
       <div id="plan"></div>
       <p>Startgewichte Woche 1: Split Squat und Ausfallschritte 2 × 10 kg, einbeiniges Kreuzheben 2 × 7,5 kg, Floor Press und Rudern 2 × 12,5 kg, Schulterdrücken 2 × 8 kg, einarmiges Rudern und Goblet 15 kg, Hüftbrücke 10 kg, Thruster 2 × 8 kg. Die App schlägt ab Woche 2 die höheren Werte vor und merkt sich, was du zuletzt genommen hast.</p>
-      <p>Paare im Wechsel: Satz A1 bis zur Reserve, 25 s Wechsel, Satz A2, 25 s Wechsel, dann die nächste Runde. Gewicht: 2 × 15 kg, wo nichts anderes steht. Wenn alle Sätze die Obergrenze erreichen, bietet die App die nächste Stufe an (3 s exzentrisch, 1,5er-Wiederholungen, Rest-Pause).</p>
+      <p>Paare im Wechsel: Satz A1 bis zur Reserve, 25 s Wechsel, Satz A2, 25 s Wechsel, dann die nächste Runde. Wenn alle Sätze die Obergrenze erreichen, bietet die App mehr Gewicht oder die nächste Stufe an (3 s exzentrisch, 1,5er-Wiederholungen, Rest-Pause).</p>
       <p>Ernährung: 130–180 g Protein pro Tag, Defizit etwa 300–400 kcal, Zielgewicht minus 0,25–0,5 kg pro Woche im Wochenschnitt.</p>
     </details>
+    <details class="xpm"><summary>Erklärungen</summary><div class="xpBody"></div></details>
   </div>
 </div>
 
@@ -157,20 +261,65 @@ details p{color:var(--mute);margin-top:8px;line-height:1.35}
     <div id="wbox"><button class="wb" id="wMinus">−</button><span id="wval"></span><button class="wb" id="wPlus">+</button></div>
     <div id="last"></div>
     <div id="time"></div>
+    <div id="lines"><div id="voiceLine"></div><div id="musicLine"></div></div>
     <div id="repBox"><button class="rb" id="rMinus">−</button><div id="reps">0</div><button class="rb" id="rPlus">+</button></div>
+    <div id="feelBox"><button data-f="leicht">Leicht</button><button data-f="passt">Passt</button><button data-f="hart">Zu hart</button></div>
+    <div id="hardPanel"></div>
     <div id="plus"></div>
     <div id="banner"></div>
     <div id="next"></div>
+    <details id="explainMobile"><summary>Erklärungen</summary><div class="xpBody"></div></details>
   </main>
   <div class="controls">
     <button id="prev">Zurück</button>
     <button id="mainBtn" class="primary">Start</button>
     <button id="skip">Weiter</button>
   </div>
+  <div id="coachOut"></div>
+  <div class="coachRow" id="coachRow"><input type="text" id="coachIn" placeholder="Coach fragen" autocomplete="off"><button id="coachSend">Senden</button></div>
   <div class="controls" style="padding-top:0"><button id="btnAbort" class="ghost">Einheit abbrechen</button></div>
 </div>
 
-<!-- HISTORY -->
+<!-- EINSTELLUNGEN -->
+<div id="viewSettings" class="view">
+  <div class="start set">
+    <div class="card">
+      <h3>Claude-Coach</h3>
+      <label class="f">Anthropic-API-Schlüssel<input type="password" data-s="apiKey" autocomplete="off" placeholder="sk-ant-..."></label>
+      <label class="f">Modell<input type="text" data-s="model" autocomplete="off"></label>
+      <div class="row"><button class="small" id="btnCoachTest">Verbindung testen</button><span class="line" id="coachTestLine" style="margin:0"></span></div>
+      <label class="t"><input type="checkbox" data-s="checkin"> Check-in vor der Einheit</label>
+      <p class="line">Der Schlüssel bleibt im Speicher dieses Browsers und geht nur an api.anthropic.com.</p>
+    </div>
+    <div class="card">
+      <h3>Sprache</h3>
+      <label class="t"><input type="checkbox" data-s="voice"> Sprachsteuerung (Aktivierungswort „Coach“)</label>
+      <p class="line" id="voiceSupport"></p>
+      <label class="t"><input type="checkbox" data-s="announce"> Ansagen</label>
+      <label class="f">Stimme<select data-s="tts"><option value="browser">Browser</option><option value="elevenlabs">ElevenLabs</option></select></label>
+      <label class="f">ElevenLabs-Schlüssel<input type="password" data-s="elKey" autocomplete="off"></label>
+      <label class="f">ElevenLabs Voice-ID<input type="text" data-s="elVoice" autocomplete="off" placeholder="leer = Standardstimme"></label>
+    </div>
+    <div class="card">
+      <h3>Spotify</h3>
+      <p class="line" style="margin-top:0">Spotify Premium nötig. In der Spotify-Entwicklerkonsole muss als Redirect-URI exakt diese Adresse eingetragen sein:<br><code id="spRedirect"></code></p>
+      <label class="f">Client-ID<input type="text" data-s="spClientId" autocomplete="off"></label>
+      <div class="row"><button class="small" id="btnSpLogin">Bei Spotify anmelden</button><button class="small" id="btnSpLogout">Abmelden</button><span class="line" id="spStatus" style="margin:0"></span></div>
+      <p class="line" id="spLine"></p>
+      <label class="f">Trainings-Playlist<select id="spPlaylist"></select></label>
+      <div class="row"><button class="small" id="btnSpLists">Playlists laden</button></div>
+      <div class="song" data-slot="songWarm"><label class="f">Aufwärm-Lied</label></div>
+      <div class="song" data-slot="songFin"><label class="f">Finisher-Lied</label></div>
+      <div class="song" data-slot="songChal"><label class="f">Challenge-Lied</label></div>
+      <label class="t"><input type="checkbox" data-s="newTrackPerPair"> Neues Lied je Paar</label>
+      <label class="t"><input type="checkbox" data-s="challenge"> Song-Challenge Liegestütze am Ende (ab Woche 2)</label>
+      <label class="f">Grundlautstärke <span id="volVal"></span><input type="range" min="0" max="1" step="0.05" data-s="volume"></label>
+    </div>
+  </div>
+  <div class="controls"><button id="btnSetBack" class="primary">Fertig</button></div>
+</div>
+
+<!-- VERLAUF -->
 <div id="viewHistory" class="view">
   <div class="hist" id="histList"></div>
   <div class="controls">
@@ -181,74 +330,58 @@ details p{color:var(--mute);margin-top:8px;line-height:1.35}
   <div id="confirmDel" style="text-align:center">Wirklich den ganzen Verlauf löschen? <button id="btnDelYes" style="padding:8px 12px;font-size:14px;margin-left:8px">Ja, löschen</button></div>
 </div>
 
+<!-- ABBRUCH -->
+<div class="overlay" id="ovAbort">
+  <div class="dlg">
+    <h2>Einheit abbrechen</h2>
+    <p class="line" style="margin:0">Grund</p>
+    <div class="row" id="abReasons"></div>
+    <textarea id="abText" placeholder="Was war los? (optional)"></textarea>
+    <button id="abSave" class="primary" style="max-width:none">Abbrechen und speichern</button>
+    <button id="abBack">Zurück zum Training</button>
+    <button id="abDiscard" class="ghost">Verwerfen, nicht speichern</button>
+  </div>
+</div>
+
+<div id="explainPanel"><div class="xh" id="xpHead">Erklärungen <span id="xpToggle">ausblenden</span></div><div class="xb xpBody"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="rig.js"></script>
+<script src="coach.js"></script>
+<script src="voice.js"></script>
+<script src="spotify.js"></script>
 <script>
-// ---------- Posen: [Kopf, Schulter, Hüfte, Ellb1, Hand1, Ellb2, Hand2, Knie1, Fuß1, Knie2, Fuß2] ----------
-const N_LEGS=[[103,150],[106,186],[97,150],[94,186]];
-const N=[[100,36],[100,62],[100,112],[105,88],[107,113],[95,88],[97,113],...N_LEGS];
-const RACK=[[100,36],[100,62],[100,112],[110,90],[108,66],[106,92],[104,68],...N_LEGS];
-const SQR=[[94,64],[92,90],[78,130],[104,112],[104,90],[100,114],[100,92],[110,154],[106,186],[104,154],[94,186]];
-const LU=[[100,42],[100,68],[100,120],[105,96],[107,121],[95,96],[97,121],[112,152],[112,186],[82,172],[66,186]];
-const HI=[[150,86],[130,94],[92,118],[131,126],[132,158],[127,126],[128,158],[98,152],[104,186],[92,152],[94,186]];
-const RO=[[150,86],[130,94],[92,118],[116,102],[134,112],[112,104],[130,114],[98,152],[104,186],[92,152],[94,186]];
-const PU_HI=[[160,118],[140,128],[95,140],[141,156],[142,184],[137,156],[138,184],[64,150],[36,182],[62,154],[32,184]];
-const PU_LO=[[160,152],[142,160],[95,164],[124,174],[142,184],[120,176],[138,184],[64,170],[36,182],[62,172],[32,184]];
-const FPu=[[40,170],[62,168],[116,168],[62,136],[62,108],[66,136],[66,108],[140,138],[160,186],[136,140],[156,186]];
-const FPd=[[40,170],[62,168],[116,168],[78,182],[76,152],[82,182],[80,152],[140,138],[160,186],[136,140],[156,186]];
-const SPu=[[100,36],[100,62],[100,112],[106,44],[106,16],[98,44],[98,16],...N_LEGS];
-const BU_SQ=[[92,70],[90,96],[76,134],[108,130],[118,176],[104,132],[114,178],[110,156],[106,186],[104,156],[94,186]];
-const HKa=[[100,36],[100,62],[100,112],[112,82],[120,66],[90,88],[80,104],[120,120],[120,152],[97,150],[94,186]];
-const HKb=[[100,36],[100,62],[100,112],[90,88],[80,104],[112,82],[120,66],[103,150],[106,186],[118,122],[118,154]];
-const SQA=[[94,64],[92,90],[78,130],[114,104],[138,100],[110,106],[134,102],[110,154],[106,186],[104,154],[94,186]];
-const GOBa=[[100,36],[100,62],[100,112],[110,86],[112,72],[106,88],[108,74],...N_LEGS];
-const GOBb=[[94,64],[92,90],[78,130],[106,112],[106,96],[102,114],[102,98],[110,154],[106,186],[104,154],[94,186]];
-const GOBh=[[97,50],[96,76],[89,121],[108,99],[109,84],[104,101],[105,86],[106,152],[106,186],[100,152],[94,186]];
-const WKa=[[100,36],[100,62],[100,112],[108,86],[112,106],[92,88],[88,110],[110,150],[116,186],[92,152],[84,186]];
-const WKb=[[100,36],[100,62],[100,112],[92,88],[88,110],[108,86],[112,106],[92,152],[84,186],[110,150],[116,186]];
-const HFa=[[102,64],[102,90],[100,140],[112,118],[108,140],[94,118],[92,140],[136,146],[136,186],[86,182],[56,186]];
-const HFb=[[108,66],[108,92],[108,142],[118,120],[114,142],[100,120],[98,142],[138,146],[136,186],[86,182],[56,186]];
-const CHa=[[100,36],[100,62],[100,112],[86,86],[80,112],[84,88],[78,114],...N_LEGS];
-const CHb=[[100,36],[100,62],[100,112],[80,84],[70,106],[78,86],[68,108],...N_LEGS];
-const SPLIT_HI=[[100,36],[100,62],[100,112],[105,88],[107,113],[95,88],[97,113],[118,148],[124,186],[82,150],[68,186]];
-const SPLIT_LO=[[100,54],[100,80],[100,130],[105,106],[107,131],[95,106],[97,131],[122,158],[124,186],[84,178],[68,186]];
-const SLRDL=[[150,86],[130,94],[92,118],[131,126],[132,158],[127,126],[128,158],[96,152],[98,186],[62,108],[30,96]];
-const ROW1a=[[150,88],[130,96],[92,122],[140,120],[146,144],[126,128],[124,160],[142,152],[152,186],[80,160],[62,186]];
-const ROW1b=[[150,88],[130,96],[92,122],[140,120],[146,144],[112,104],[128,118],[142,152],[152,186],[80,160],[62,186]];
-const DBa=[[40,172],[62,170],[116,168],[62,140],[62,112],[66,140],[66,112],[116,138],[146,138],[112,140],[142,140]];
-const DBb=[[40,172],[62,170],[116,168],[40,160],[18,152],[66,140],[66,112],[150,160],[184,164],[112,140],[142,140]];
-const BRa=[[40,172],[62,170],[116,168],[88,180],[112,160],[90,182],[114,162],[140,138],[160,186],[150,152],[186,160]];
-const BRb=[[40,172],[62,170],[110,132],[84,164],[106,124],[86,166],[108,126],[140,130],[160,186],[150,120],[188,112]];
-const BR2a=[[40,172],[62,170],[116,168],[86,182],[110,184],[90,184],[114,184],[140,138],[160,186],[136,140],[156,186]];
-const BR2b=[[40,172],[62,170],[110,134],[86,182],[110,184],[90,184],[114,184],[140,130],[160,186],[136,132],[156,186]];
-const SPa=[[60,116],[62,140],[118,160],[56,184],[82,184],[92,150],[118,158],[150,172],[182,184],[148,174],[180,186]];
-const SPb=[[60,117],[62,141],[120,158],[56,184],[82,184],[92,150],[118,157],[150,172],[182,184],[148,174],[180,186]];
-
 // ---------- Übungen ----------
-// db: Liste von Punktindizes für Hanteln, oder 'mid' (eine Hantel zwischen den Händen), oder []
 const EX={
-  kniehebe:{name:'Kniehebelauf',hint:'Auf der Stelle, Knie hüfthoch, Arme locker mitnehmen',poses:[HKa,HKb],db:[],dur:1.0},
-  sqa:{name:'Kniebeugen + Armkreisen',hint:'Ohne Gewicht, tief runter, Arme oben weit kreisen',poses:[SPu,SQA],db:[],dur:2.4},
-  bridge2:{name:'Hüftbrücke + Katze-Kuh',hint:'Beide Füße am Boden, Hüfte hoch, oben kurz halten; danach im Vierfüßler Rücken rund und hohl',poses:[BR2a,BR2b],db:[],dur:2.4},
-  probe:{name:'Probesätze',hint:'Leichte Probesätze der ersten beiden Übungen, locker',poses:[SPLIT_HI,SPLIT_LO],db:[4,6],dur:2.4},
-  splitsquat:{name:'Split Squat',hint:'Hanteln seitlich, ein Bein vorn, hinteres Knie fast bis zum Boden; erst alle Wdh. links, dann rechts',poses:[SPLIT_HI,SPLIT_LO],db:[4,6],dur:2.4,range:[8,20],side:'je Bein',stages:true},
-  pushup:{name:'Liegestütze',hint:'Hände am Boden, Körper eine Linie, Brust fast bis zum Boden',poses:[PU_HI,PU_LO],db:[],dur:2.2,range:[6,25],stages:true},
-  slrdl:{name:'Einbeiniges Kreuzheben',hint:'Beide Hanteln, Standbein leicht gebeugt, freies Bein nach hinten, Rücken gerade; erst links, dann rechts',poses:[N,SLRDL],db:[4,6],dur:2.8,range:[8,20],side:'je Bein',stages:true},
-  floorpress:{name:'Floor Press',hint:'Rückenlage, Ellbogen tippen den Boden, oben voll strecken',poses:[FPd,FPu],db:[4,6],dur:2.2,range:[8,25],stages:true},
-  row1:{name:'Einarmiges Rudern',hint:'Ausfallschritt, freie Hand auf dem Knie, 15 kg, Ellbogen eng zur Hüfte; erst links, dann rechts',poses:[ROW1a,ROW1b],db:[6],dur:2.0,range:[8,20],side:'je Arm',stages:true},
-  deadbug:{name:'Dead Bug',hint:'Rückenlage, unterer Rücken bleibt am Boden, gegenüberliegende Hand und Fuß langsam ausstrecken',poses:[DBa,DBb],db:[],dur:3.0,range:[8,12],side:'je Seite',stages:false},
-  goblet:{name:'Goblet Squat',hint:'Eine 15er vor der Brust, 3 s absenken, tief, Rücken lang',poses:[GOBa,GOBb,GOBh,GOBb],db:'mid',dur:4.0,range:[8,20],stages:true},
-  press:{name:'Schulterdrücken stehend',hint:'Bauch fest, nicht ins Hohlkreuz, oben voll strecken; Gewicht nach Bedarf unter 15 kg',poses:[RACK,SPu],db:[4,6],dur:2.2,range:[8,20],stages:true},
-  bridge1:{name:'Einbeinige Hüftbrücke',hint:'Rückenlage, eine Hantel auf der Hüfte, ein Fuß am Boden, Hüfte hoch und oben 1 s halten; erst links, dann rechts',poses:[BRa,BRb],db:'mid',dur:2.2,range:[10,25],side:'je Bein',stages:true},
-  row:{name:'Rudern vorgebeugt',hint:'Beide Hanteln, Oberkörper fast waagerecht, oben 1 s halten',poses:[HI,RO],db:[4,6],dur:2.2,range:[8,20],stages:true},
-  lunge:{name:'Ausfallschritte rückwärts',hint:'Hanteln hängend, großer Schritt zurück, hinteres Knie kurz über den Boden, im Wechsel',poses:[N,LU],db:[4,6],dur:2.2,range:[8,15],side:'je Bein',stages:true},
-  sideplank:{name:'Seitstütz',hint:'Unterarm am Boden, Hüfte hoch, Körper eine Linie; erst links, dann rechts',poses:[SPa,SPb],db:[],dur:3.0,range:[20,45],side:'je Seite',unit:'s',stages:false},
-  thruster:{name:'Thruster',hint:'Kniebeuge direkt in Schulterdrücken, 10 bis 12 kg',poses:[SQR,SPu],db:[4,6],dur:2.0},
-  burpee:{name:'Burpee ohne Sprung',hint:'Hände runter, Füße zurück, Liegestütz, Füße vor, aufstehen',poses:[N,BU_SQ,PU_LO,BU_SQ],db:[],dur:3.6},
-  walk:{name:'Lockeres Gehen',hint:'Auf der Stelle, Atmung runterfahren',poses:[WKa,WKb],db:[],dur:1.6},
-  hipflex:{name:'Hüftbeuger dehnen',hint:'Kniestand, Becken nach vorn, nach 30 s Seite wechseln',poses:[HFa,HFb],db:[],dur:4},
-  chest:{name:'Brust dehnen',hint:'Hände hinter dem Rücken fassen, Brust öffnen',poses:[CHa,CHb],db:[],dur:4}
+  kniehebe:{name:'Kniehebelauf',hint:'Auf der Stelle, Knie hüfthoch, Arme locker mitnehmen'},
+  sqa:{name:'Kniebeugen + Armkreisen',hint:'Ohne Gewicht, tief runter, Arme oben weit kreisen'},
+  bridge2:{name:'Hüftbrücke + Katze-Kuh',hint:'Beide Füße am Boden, Hüfte hoch, oben kurz halten; danach im Vierfüßler Rücken rund und hohl'},
+  probe:{name:'Probesätze',hint:'Leichte Probesätze der ersten beiden Übungen, locker'},
+  splitsquat:{name:'Split Squat',range:[8,20],side:'je Bein',stages:true},
+  pushup:{name:'Liegestütze',range:[6,25],stages:true},
+  slrdl:{name:'Einbeiniges Kreuzheben',range:[8,20],side:'je Bein',stages:true},
+  floorpress:{name:'Floor Press',range:[8,25],stages:true},
+  row1:{name:'Einarmiges Rudern',range:[8,20],side:'je Arm',stages:true},
+  deadbug:{name:'Dead Bug',range:[8,12],side:'je Seite'},
+  goblet:{name:'Goblet Squat',range:[8,20],stages:true},
+  press:{name:'Schulterdrücken stehend',range:[8,20],stages:true},
+  bridge1:{name:'Einbeinige Hüftbrücke',range:[10,25],side:'je Bein',stages:true},
+  row:{name:'Rudern vorgebeugt',range:[8,20],stages:true},
+  lunge:{name:'Ausfallschritte rückwärts',range:[8,15],side:'je Bein',stages:true},
+  sideplank:{name:'Seitstütz',range:[20,45],side:'je Seite',unit:'s'},
+  // leichtere Varianten
+  kneepushup:{name:'Liegestütze auf den Knien',range:[8,25],variant:true},
+  rdl:{name:'Rumänisches Kreuzheben',range:[10,20],variant:true},
+  squatbw:{name:'Kniebeugen ohne Gewicht',range:[12,30],variant:true},
+  bridge2w:{name:'Hüftbrücke mit Hantel',range:[12,25],variant:true},
+  lungebw:{name:'Ausfallschritte ohne Gewicht',range:[10,20],side:'je Bein',variant:true},
+  sideplankknee:{name:'Seitstütz auf dem Knie',range:[20,45],side:'je Seite',unit:'s',variant:true},
+  deadbuglegs:{name:'Dead Bug nur Beine',range:[8,12],side:'je Seite',variant:true},
+  // Finisher und Ausklang
+  thruster:{name:'Thruster'},burpee:{name:'Burpee ohne Sprung'},
+  walk:{name:'Lockeres Gehen'},hipflex:{name:'Hüftbeuger dehnen'},chest:{name:'Brust dehnen'}
 };
+const LIGHTER={splitsquat:'goblet',goblet:'squatbw',pushup:'kneepushup',slrdl:'rdl',bridge1:'bridge2w',lunge:'lungebw',sideplank:'sideplankknee',deadbug:'deadbuglegs'};
 
 // ---------- Ausführung in drei Zeilen + Videosuche ----------
 const HOW={
@@ -268,6 +401,13 @@ const HOW={
   row:{start:'Eine Hantel in jeder Hand, Knie leicht gebeugt, Oberkörper fast waagerecht nach vorn geneigt, Rücken gerade.',move:'Beide Hanteln zum Bauch ziehen, Ellbogen nach hinten, oben 1 s halten, langsam senken.',watch:'Rücken bleibt gerade, kein Schwung aus der Hüfte.',yt:'bent over dumbbell row form'},
   lunge:{start:'Aufrecht stehen, Hanteln seitlich hängend.',move:'Großer Schritt nach hinten, hinteres Knie fast bis zum Boden, über die vordere Ferse zurück in den Stand, dann das andere Bein.',watch:'Oberkörper aufrecht, vorderes Knie über dem Fuß.',yt:'dumbbell reverse lunge form'},
   sideplank:{start:'Seitlage, Unterarm unter der Schulter, Füße übereinander.',move:'Hüfte anheben, bis der Körper eine gerade Linie bildet, und halten.',watch:'Hüfte nicht absinken lassen, Blick geradeaus. Zu schwer: unteres Knie am Boden.',yt:'side plank form'},
+  kneepushup:{start:'Stütz auf Händen und Knien, Hände etwas breiter als die Schultern, Körper gerade von Kopf bis Knie.',move:'Brust bis kurz über den Boden senken, hochdrücken.',watch:'Hüfte bleibt in einer Linie, nicht abknicken. Ellbogen etwa 45 Grad zum Körper.',yt:'knee push up form'},
+  rdl:{start:'Hüftbreiter Stand, eine Hantel in jeder Hand vor den Oberschenkeln, Knie leicht gebeugt.',move:'Hüfte nach hinten schieben, Oberkörper nach vorn kippen, Hanteln gleiten an den Beinen bis unter die Knie. Über die Hüfte wieder aufrichten.',watch:'Rücken gerade, Hanteln nah am Körper, Spannung hinten in den Oberschenkeln.',yt:'dumbbell romanian deadlift form'},
+  squatbw:{start:'Füße schulterbreit, Arme locker vor dem Körper.',move:'Zügig in die tiefe Hocke, Arme nach vorn, wieder hoch.',watch:'Fersen am Boden, Knie zeigen in Richtung Fußspitzen, Rücken lang.',yt:'bodyweight squat form'},
+  bridge2w:{start:'Rückenlage, beide Füße aufgestellt, eine Hantel mit beiden Händen auf der Hüfte.',move:'Hüfte anheben, bis Schulter, Hüfte und Knie eine Linie bilden, 1 s halten, senken.',watch:'Über die Fersen drücken, Po oben anspannen, kein Hohlkreuz.',yt:'dumbbell glute bridge'},
+  lungebw:{start:'Aufrecht stehen, Hände an der Hüfte.',move:'Großer Schritt nach hinten, hinteres Knie fast bis zum Boden, zurück in den Stand, dann das andere Bein.',watch:'Oberkörper aufrecht, vorderes Knie über dem Fuß.',yt:'bodyweight reverse lunge'},
+  sideplankknee:{start:'Seitlage, Unterarm unter der Schulter, Knie gebeugt und übereinander.',move:'Hüfte anheben, bis Kopf, Hüfte und Knie eine Linie bilden, und halten.',watch:'Hüfte nicht absinken lassen, nicht nach vorn kippen.',yt:'modified side plank knees'},
+  deadbuglegs:{start:'Rückenlage, Arme neben dem Körper am Boden, Beine angehoben, Knie im rechten Winkel über der Hüfte.',move:'Ein Bein langsam lang ausstrecken, knapp über dem Boden, zurück, dann das andere.',watch:'Unterer Rücken bleibt fest am Boden.',yt:'dead bug legs only beginner'},
   thruster:{start:'Hanteln auf Schulterhöhe, Füße schulterbreit.',move:'In die Hocke; beim Hochkommen die Hanteln in einem Zug über den Kopf drücken, zurück zu den Schultern und direkt die nächste.',watch:'Fersen am Boden, Bauch fest.',yt:'dumbbell thruster form'},
   burpee:{start:'Aufrecht stehen.',move:'In die Hocke, Hände auf den Boden, Füße nach hinten in den Stütz, ein Liegestütz, Füße wieder nach vorn, aufstehen.',watch:'Kein Sprung; sauber statt schnell.',yt:'burpee no jump'},
   walk:{start:'Aufrecht stehen.',move:'Locker auf der Stelle gehen, Arme schwingen.',watch:'Ruhig durch die Nase atmen.',yt:'cool down walking in place'},
@@ -279,175 +419,477 @@ function howHTML(k){howKey=k;
   const h=HOW[k]; if(!h)return '';
   const q=encodeURIComponent(h.yt);
   if(!howOpen)return `<div><b>Bewegung</b> ${h.move} <span class="more">mehr</span></div>`;
-  return `<div><b>Start</b> ${h.start}</div><div><b>Bewegung</b> ${h.move}</div><div><b>Achte auf</b> ${h.watch}</div><a href="https://www.youtube.com/results?search_query=${q}">Video zur Übung (YouTube-Suche)</a> <span class="more">weniger</span>`;
+  return `<div><b>Start</b> ${h.start}</div><div><b>Bewegung</b> ${h.move}</div><div><b>Achte auf</b> ${h.watch}</div><a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">Video zur Übung (YouTube-Suche)</a> <span class="more">weniger</span>`;
 }
 
 // ---------- Gewichte: n = Anzahl Hanteln, start = Woche 1, w2 = ab Woche 2 ----------
-const WT={splitsquat:{n:2,start:10,w2:15},slrdl:{n:2,start:7.5,w2:10},floorpress:{n:2,start:12.5,w2:15},row1:{n:1,start:15,w2:15},goblet:{n:1,start:15,w2:15},press:{n:2,start:8,w2:10},bridge1:{n:1,start:10,w2:15},row:{n:2,start:12.5,w2:15},lunge:{n:2,start:10,w2:15},thruster:{n:2,start:8,w2:10}};
+const WT={splitsquat:{n:2,start:10,w2:15},slrdl:{n:2,start:7.5,w2:10},floorpress:{n:2,start:12.5,w2:15},row1:{n:1,start:15,w2:15},goblet:{n:1,start:15,w2:15},press:{n:2,start:8,w2:10},bridge1:{n:1,start:10,w2:15},row:{n:2,start:12.5,w2:15},lunge:{n:2,start:10,w2:15},thruster:{n:2,start:8,w2:10},
+  rdl:{n:2,start:10,w2:10},bridge2w:{n:1,start:10,w2:10}};
 const WMAX=15;
+const clampW=v=>Math.max(0,Math.min(WMAX,Math.round(v*2)/2));
 function wtDefault(k,week){const w=WT[k];if(!w)return null;if(store.weights&&store.weights[k]!=null)return store.weights[k];return week>=2?w.w2:w.start;}
-function wtText(k,v){const w=WT[k];if(!w||v==null)return '';return (w.n===2?'2 × ':'')+String(v).replace('.',',')+' kg';}
+const num=v=>String(v).replace('.',',');
+function wtText(k,v){const w=WT[k];if(!w||v==null)return '';return (w.n===2?'2 × ':'')+num(v)+' kg';}
+function wtSpeech(k,v){const w=WT[k];if(!w||v==null)return '';return (w.n===2?'2 mal ':'')+num(v)+' Kilo';}
 const STAGES=['Standard','3 s exzentrisch + 1 s Pause unten','1,5er-Wiederholungen','Rest-Pause im letzten Satz'];
 const DAYS={
   A:[['splitsquat','pushup'],['slrdl','floorpress'],['row1','deadbug']],
   B:[['goblet','press'],['bridge1','row'],['lunge','sideplank']]
 };
 const WEEK={
-  1:{rounds:2,rir:'3–4 Wdh. in Reserve',fin:{kind:'walk',dur:180}},
-  2:{rounds:3,rir:'2–3 Wdh. in Reserve',fin:{kind:'amrap',dur:120,label:'Finisher, locker'}},
-  3:{rounds:3,rir:'1–2 in Reserve, letzter Oberkörper-Satz 0–1',fin:{kind:'amrap',dur:180,label:'Finisher-Score'}}
+  1:{rounds:2,rir:[3,4],fin:{kind:'walk',dur:180}},
+  2:{rounds:3,rir:[2,3],fin:{kind:'amrap',dur:120,label:'Finisher, locker'}},
+  3:{rounds:3,rir:[1,2],fin:{kind:'amrap',dur:180,label:'Finisher-Score'}}
 };
-const REST_SEC=25;
+const REST_SEC=25, SET_EST=40;
+const FEEL_LABEL={leicht:'Leicht',passt:'Passt',hart:'Zu hart'};
+const REASONS={zeit:'Zeit',zu_hart:'Zu hart',schmerz:'Schmerz',sonstiges:'Sonstiges'};
 
+// ---------- Erklärungen ----------
+const EXPLAIN=[
+  ['Reserve','Wiederholungen, die am Satzende noch sauber gegangen wären. „2–3 in Reserve“ heißt: aufhören, wenn noch zwei bis drei Wiederholungen möglich wären. Am Tag „Leichter“ und nach Coach-Anpassung kommt eine Wiederholung Reserve dazu.'],
+  ['Zielbereich','Spanne der Wiederholungen pro Satz, etwa 8–20. Unter der Untergrenze ist es zu schwer, an der Obergrenze wird die Übung gesteigert. „je Bein“ oder „je Seite“: die Zahl gilt für jede Seite.'],
+  ['Stufe','Wenn das Gewicht ausgereizt ist (15 kg oder ohne Hantel), wird die Ausführung schwerer. Stufe 1 Tempo: 3 s absenken, 1 s Pause unten. Stufe 2 1,5er: ganz runter, halb hoch, wieder runter, ganz hoch zählt als eine. Stufe 3 Rest-Pause: im letzten Satz nach Satzende 15 s Pause, dann weiter bis zur Reserve.'],
+  ['Woche 1–3+','Woche 1: 2 Runden, 3–4 in Reserve, kein Finisher. Woche 2: 3 Runden, 2–3 in Reserve, Finisher 2 min. Ab Woche 3: 3 Runden, 1–2 in Reserve, Finisher 3 min. Die Woche ergibt sich aus der Zahl der Einheiten (3 pro Woche), lässt sich aber wählen.'],
+  ['Plus','Ein Plus gibt es für jeden Satz mit mehr Wiederholungen als beim letzten Mal mit dieser Übung, oder mit mehr Gewicht bei höchstens 2 Wiederholungen weniger.'],
+  ['Gewicht und Progression','Erst Wiederholungen steigern. Erreichen alle Sätze einer Übung die Obergrenze, schlägt die App 2,5 kg mehr vor, bei 15 kg die nächste Stufe. + und − beim Gewicht gelten auch für die nächsten Einheiten; Gewicht runter über „Zu hart“ gilt nur für heute.'],
+  ['Finisher-Score','5 Thruster + 5 Burpees sind eine Runde. Gezählt werden volle Runden in der Zeit (oder Liedlänge). Der Score ist der direkte Vergleich von Einheit zu Einheit. Die Song-Challenge zählt Liegestütze bis zum Liedende.'],
+  ['Rückmeldung','Leicht: Satz ging leichter als die Reserve vorgibt. Passt: wie geplant. Zu hart: Reserve nicht geschafft oder Technik bricht ein; dann Gewicht runter, leichtere Variante, Satz überspringen oder Runde streichen. Beim nächsten Mal schlägt die App für diese Übung weniger Gewicht oder die Variante vor.']
+];
+(function(){
+  const h=EXPLAIN.map(([t,p])=>`<details class="xt"><summary>${t}</summary><p>${p}</p></details>`).join('');
+  document.querySelectorAll('.xpBody').forEach(b=>b.innerHTML=h);
+})();
 
 // ---------- Speicher ----------
 const KEY='hiit30.v2';
-let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null};
-try{const s=localStorage.getItem(KEY);if(s)store=Object.assign(store,JSON.parse(s));}catch(e){}
+const DEF_SETTINGS={apiKey:'',model:'claude-sonnet-5-5',checkin:true,voice:false,announce:true,tts:'browser',elKey:'',elVoice:'',spClientId:'',playlist:null,songWarm:null,songFin:null,songChal:null,newTrackPerPair:false,challenge:false,volume:.8};
+let firstRun=false;
+let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null,settings:{},spTok:null,coachNote:'',progDone:0};
+try{const s=localStorage.getItem(KEY);if(s)store=Object.assign(store,JSON.parse(s));else firstRun=true;}catch(e){}
+if(!Array.isArray(store.sessions))store.sessions=[];
 if(!store.weights)store.weights={};
+if(!store.stages)store.stages={};
+store.settings=Object.assign({},DEF_SETTINGS,store.settings||{});
+store.progDone=store.progDone||0;
+store.sessions.forEach(s=>{s.sets=s.sets||{};s.stage=s.stage||{};s.wts=s.wts||{};s.feel=s.feel||{};s.swaps=s.swaps||{};if(s.plus==null)s.plus=0;});
+const ST=()=>store.settings;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
 const $=id=>document.getElementById(id);
 const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
 const fmtDate=d=>{const x=new Date(d);return x.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});};
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function autoWeek(){return Math.min(3,Math.floor(store.sessions.length/3)+1);}
 function nextDay(){const l=store.sessions[store.sessions.length-1];return l&&l.day==='A'?'B':'A';}
 function stageOf(k){return store.stages[k]||0;}
-function lastSessionLike(day,exKey,stage){
-  for(let i=store.sessions.length-1;i>=0;i--){const s=store.sessions[i];if(s.day===day&&s.sets[exKey]&&(s.stage[exKey]||0)===stage)return s;}
+// Letzte Einheit mit dieser (tatsächlich ausgeführten) Übung in derselben Stufe
+function lastSessionLike(exKey,stage,before){
+  const end=before==null?store.sessions.length:before;
+  for(let i=end-1;i>=0;i--){const s=store.sessions[i];if(s.sets[exKey]&&(s.stage[exKey]||0)===stage)return s;}
   return null;
 }
+function lastSessionWith(exKey){for(let i=store.sessions.length-1;i>=0;i--){const s=store.sessions[i];if(s.sets[exKey]||(s.feel&&s.feel[exKey]))return s;}return null;}
+function origKeys(day){return DAYS[day].flat();}
+
+// ---------- Konfiguration der Module ----------
+function applyConfig(){
+  const s=ST();
+  Coach.configure({apiKey:s.apiKey,model:s.model||'claude-sonnet-5-5'});
+  Voice.configure({tts:s.tts,elKey:s.elKey,elVoice:s.elVoice});
+  Music.configure({clientId:s.spClientId,baseVolume:+s.volume});
+}
+Voice.configure({onStatus:t=>{$('voiceLine').textContent='Sprachsteuerung: '+t;}});
+Voice.on({onCommand:(cmd,n)=>voiceCommand(cmd,n)});
+Music.configure({
+  onTokens:t=>{store.spTok=t;save();},
+  onState:st=>{
+    $('musicLine').textContent=st&&st.name?'Musik: '+st.name+(st.artist?' – '+st.artist:''):'';
+    const s=ST(),song=[s.songWarm,s.songFin,s.songChal].find(x=>x&&x.bpm&&st&&st.id&&x.uri===('spotify:track:'+st.id));
+    if(typeof Rig!=='undefined')Rig.setCycle(song?4*60/song.bpm:null);
+  }
+});
+if(store.spTok)Music.setTokens(store.spTok);
+applyConfig();
 
 // ---------- Session ----------
-let sel={day:'A',week:1};
+let sel={day:'A',week:1,dayManual:false,light:false,swaps:{}};
+let ci={sleep:3,sore:0,energy:3,time:30};
 let S=null; // aktuelle Session
-let steps=[],idx=0,remaining=0,running=false,endAt=0,tick=null,lastBeep=-1,wakeLock=null,audio=null,setStart=0,repVal=0;
+let steps=[],idx=0,remaining=0,running=false,endAt=0,tick=null,lastBeep=-1,wakeLock=null,audio=null,setStart=0,repVal=0,wtVal=null,lastTick=0,hardOpen=false;
+let RT={}; // Laufzeitflags, nicht gespeichert
 
-function buildSteps(day,week){
-  const W=WEEK[week],pairs=DAYS[day],st=[];
-  const warm=['kniehebe','sqa','bridge2','probe'];
-  warm.forEach((k,i)=>st.push({kind:'timed',type:'warm',dur:60,ex:k,phase:`Aufwärmen ${i+1}/4`,exLabel:k==='probe'?'Probesätze: '+EX[pairs[0][0]].name+', '+EX[pairs[0][1]].name:null,figEx:k==='probe'?pairs[0][0]:k}));
+function basePlan(week){const W=WEEK[week];return {rounds:W.rounds,rirShift:0,weightDelta:0,finisher:week>=2?true:null,finisherSec:week>=2?W.fin.dur:null,skipPairs:[],light:false,warmSec:null,finSongSec:null,chalSec:null};}
+function rirText(){
+  const W=WEEK[S.week],sh=Math.min(2,S.plan.rirShift||0);
+  let t=`${W.rir[0]+sh}–${W.rir[1]+sh} Wdh. in Reserve`;
+  if(S.week===3)t+=`, letzter Oberkörper-Satz ${sh}–${1+sh}`;
+  return t;
+}
+function exOf(st){return st&&st.ex?(S.swaps[st.ex]||st.ex):null;}
+function origOf(k){return origKeys(S.day).find(o=>o===k||(S.swaps[o]||o)===k)||null;}
+function firstPairKeys(){const p=steps.find(x=>x.kind==='set');const pair=p?DAYS[S.day][p.pair-1]:DAYS[S.day][0];return pair.map(o=>S.swaps[o]||o);}
+
+function buildSteps(S){
+  const P=S.plan,pairs=DAYS[S.day],st=[];
+  const wd=P.warmSec?Math.max(20,Math.round(P.warmSec/4)):60;
+  ['kniehebe','sqa','bridge2','probe'].forEach((k,i)=>st.push({id:'w'+i,ord:i,kind:'timed',type:'warm',dur:wd,ex:k,phase:`Aufwärmen ${i+1}/4`}));
   pairs.forEach((pair,pi)=>{
-    for(let r=1;r<=W.rounds;r++){
+    if((P.skipPairs||[]).includes(pi+1))return;
+    for(let r=1;r<=P.rounds;r++){
       pair.forEach((k,si)=>{
-        st.push({kind:'set',type:'work',ex:k,pair:pi+1,round:r,slot:si,setIndex:r-1,phase:`Paar ${pi+1} · Runde ${r}/${W.rounds} · ${String.fromCharCode(65+pi)}${si+1}`});
-        st.push({kind:'rest',type:'rest',dur:REST_SEC,phase:'Wechsel'});
+        const o=100+pi*100+r*4+si*2;
+        st.push({id:`s${pi}-${r}-${si}`,ord:o,kind:'set',type:'work',ex:k,pair:pi+1,round:r,slot:si,setIndex:r-1});
+        st.push({id:`r${pi}-${r}-${si}`,ord:o+1,kind:'rest',type:'rest',dur:REST_SEC,pair:pi+1,round:r,slot:si});
       });
     }
   });
-  if(W.fin.kind==='walk')st.push({kind:'timed',type:'cool',dur:W.fin.dur,ex:'walk',phase:'Statt Finisher (Woche 1)'});
-  else st.push({kind:'finisher',type:'fin',dur:W.fin.dur,phase:W.fin.label});
-  st.push({kind:'timed',type:'cool',dur:60,ex:'hipflex',phase:'Ausklang 1/2'});
-  st.push({kind:'timed',type:'cool',dur:30,ex:'chest',phase:'Ausklang 2/2'});
-  st.push({kind:'end',type:'cool'});
-  // 'next' für Wechsel-Schritte setzen
-  st.forEach((s,i)=>{ if(s.kind==='rest'){const n=st[i+1]; s.next=n; } });
-  return st;
+  if(S.week===1){ if(P.finisher!==false)st.push({id:'walk',ord:1000,kind:'timed',type:'cool',dur:180,ex:'walk',phase:'Statt Finisher (Woche 1)'}); }
+  else if(P.finisher!==false){
+    st.push({id:'fin',ord:1000,kind:'finisher',type:'fin',dur:P.finSongSec||P.finisherSec||WEEK[S.week].fin.dur,phase:WEEK[S.week].fin.label});
+    if(P.chalSec)st.push({id:'chal',ord:1001,kind:'challenge',type:'fin',dur:P.chalSec,phase:'Song-Challenge'});
+  }
+  st.push({id:'c1',ord:1010,kind:'timed',type:'cool',dur:60,ex:'hipflex',phase:'Ausklang 1/2'});
+  st.push({id:'c2',ord:1011,kind:'timed',type:'cool',dur:30,ex:'chest',phase:'Ausklang 2/2'});
+  st.push({id:'end',ord:1100,kind:'end',type:'cool'});
+  const cut=new Set(S.cut||[]);
+  return st.filter(s=>!cut.has(s.id));
+}
+function stepPhase(s){
+  if(!s)return '';
+  if(s.kind==='set')return `Paar ${s.pair} · Runde ${s.round}/${S.plan.rounds} · ${String.fromCharCode(64+s.pair)}${s.slot+1}`;
+  if(s.kind==='rest')return 'Wechsel';
+  if(s.kind==='end')return 'Fertig';
+  return s.phase||'';
+}
+function resolveIdx(ord){let i=steps.findIndex(s=>s.ord>=ord);return i<0?steps.length-1:i;}
+function rebuild(){
+  const ord=steps[idx].ord;
+  steps=buildSteps(S);
+  const i=resolveIdx(ord),changed=steps[i].ord!==ord;
+  idx=i;S.curOrd=steps[i].ord;save();
+  if(changed){remaining=steps[i].dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;if(steps[i].kind==='set')setStart=Date.now();render();enterStep(true);}
+  else render();
+}
+
+function compactSession(s){
+  const o={date:(s.date||'').slice(0,10),day:s.day,week:s.week,sets:s.sets,wts:s.wts,feel:s.feel||{}};
+  if(s.swaps&&Object.keys(s.swaps).length)o.swaps=s.swaps;
+  if(s.aborted)o.aborted={reason:s.aborted.reason,phase:s.aborted.phase,text:s.aborted.text||''};
+  if(s.finisher&&s.finisher.kind==='amrap')o.finisher=s.finisher.rounds;
+  if(s.challenge)o.challenge=s.challenge.reps;
+  if(s.light)o.light=true;
+  if(s.checkin)o.checkin=s.checkin;
+  return o;
+}
+function lastN(n){return store.sessions.slice(-n).map(compactSession);}
+
+// Start mit Check-in, Coach oder lokalen Regeln
+async function beginSession(){
+  const btn=$('btnStartSession');
+  if(btn.disabled)return;
+  const week=sel.week,day=sel.day;
+  S={date:new Date().toISOString(),day,week,sets:{},stage:{},wts:{},wtAdj:{},feel:{},swaps:{},swapLog:[],cut:[],plan:basePlan(week),checkin:null,light:sel.light,finisher:null,challenge:null,plus:0,activeMs:0,curOrd:0};
+  origKeys(day).forEach(k=>{S.stage[k]=stageOf(k);});
+  let say='',err='';
+  if(ST().checkin){
+    S.checkin={sleep:ci.sleep,sore:ci.sore,energy:ci.energy,time:ci.time,text:$('ciText').value.trim()};
+    let adj=null;
+    if(Coach.ready()){
+      btn.disabled=true;btn.textContent='Coach passt den Plan an …';
+      try{adj=await Promise.race([Coach.planAdjust(planCtx()),new Promise((_,rej)=>setTimeout(()=>rej(new Error('Zeitüberschreitung')),25000))]);}
+      catch(e){err='Coach nicht erreichbar ('+e.message+'). Plan unverändert.';}
+      btn.disabled=false;btn.textContent='Einheit starten';
+    } else adj=Coach.localAdjust(S.checkin);
+    if(adj){applyAdjust(adj);say=adj.say||'';S.adjust=adj;}
+  }
+  // vom Startbildschirm übernommene Varianten (Schmerz-Hinweis)
+  Object.keys(sel.swaps).forEach(o=>{if(origKeys(day).includes(o))S.swaps[o]=sel.swaps[o];});
+  if(sel.light){const P=S.plan;P.light=true;P.rounds=Math.max(2,P.rounds-1);P.weightDelta-=2.5;P.rirShift+=1;}
+  S.plan.weightDelta=Math.max(-5,S.plan.weightDelta);S.plan.rirShift=Math.min(2,S.plan.rirShift);
+  // Liedlängen, nur wenn Spotify verbunden
+  const s=ST();
+  if(Music.connected()){
+    if(s.songWarm&&s.songWarm.duration)S.plan.warmSec=Math.round(s.songWarm.duration/1000);
+    if(s.songFin&&s.songFin.duration&&week>=2)S.plan.finSongSec=Math.round(s.songFin.duration/1000);
+    if(s.challenge&&s.songChal&&s.songChal.duration&&week>=2)S.plan.chalSec=Math.round(s.songChal.duration/1000);
+  }
+  // Gewichte: Plan-Delta gilt nur für heute
+  const d=S.plan.weightDelta;
+  origKeys(day).forEach(o=>{[o,S.swaps[o]].forEach(k=>{if(k&&WT[k]&&S.wts[k]==null){S.wts[k]=clampW(wtDefault(k,week)+d);S.wtAdj[k]=S.wts[k]-wtDefault(k,week);}});});
+  sel.swaps={};
+  startSession(false);
+  if(err)coachOut(err,true);
+  else if(say){coachOut(say);speak(say,true);}
+}
+function planCtx(){
+  const day=S.day;
+  return {day,week:S.week,
+    plan:{rounds:S.plan.rounds,finisher:S.week>=2,finisherSec:S.plan.finisherSec,pairs:DAYS[day].map(p=>p.map(k=>EX[k].name))},
+    checkin:S.checkin,lastSessions:lastN(3),
+    exercises:origKeys(day).map(k=>({key:k,name:EX[k].name,range:EX[k].range,lighter:LIGHTER[k]||null})),
+    weights:Object.fromEntries(origKeys(day).filter(k=>WT[k]).map(k=>[k,wtDefault(k,S.week)])),
+    stages:store.stages,notes:store.coachNote||''};
+}
+function applyAdjust(a){
+  const P=S.plan;
+  if(a.rounds)P.rounds=a.rounds;
+  if(a.weightDelta)P.weightDelta+=a.weightDelta;
+  if(a.rirShift)P.rirShift+=a.rirShift;
+  if(a.finisher===false)P.finisher=false;
+  if(a.finisherSec&&S.week>=2)P.finisherSec=a.finisherSec;
+  if(a.swaps)for(const o in a.swaps){if(origKeys(S.day).includes(o)&&LIGHTER[o]===a.swaps[o])S.swaps[o]=a.swaps[o];}
+  const sp=[...new Set((a.skipPairs||[]).map(Number))].filter(n=>n>=1&&n<=3);
+  P.skipPairs=sp.slice(0,2);
 }
 
 function startSession(resume){
-  if(!resume){
-    S={date:new Date().toISOString(),day:sel.day,week:sel.week,sets:{},stage:{},wts:{},finisher:null,plus:0};
-    DAYS[sel.day].flat().forEach(k=>{S.stage[k]=stageOf(k);});
-    idx=0;
-  }else{ idx=S.idx||0; }
-  steps=buildSteps(S.day,S.week);
-  S.idx=idx; store.cur=S; save();
+  if(resume){
+    S.wtAdj=S.wtAdj||{};S.feel=S.feel||{};S.swaps=S.swaps||{};S.swapLog=S.swapLog||[];S.cut=S.cut||[];S.activeMs=S.activeMs||0;
+    if(!S.plan){S.plan=basePlan(S.week);steps=buildSteps(S);idx=Math.min(S.idx||0,steps.length-1);S.curOrd=steps[idx].ord;}
+    else{steps=buildSteps(S);idx=resolveIdx(S.curOrd||0);}
+  }else{steps=buildSteps(S);idx=0;S.curOrd=steps[0].ord;}
+  RT={pairTrack:{},music:false,playlistPending:false,afterSong:false,summary:null,summaryAsked:false};
+  hardOpen=false;
+  S.idx=idx;store.cur=S;save();
   showView('viewMain');
-  remaining=steps[idx].dur||0; running=false;
+  coachOut('');$('voiceLine').textContent='';$('musicLine').textContent='';
+  remaining=steps[idx].dur||0;running=false;
+  if(steps[idx].kind==='set')setStart=Date.now();
   render();
-  if(!resume)start();
+  startExtras();
+  if(!resume){start();enterStep(true);}
 }
-function abortSession(){ pause(); store.cur=null; save(); S=null; showView('viewStart'); renderStart(); }
+function startExtras(){
+  if(ST().voice&&Voice.supported())Voice.start();
+  musicInit();
+}
+function stopExtras(){
+  try{Voice.stop();}catch(e){}
+  $('voiceLine').textContent='';
+  if(RT.music)Music.pause().catch(()=>{});
+  RT.music=false;
+  if(typeof Rig!=='undefined')Rig.setCycle(null);
+}
 
 // ---------- Rendering ----------
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));}
-function elapsed(){ return S&&S.startedAt?(Date.now()-S.startedAt)/1000:0; }
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+  document.body.classList.toggle('xp',id==='viewMain'||id==='viewStart');
+}
+function setType(t){['work','rest','warm','cool','fin'].forEach(c=>document.body.classList.toggle(c,c===t));}
+function restEstimate(){
+  if(!S||!steps.length)return 0;
+  const s=steps[idx];let t=0;
+  if(s.kind==='set')t+=Math.max(0,SET_EST-(Date.now()-setStart)/1000);
+  else if(s.dur)t+=Math.max(0,remaining);
+  for(let i=idx+1;i<steps.length;i++){const x=steps[i];if(x.kind==='set')t+=SET_EST;else if(x.dur)t+=x.dur;}
+  return t;
+}
+function updateClock(){
+  if(!S)return;
+  $('meta').textContent=`Verstrichen ${fmt((S.activeMs||0)/1000)} · noch ca. ${fmt(restEstimate())}`;
+}
+function setFig(k){
+  if(typeof THREE==='undefined'||typeof Rig==='undefined'){$('fig').innerHTML='<div style="padding:20px;color:#9aa3ad;font-size:13px">3D-Figur konnte nicht geladen werden (Internet?)</div>';return;}
+  if(!$('fig').dataset.init){Rig.init($('fig'));$('fig').dataset.init='1';}
+  Rig.show(k);
+}
+function setHow(k){$('how').innerHTML=howHTML(k);$('how').classList.add('on');}
+function targetText(k){const ex=EX[k];return `Ziel ${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'s':'Wdh.'}${ex.side?' '+ex.side:''}`;}
+function lastText(k,stg){
+  const last=lastSessionLike(k,stg);
+  if(!last)return 'Erstes Mal mit dieser Übung';
+  const v=last.sets[k],w=last.wts?last.wts[k]:null;
+  return 'Letztes Mal: '+v.map(x=>x==null?'–':x).join(' · ')+(EX[k].unit==='s'?' s':'')+(w!=null?' ('+wtText(k,w)+')':'');
+}
 
 function render(){
   const s=steps[idx];
-  document.body.className=s.type;
+  setType(s.type);
   $('progressBar').style.width=(idx/(steps.length-1)*100)+'%';
-  $('meta').innerHTML=`Tag ${S.day} · Woche ${S.week} · Schritt ${idx+1}/${steps.length}`;
-  $('repBox').classList.remove('on'); $('banner').classList.remove('on'); $('how').classList.remove('on'); $('how').innerHTML=''; $('wbox').classList.remove('on'); $('plus').textContent=''; $('last').textContent=''; $('target').textContent=''; $('next').textContent='';
-  $('prev').style.display=''; $('skip').style.display='';
-  const setFig=(k)=>{ if(typeof THREE==='undefined'||typeof Rig==='undefined'){$('fig').innerHTML='<div style="padding:20px;color:#9aa3ad;font-size:13px">3D-Figur konnte nicht geladen werden (Internet?)</div>';return;} if(!$('fig').dataset.init){Rig.init($('fig'));$('fig').dataset.init='1';} Rig.show(k); };
-  const setHow=(k)=>{ $('how').innerHTML=howHTML(k); $('how').classList.add('on'); };
+  $('metaL').textContent=`· Tag ${S.day} · Woche ${S.week}${S.light?' · leichter':''}`;
+  updateClock();
+  ['repBox','banner','how','wbox','feelBox','hardPanel'].forEach(i=>$(i).classList.remove('on'));
+  $('how').innerHTML='';$('plus').textContent='';$('last').textContent='';$('target').textContent='';$('next').textContent='';$('hint').textContent='';$('time').textContent='';
+  $('prev').style.display='';$('skip').style.display='';
+  $('coachRow').style.display=s.kind==='end'?'none':'';
+  $('btnAbort').style.display=s.kind==='end'?'none':'';
+  $('phase').textContent=s.kind==='rest'?'Wechsel · '+fmt(remaining):stepPhase(s);
 
   if(s.kind==='timed'){
     const ex=EX[s.ex];
-    $('phase').textContent=s.phase; $('name').textContent=s.exLabel||ex.name; $('hint').textContent='';
-    setFig(s.figEx||s.ex); setHow(s.ex); $('time').textContent=fmt(remaining);
+    if(s.ex==='probe'){const fp=firstPairKeys();$('name').textContent='Probesätze: '+EX[fp[0]].name+', '+EX[fp[1]].name;setFig(fp[0]);}
+    else{$('name').textContent=ex.name;setFig(s.ex);}
+    setHow(s.ex);$('time').textContent=fmt(remaining);
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
-    const n=steps[idx+1]; if(n&&n.kind==='set')$('next').textContent='Danach: '+EX[n.ex].name;
+    const n=steps[idx+1];if(n&&n.kind==='set')$('next').textContent='Danach: '+EX[exOf(n)].name;
   }
   else if(s.kind==='rest'){
-    const n=s.next;
-    $('phase').textContent='Wechsel · '+fmt(remaining);
-    if(n.kind==='set'){const ex=EX[n.ex];$('name').textContent='Gleich: '+ex.name;$('hint').textContent='';setFig(n.ex);setHow(n.ex);$('target').textContent=targetText(n);}
+    const n=steps[idx+1];
+    if(n.kind==='set'){const k=exOf(n);$('name').textContent='Gleich: '+EX[k].name;setFig(k);setHow(k);$('target').textContent=targetText(k)+(WT[k]?' · '+wtText(k,S.wts[k]):'');}
     else if(n.kind==='finisher'){$('name').textContent='Gleich: Finisher';$('hint').textContent='5 Thruster + 5 Burpees = 1 Runde, so viele Runden wie möglich';setFig('thruster');setHow('thruster');}
-    else {$('name').textContent='Gleich: '+EX[n.ex].name;$('hint').textContent='';setFig(n.ex);setHow(n.ex);}
+    else if(n.ex){$('name').textContent='Gleich: '+EX[n.ex].name;setFig(n.ex);setHow(n.ex);}
+    else $('name').textContent='Gleich geschafft';
     $('time').textContent=fmt(remaining);
     $('plus').textContent=S.lastPlus||'';
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
   }
-  else if(s.kind==='set'){
-    const ex=EX[s.ex],stg=S.stage[s.ex]||0;
-    $('phase').textContent=s.phase; $('name').textContent=ex.name; $('hint').textContent=(ex.stages&&stg?'Stufe: '+STAGES[stg]:'');
-    setFig(s.ex); setHow(s.ex);
-    $('target').textContent=targetText(s)+' · '+WEEK[S.week].rir;
-    const last=lastSessionLike(S.day,s.ex,stg);
-    const lastSets=last?last.sets[s.ex]:null;
-    const lastWt=last&&last.wts?last.wts[s.ex]:null;
-    $('last').textContent=lastSets?'Letztes Mal: '+lastSets.map(v=>v==null?'–':v).join(' · ')+(ex.unit==='s'?' s':'')+(lastWt!=null?' ('+wtText(s.ex,lastWt)+')':''):'Erstes Mal mit dieser Übung';
-    if(WT[s.ex]){ if(S.wts[s.ex]==null)S.wts[s.ex]=wtDefault(s.ex,S.week); wtVal=S.wts[s.ex]; $('wval').textContent=wtText(s.ex,wtVal); $('wbox').classList.add('on'); }
-    $('time').textContent='';
-    const logged=(S.sets[s.ex]||[])[s.setIndex];
-    repVal=logged!=null?logged:(lastSets&&lastSets[s.setIndex]!=null?lastSets[s.setIndex]:ex.range[0]);
-    $('reps').textContent=repVal; $('repBox').classList.add('on');
-    $('mainBtn').textContent='Satz fertig';
-    // Stufen-Banner
-    const atTop=lastSets&&lastSets.length>=WEEK[S.week].rounds&&lastSets.every(v=>v!=null&&v>=ex.range[1])&&!S.sets[s.ex];
-    const canWtUp=!!WT[s.ex]&&lastWt!=null&&lastWt<WMAX;
-    if(atTop&&canWtUp&&(S.wts[s.ex]==null||S.wts[s.ex]<=lastWt)){
-      const nw=Math.min(WMAX,lastWt+2.5);
-      $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]}). Erst Gewicht erhöhen: <b>${wtText(s.ex,nw)}</b>.<br><button id="wtUp">Gewicht übernehmen</button>`;
-      $('banner').classList.add('on');
-      $('wtUp').onclick=()=>{S.wts[s.ex]=nw;store.weights[s.ex]=nw;save();render();};
-    } else if(ex.stages&&atTop&&!canWtUp&&stg<STAGES.length-1){
-      $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]})${WT[s.ex]?' mit maximalem Gewicht':''}. Nächste Stufe: <b>${STAGES[stg+1]}</b>. Danach wieder am unteren Ende des Bereichs starten.<br><button id="stageUp">Stufe übernehmen</button>`;
-      $('banner').classList.add('on');
-      $('stageUp').onclick=()=>{store.stages[s.ex]=stg+1;S.stage[s.ex]=stg+1;save();render();};
-    }
-    setStart=Date.now();
-    if(!running)$('time').textContent='';
-  }
+  else if(s.kind==='set')renderSet(s);
   else if(s.kind==='finisher'){
-    $('phase').textContent=s.phase; $('name').textContent='5 Thruster + 5 Burpees';
-    $('hint').textContent='So viele Runden wie möglich. Jede volle Runde mit + zählen.';
-    setFig('thruster'); $('how').innerHTML='<div><b>Thruster</b> '+HOW.thruster.move+'</div><div><b>Burpee</b> '+HOW.burpee.move+'</div>'; $('how').classList.add('on');
+    $('name').textContent='5 Thruster + 5 Burpees';
+    $('hint').textContent='So viele Runden wie möglich. Jede volle Runde mit + zählen.'+(S.plan.finSongSec&&ST().songFin?' Bis zum Ende von „'+ST().songFin.name+'“.':'');
+    setFig('thruster');$('how').innerHTML='<div><b>Thruster</b> '+HOW.thruster.move+'</div><div><b>Burpee</b> '+HOW.burpee.move+'</div>';$('how').classList.add('on');
     $('time').textContent=fmt(remaining);
     const lastFin=[...store.sessions].reverse().find(x=>x.finisher&&x.finisher.kind==='amrap');
     $('last').textContent=lastFin?'Letzter Score: '+lastFin.finisher.rounds+' Runden'+(lastFin.finisher.w!=null?' ('+wtText('thruster',lastFin.finisher.w)+')':''):'';
-    if(!S.finisher)S.finisher={kind:'amrap',dur:s.dur,rounds:0,w:wtDefault('thruster',S.week)};
-    repVal=S.finisher.rounds; $('reps').textContent=repVal; $('repBox').classList.add('on');
+    if(!S.finisher)S.finisher={kind:'amrap',dur:s.dur,rounds:0,w:clampW(wtDefault('thruster',S.week)+S.plan.weightDelta)};
+    if(S.wtAdj.thruster==null)S.wtAdj.thruster=S.finisher.w-wtDefault('thruster',S.week);
+    repVal=S.finisher.rounds;$('reps').textContent=repVal;$('repBox').classList.add('on');
     $('target').textContent='Runden';
-    wtVal=S.finisher.w; $('wval').textContent=wtText('thruster',wtVal); $('wbox').classList.add('on');
+    wtVal=S.finisher.w;$('wval').textContent=wtText('thruster',wtVal);$('wbox').classList.add('on');
+    $('mainBtn').textContent=running?'Pause':'Fortsetzen';
+  }
+  else if(s.kind==='challenge'){
+    const song=ST().songChal;
+    $('name').textContent='Liegestütze bis Liedende';
+    $('hint').textContent='So viele Liegestütze wie möglich, Pausen im Stütz oder auf den Knien sind erlaubt.'+(song?' Lied: „'+song.name+'“.':'');
+    setFig('pushup');setHow('pushup');
+    $('time').textContent=fmt(remaining);
+    const lastC=[...store.sessions].reverse().find(x=>x.challenge);
+    $('last').textContent=lastC?'Letzter Challenge-Score: '+lastC.challenge.reps+' Liegestütze':'';
+    if(!S.challenge)S.challenge={reps:0,dur:s.dur,song:song?song.name:''};
+    repVal=S.challenge.reps;$('reps').textContent=repVal;$('repBox').classList.add('on');
+    $('target').textContent='Liegestütze';
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
   }
   else if(s.kind==='end'){
-    $('phase').textContent='Fertig'; $('name').textContent='Einheit geschafft';
+    $('name').textContent='Einheit geschafft';
     const n=Object.values(S.sets).reduce((a,v)=>a+v.filter(x=>x!=null).length,0);
-    let t=`${n} Sätze protokolliert · ${S.plus} Plus gegenüber letztem Tag ${S.day}`;
+    let t=`${n} Sätze protokolliert · ${S.plus} Plus gegenüber letztem Mal`;
     if(S.finisher&&S.finisher.kind==='amrap')t+=` · Finisher ${S.finisher.rounds} Runden`;
-    $('hint').textContent=t; setFig('walk'); $('time').textContent='';
+    if(S.challenge)t+=` · Challenge ${S.challenge.reps} Liegestütze`;
+    $('hint').textContent=t;setFig('walk');
     $('target').textContent='Nächste Einheit frühestens übermorgen: Tag '+(S.day==='A'?'B':'A');
-    $('mainBtn').textContent='Speichern und schließen'; $('skip').style.display='none';
+    $('mainBtn').textContent='Speichern und schließen';$('skip').style.display='none';
+    renderSummary();
   }
 }
-function targetText(s){const ex=EX[s.ex];return `Ziel ${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'s':'Wdh.'}${ex.side?' '+ex.side:''}`;}
 
-// ---------- Ton ----------
+function renderSet(s){
+  const k=exOf(s),ex=EX[k],stg=S.stage[k]||0;
+  $('name').textContent=ex.name;
+  const hints=[];
+  if(k!==s.ex)hints.push('Variante statt '+EX[s.ex].name);
+  if(ex.stages&&stg)hints.push('Stufe: '+STAGES[stg]);
+  $('hint').textContent=hints.join(' · ');
+  setFig(k);setHow(k);
+  $('target').textContent=targetText(k)+' · '+rirText();
+  const last=lastSessionLike(k,stg);
+  const lastSets=last?last.sets[k]:null;
+  const lastWt=last&&last.wts?last.wts[k]:null;
+  $('last').textContent=lastText(k,stg);
+  if(WT[k]){
+    if(S.wts[k]==null){S.wts[k]=clampW(wtDefault(k,S.week)+S.plan.weightDelta);S.wtAdj[k]=S.wts[k]-wtDefault(k,S.week);}
+    wtVal=S.wts[k];$('wval').textContent=wtText(k,wtVal);$('wbox').classList.add('on');
+  }
+  // Zähler nur beim Betreten des Satzes (oder Übungswechsel) neu setzen, nicht bei jedem Neuzeichnen
+  if(RT.repFor!==s.id+':'+k){
+    const logged=(S.sets[k]||[])[s.setIndex];
+    repVal=logged!=null?logged:(lastSets&&lastSets[s.setIndex]!=null?lastSets[s.setIndex]:ex.range[0]);
+    RT.repFor=s.id+':'+k;
+  }
+  $('reps').textContent=repVal;$('repBox').classList.add('on');
+  $('mainBtn').textContent='Satz fertig';
+  // Rückmeldung
+  const f=((S.feel[k]||[])[s.setIndex])||'passt';
+  $('feelBox').classList.add('on');
+  $('feelBox').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.dataset.f===f));
+  if(hardOpen)renderHard(s,k);
+  // Banner nur vor dem ersten Satz dieser Übung
+  const fresh=!S.sets[k]&&!S.feel[k]&&!(RT.bnDone&&RT.bnDone[k]);
+  if(!fresh)return;
+  const lastAny=lastSessionWith(k);
+  const wasHard=lastAny&&lastAny.feel&&(lastAny.feel[k]||[]).includes('hart');
+  if(wasHard){
+    const opts=[];
+    if(WT[k]&&S.wts[k]>2.5)opts.push(`<button id="bnW">2,5 kg weniger: ${wtText(k,clampW(S.wts[k]-2.5))}</button>`);
+    if(LIGHTER[k])opts.push(`<button id="bnV">Variante: ${EX[LIGHTER[k]].name}</button>`);
+    $('banner').innerHTML=`Letztes Mal war ${ex.name} zu hart.${opts.length?' Vorschlag:':''}<br>${opts.join('')}`;
+    $('banner').classList.add('on');
+    const done=()=>{(RT.bnDone=RT.bnDone||{})[k]=1;};
+    if($('bnW'))$('bnW').onclick=()=>{const base=wtDefault(k,S.week);store.weights[k]=clampW(base-2.5);S.wts[k]=clampW(S.wts[k]-2.5);done();save();render();};
+    if($('bnV'))$('bnV').onclick=()=>{done();doSwap(s.ex);render();};
+    return;
+  }
+  const atTop=lastSets&&lastSets.length>=S.plan.rounds&&lastSets.every(v=>v!=null&&v>=ex.range[1]);
+  const canWtUp=!!WT[k]&&lastWt!=null&&lastWt<WMAX;
+  if(atTop&&canWtUp&&(S.wts[k]==null||S.wts[k]<=lastWt)){
+    const nw=Math.min(WMAX,lastWt+2.5);
+    $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]}). Erst Gewicht erhöhen: <b>${wtText(k,nw)}</b>.<br><button id="wtUp">Gewicht übernehmen</button>`;
+    $('banner').classList.add('on');
+    $('wtUp').onclick=()=>{S.wts[k]=clampW(nw+(S.wtAdj[k]||0));store.weights[k]=nw;save();render();};
+  } else if(ex.stages&&atTop&&!canWtUp&&stg<STAGES.length-1){
+    $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]})${WT[k]?' mit maximalem Gewicht':''}. Nächste Stufe: <b>${STAGES[stg+1]}</b>. Danach wieder am unteren Ende des Bereichs starten.<br><button id="stageUp">Stufe übernehmen</button>`;
+    $('banner').classList.add('on');
+    $('stageUp').onclick=()=>{store.stages[k]=stg+1;S.stage[k]=stg+1;save();render();};
+  }
+}
+function renderHard(s,k){
+  let h='';
+  if(WT[k]&&S.wts[k]>2.5)h+='<button data-h="w">Gewicht −2,5 kg</button>';
+  if(LIGHTER[k])h+=`<button data-h="v">Leichtere Variante: ${EX[LIGHTER[k]].name}</button>`;
+  h+='<button data-h="skip">Satz überspringen</button><button data-h="round">Runde streichen</button>';
+  $('hardPanel').innerHTML=h;$('hardPanel').classList.add('on');
+}
+function setFeel(f){
+  const s=steps[idx];if(s.kind!=='set')return;
+  const k=exOf(s);(S.feel[k]=S.feel[k]||[])[s.setIndex]=f;
+  hardOpen=f==='hart';save();render();
+}
+
+// Variante für den Rest der Einheit
+function doSwap(orig){
+  const cur=S.swaps[orig]||orig,v=LIGHTER[cur];if(!v)return null;
+  S.swaps[orig]=v;S.swapLog.push({from:cur,to:v,at:stepPhase(steps[idx])});
+  if(S.stage[v]==null)S.stage[v]=0;
+  if(WT[v]&&S.wts[v]==null){S.wts[v]=clampW(wtDefault(v,S.week)+S.plan.weightDelta);S.wtAdj[v]=S.wts[v]-wtDefault(v,S.week);}
+  hardOpen=false;save();return v;
+}
+function weightAdj(k,d,persist){
+  if(!WT[k])return false;
+  const isFin=steps[idx].kind==='finisher'&&k==='thruster';
+  const cur=isFin?S.finisher.w:S.wts[k];
+  const nv=clampW((cur||0)+d);if(nv===cur)return false;
+  if(isFin)S.finisher.w=nv;else S.wts[k]=nv;
+  if(persist)store.weights[k]=clampW(nv-(S.wtAdj[k]||0));
+  else S.wtAdj[k]=(S.wtAdj[k]||0)+(nv-cur);
+  wtVal=nv;save();return true;
+}
+function skipSet(){
+  const s=steps[idx];if(s.kind!=='set')return;
+  const k=exOf(s);if(!(S.feel[k]&&S.feel[k][s.setIndex]))(S.feel[k]=S.feel[k]||[])[s.setIndex]='hart';
+  S.lastPlus='Satz übersprungen';
+  advance(true);if(!running)start();
+}
+function cutRound(){
+  const s=steps[idx];if(s.kind!=='set'&&s.kind!=='rest')return;
+  const k=exOf(s);if(s.kind==='set'&&!(S.feel[k]&&S.feel[k][s.setIndex]))(S.feel[k]=S.feel[k]||[])[s.setIndex]='hart';
+  for(let i=idx;i<steps.length;i++){const x=steps[i];if((x.kind==='set'||x.kind==='rest')&&x.pair===s.pair&&x.round===s.round)S.cut.push(x.id);}
+  S.lastPlus=`Runde ${s.round} von Paar ${s.pair} gestrichen`;
+  rebuild();if(!running)start();
+}
+function cutPair(){
+  let s=steps[idx];
+  if(s.kind!=='set'&&s.kind!=='rest')return false;
+  let p=s.pair;
+  if(s.kind==='rest'){const n=steps[idx+1];if(n&&n.kind==='set')p=n.pair;}
+  for(let i=idx;i<steps.length;i++){const x=steps[i];if((x.kind==='set'||x.kind==='rest')&&x.pair===p)S.cut.push(x.id);}
+  S.lastPlus=`Paar ${p} gestrichen`;
+  rebuild();if(!running)start();return true;
+}
+
+// ---------- Ton und Sprache ----------
 function beep(freq,ms,vol){
   try{
     if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
@@ -460,26 +902,39 @@ function beep(freq,ms,vol){
   }catch(e){}
 }
 function switchSound(kind){
-  if(kind==='set'||kind==='finisher'){beep(880,120);setTimeout(()=>beep(1320,260),140);} else beep(660,220);
+  if(kind==='set'||kind==='finisher'||kind==='challenge'){beep(880,120);setTimeout(()=>beep(1320,260),140);} else beep(660,220);
   if(navigator.vibrate)try{navigator.vibrate(kind==='set'?[120,60,120]:120);}catch(e){}
 }
+// force: auch bei ausgeschalteten Ansagen (Antwort auf Sprachbefehl)
+function speak(text,coach,force){
+  if(!text)return;
+  const s=ST();
+  if(!force&&!s.announce)return;
+  Music.duck(true);
+  Voice.speak(text).then(()=>Music.duck(false),()=>Music.duck(false));
+}
+function coachOut(t,err){$('coachOut').textContent=t||'';$('coachOut').classList.toggle('err',!!err);}
 async function requestWake(){try{if('wakeLock' in navigator)wakeLock=await navigator.wakeLock.request('screen');}catch(e){}}
 function releaseWake(){try{wakeLock&&wakeLock.release();}catch(e){}wakeLock=null;}
 
 // ---------- Ablauf ----------
+function accum(){const now=Date.now();if(running&&S&&lastTick)S.activeMs=(S.activeMs||0)+(now-lastTick);lastTick=now;}
 function start(){
-  running=true; if(!S.startedAt)S.startedAt=Date.now();
+  if(!S)return;
+  lastTick=Date.now();running=true;if(!S.startedAt)S.startedAt=Date.now();
   const s=steps[idx];
   if(s.dur){endAt=performance.now()+remaining*1000;}
-  lastBeep=-1; beep(880,80,.2); requestWake();
-  clearInterval(tick); tick=setInterval(loop,100); render();
+  lastBeep=-1;beep(880,80,.2);requestWake();
+  clearInterval(tick);tick=setInterval(loop,100);render();
 }
-function pause(){running=false;clearInterval(tick);releaseWake();if(S)render();}
+function pause(){accum();running=false;clearInterval(tick);releaseWake();if(S){save();render();}}
 function loop(){
+  if(!S)return;
+  accum();
   const s=steps[idx];
-  if(s.kind==='end'){ pause(); return; }
-  if(s.kind==='set'){ $('time').textContent='Satzzeit '+fmt((Date.now()-setStart)/1000); $('time').style.fontSize='22px'; return; }
-  $('time').style.fontSize='';
+  updateClock();
+  if(s.kind==='end'){pause();return;}
+  if(s.kind==='set')return;
   remaining=(endAt-performance.now())/1000;
   const sec=Math.ceil(remaining);
   if(sec<=3&&sec>0&&sec!==lastBeep){lastBeep=sec;beep(1000,90,.35);}
@@ -487,30 +942,57 @@ function loop(){
   $('time').textContent=fmt(remaining);
   if(s.kind==='rest')$('phase').textContent='Wechsel · '+fmt(remaining);
 }
-function advance(auto){
+function storeCounter(){
   const s=steps[idx];
   if(s.kind==='finisher'&&S.finisher)S.finisher.rounds=repVal;
-  if(idx>=steps.length-1)return;
-  idx++; S.idx=idx; save();
-  const n=steps[idx];
-  remaining=n.dur||0; endAt=performance.now()+remaining*1000; lastBeep=-1;
-  if(auto)switchSound(n.kind);
-  $('time').style.fontSize='';
-  if(n.kind==='set'){ setStart=Date.now(); }
-  if(n.kind==='end'){ pause(); }
-  render();
+  if(s.kind==='challenge'&&S.challenge)S.challenge.reps=repVal;
 }
+function advance(auto){
+  storeCounter();
+  if(idx>=steps.length-1)return;
+  goTo(idx+1,auto);
+}
+function goTo(i,auto){
+  const prevStep=steps[idx];
+  idx=i;S.idx=idx;S.curOrd=steps[idx].ord;save();
+  const n=steps[idx];
+  remaining=n.dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;RT.repFor=null;
+  if(auto)switchSound(n.kind);
+  if(n.kind==='set')setStart=Date.now();
+  if(n.kind==='end')pause();
+  render();
+  enterStep(auto,prevStep);
+}
+// Ansagen, Musik und Coach beim Betreten eines Schritts
+function enterStep(announce,prevStep){
+  const s=steps[idx];
+  if(announce){
+    if(s.kind==='set')speak(EX[exOf(s)].name);
+    else if(s.kind==='rest'){const n=steps[idx+1];
+      if(n&&n.kind==='set'){const k=exOf(n),ex=EX[k];speak(`Gleich ${ex.name}, ${ex.range[0]} bis ${ex.range[1]}${ex.unit==='s'?' Sekunden':''}${ex.side?' '+ex.side:''}${WT[k]?', '+wtSpeech(k,S.wts[k]):''}`);}
+      else if(n&&n.kind==='finisher')speak('Gleich Finisher: 5 Thruster und 5 Burpees');
+    }
+    else if(s.kind==='timed')speak(s.ex==='probe'?'Probesätze':EX[s.ex].name);
+    else if(s.kind==='finisher')speak('Finisher, los');
+    else if(s.kind==='challenge')speak('Liegestütze bis zum Liedende');
+  }
+  musicStep(s,prevStep);
+  if(s.kind==='end')endSummary();
+}
+
 function finishSet(){
-  const s=steps[idx],ex=EX[s.ex],stg=S.stage[s.ex]||0;
-  if(!S.sets[s.ex])S.sets[s.ex]=[];
-  S.sets[s.ex][s.setIndex]=repVal;
-  const last=lastSessionLike(S.day,s.ex,stg);
-  const lv=last&&last.sets[s.ex]?last.sets[s.ex][s.setIndex]:null;
-  const lw=last&&last.wts?last.wts[s.ex]:null, cw=S.wts[s.ex];
-  if(WT[s.ex]&&cw!=null)store.weights[s.ex]=cw;
+  const s=steps[idx],k=exOf(s),stg=S.stage[k]||0;
+  if(!S.sets[k])S.sets[k]=[];
+  S.sets[k][s.setIndex]=repVal;
+  if(!S.feel[k])S.feel[k]=[];
+  if(!S.feel[k][s.setIndex])S.feel[k][s.setIndex]='passt';
+  const last=lastSessionLike(k,stg);
+  const lv=last&&last.sets[k]?last.sets[k][s.setIndex]:null;
+  const lw=last&&last.wts?last.wts[k]:null,cw=S.wts[k];
+  if(WT[k]&&cw!=null)store.weights[k]=clampW(cw-(S.wtAdj[k]||0));
   if(lv!=null){
-    if(lw!=null&&cw!=null&&cw>lw){ if(repVal>=lv-2){S.plus++;S.lastPlus=`Plus: mehr Gewicht (${wtText(s.ex,cw)})`;} else S.lastPlus=`Mehr Gewicht, ${repVal-lv} Wdh.`; }
-    else if(lw!=null&&cw!=null&&cw<lw){S.lastPlus=`Weniger Gewicht als letztes Mal (${wtText(s.ex,lw)})`;}
+    if(lw!=null&&cw!=null&&cw>lw){if(repVal>=lv-2){S.plus++;S.lastPlus=`Plus: mehr Gewicht (${wtText(k,cw)})`;}else S.lastPlus=`Mehr Gewicht, ${repVal-lv} Wdh.`;}
+    else if(lw!=null&&cw!=null&&cw<lw){S.lastPlus=`Weniger Gewicht als letztes Mal (${wtText(k,lw)})`;}
     else if(repVal>lv){S.plus++;S.lastPlus=`Plus: +${repVal-lv} gegenüber letztem Mal`;}
     else if(repVal===lv)S.lastPlus='Gleich wie letztes Mal';
     else S.lastPlus=`${repVal-lv} gegenüber letztem Mal`;
@@ -518,11 +1000,190 @@ function finishSet(){
   advance(true);
   if(!running)start();
 }
+function cleanSession(x){['idx','curOrd','lastPlus','wtAdj','cut','startedAt'].forEach(f=>delete x[f]);if(x.swapLog&&!x.swapLog.length)delete x.swapLog;return x;}
 function endSession(){
-  pause();
-  delete S.idx; delete S.lastPlus;
-  store.sessions.push(S); store.cur=null; save(); S=null;
-  showView('viewStart'); renderStart();
+  pause();stopExtras();
+  store.sessions.push(cleanSession(S));store.cur=null;save();S=null;
+  coachOut('');showView('viewStart');renderStart();
+}
+
+// ---------- Abbruch ----------
+let abReason=null;
+function openAbort(reason){
+  if(!S)return;
+  if(running)pause();
+  abReason=reason||null;$('abText').value='';
+  renderReasons();$('ovAbort').classList.add('on');
+}
+function renderReasons(){
+  $('abReasons').innerHTML=Object.entries(REASONS).map(([k,v])=>`<div class="chip${abReason===k?' sel':''}" data-r="${k}">${v}</div>`).join('');
+  $('abReasons').querySelectorAll('[data-r]').forEach(c=>c.onclick=()=>{abReason=c.dataset.r;renderReasons();});
+  $('abSave').disabled=!abReason;
+}
+function abortInfo(reason,text){
+  const s=steps[idx];let ls=null;
+  for(let i=idx;i>=0;i--)if(steps[i].kind==='set'){ls=steps[i];break;}
+  return {step:idx,phase:stepPhase(s),reason,text,pair:ls?ls.pair:null,round:ls?ls.round:null,ex:ls?exOf(ls):null,orig:ls?ls.ex:null};
+}
+$('abSave').onclick=()=>{
+  if(!abReason||!S)return;
+  storeCounter();
+  S.aborted=abortInfo(abReason,$('abText').value.trim());
+  $('ovAbort').classList.remove('on');
+  endSession();
+};
+$('abBack').onclick=()=>$('ovAbort').classList.remove('on');
+$('abDiscard').onclick=()=>{$('ovAbort').classList.remove('on');pause();stopExtras();store.cur=null;save();S=null;coachOut('');showView('viewStart');renderStart();};
+function abortText(a,html){
+  const r=REASONS[a.reason]||a.reason,tx=html?esc(a.text):a.text;
+  const where=a.pair?`nach Paar ${a.pair}, Runde ${a.round}`:'beim Aufwärmen';
+  return `abgebrochen ${where} (${r}${tx?': '+tx:''})`;
+}
+
+// ---------- Coach während des Trainings ----------
+function askCtx(){
+  const s=steps[idx],k=s.kind==='set'?exOf(s):(s.kind==='rest'&&steps[idx+1]&&steps[idx+1].kind==='set'?exOf(steps[idx+1]):(s.ex||null));
+  return {step:stepPhase(s),stepKind:s.kind,
+    exercise:k&&EX[k]?{key:k,name:EX[k].name,range:EX[k].range||null,lighter:LIGHTER[k]||null}:null,
+    set:s.kind==='set'?s.setIndex+1:null,reps:k?(S.sets[k]||[]):[],current:repVal,
+    feel:k?(S.feel[k]||[]):[],weights:S.wts,plan:S.plan,checkin:S.checkin,remainingMin:Math.round(restEstimate()/60)};
+}
+async function askCoach(text,fromVoice){
+  text=(text||'').trim();if(!text||!S)return;
+  let r;
+  if(Coach.ready()){
+    coachOut('Coach denkt nach …');
+    try{r=await Coach.ask(text,askCtx());}
+    catch(e){coachOut('Coach nicht erreichbar ('+e.message+')',true);return;}
+  } else r=Coach.localAnswer(text);
+  if(!S)return;
+  coachOut(r.say);speak(r.say,true,fromVoice);
+  runActions(r.actions||[]);
+}
+function curExKey(){const s=steps[idx];if(s.kind==='set')return exOf(s);if(s.kind==='finisher')return 'thruster';if(s.kind==='rest'){const n=steps[idx+1];if(n&&n.kind==='set')return exOf(n);}return null;}
+function runActions(acts){
+  acts.forEach(a=>{
+    const s=steps[idx];
+    switch(a.type){
+      case 'weight':{let k=a.ex?(S.swaps[a.ex]||a.ex):curExKey();if(k&&WT[k]&&+a.delta)weightAdj(k,+a.delta,false);render();break;}
+      case 'variant':{let k=a.ex?(S.swaps[a.ex]||a.ex):curExKey();const o=k?origOf(k):null;if(o&&doSwap(o))render();break;}
+      case 'skipSet':skipSet();break;
+      case 'skipPair':cutPair();break;
+      case 'rounds':{const n=+a.n;if(n>=1&&n<=3){S.plan.rounds=n;rebuild();}break;}
+      case 'finisher':S.plan.finisher=a.on?(S.week>=2?true:null):false;rebuild();break;
+      case 'pause':if(running)pause();break;
+      case 'resume':if(!running)start();break;
+      case 'abort':openAbort(REASONS[a.reason]?a.reason:null);break;
+    }
+  });
+}
+$('coachSend').onclick=()=>{const t=$('coachIn').value;$('coachIn').value='';askCoach(t,false);};
+$('coachIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('coachSend').click();}});
+
+// Auswertung nach der Einheit
+async function endSummary(){
+  if(!Coach.ready()||RT.summaryAsked||!S)return;
+  RT.summaryAsked=true;
+  coachOut('Coach wertet aus …');
+  try{
+    const r=await Coach.summary(compactSession(S),lastN(5));
+    RT.summary=r;S.coachSay=r.say;
+    store.coachNote=r.next.note||'';save();
+    coachOut('');
+    if(S&&steps[idx].kind==='end')render();
+    speak(r.say,true);
+  }catch(e){coachOut('Coach nicht erreichbar ('+e.message+')',true);}
+}
+function renderSummary(){
+  const r=RT.summary;if(!r)return;
+  const ks=Object.keys(r.next.weights||{}).filter(k=>WT[k]);
+  let h=`<b>Coach:</b> ${esc(r.say)}`;
+  if(ks.length&&!RT.sumApplied){
+    h+='<br>Nächstes Mal: '+ks.map(k=>`${EX[k]?EX[k].name:k} ${wtText(k,r.next.weights[k])}`).join(', ')+'<br><button id="sumApply">Übernehmen</button>';
+  } else if(RT.sumApplied)h+='<br>Gewichte übernommen.';
+  $('banner').innerHTML=h;$('banner').classList.add('on');
+  if($('sumApply'))$('sumApply').onclick=()=>{ks.forEach(k=>{store.weights[k]=clampW(r.next.weights[k]);});RT.sumApplied=true;save();render();};
+}
+
+// ---------- Sprachsteuerung ----------
+function whatNowText(){
+  const s=steps[idx];
+  let k=null;
+  if(s.kind==='set')k=exOf(s);
+  else if(s.kind==='rest'&&steps[idx+1]&&steps[idx+1].kind==='set')k=exOf(steps[idx+1]);
+  if(k){const ex=EX[k];return `${s.kind==='rest'?'Gleich ':''}${ex.name}, ${ex.range[0]} bis ${ex.range[1]}${ex.unit==='s'?' Sekunden':''}${ex.side?' '+ex.side:''}${WT[k]?', '+wtSpeech(k,S.wts[k]):''}`;}
+  if(s.kind==='finisher')return 'Finisher: 5 Thruster und 5 Burpees, so viele Runden wie möglich';
+  if(s.kind==='challenge')return 'Liegestütze bis zum Liedende';
+  if(s.kind==='timed')return s.ex==='probe'?'Probesätze':EX[s.ex].name;
+  return 'Einheit geschafft';
+}
+function voiceCommand(cmd,n){
+  if(!S)return;
+  const c=Voice.classify(cmd);
+  if(!c){askCoach(cmd,true);return;}
+  const s=steps[idx],say=t=>speak(t,false,true);
+  switch(c.name){
+    case 'finish':
+      if(s.kind==='set'){if(c.n!=null){repVal=c.n;$('reps').textContent=repVal;}finishSet();}
+      else if((s.kind==='finisher'||s.kind==='challenge')&&c.n!=null){repVal=c.n;$('reps').textContent=repVal;storeCounter();}
+      break;
+    case 'pause':if(running)pause();break;
+    case 'resume':if(!running)start();break;
+    case 'hard':{
+      if(s.kind!=='set')break;
+      const k=exOf(s);(S.feel[k]=S.feel[k]||[])[s.setIndex]='hart';
+      if(WT[k]&&S.wts[k]>2.5){weightAdj(k,-2.5,false);render();say('Gewicht runter auf '+wtSpeech(k,S.wts[k]));}
+      else if(LIGHTER[k]){const v=doSwap(s.ex);render();say('Wechsel auf '+EX[v].name);}
+      else{say('Satz übersprungen');skipSet();}
+      break;}
+    case 'easy':setFeel('leicht');break;
+    case 'lighter':case 'heavier':{const k=curExKey();if(k&&weightAdj(k,c.name==='lighter'?-2.5:2.5,true)){render();say(wtSpeech(k,wtVal));}break;}
+    case 'skip':$('skip').click();break;
+    case 'prev':$('prev').click();break;
+    case 'addReps':if(s.kind==='set'||s.kind==='finisher'||s.kind==='challenge'){repVal=Math.max(0,repVal+c.n);$('reps').textContent=repVal;storeCounter();}break;
+    case 'louder':case 'quieter':{const v=Math.max(0,Math.min(1,Music.baseVolume()+(c.name==='louder'?.1:-.1)));Music.setBase(v);ST().volume=Math.round(v*100)/100;save();break;}
+    case 'musicOn':if(RT.music)Music.resume().catch(e=>musicErr(e));break;
+    case 'musicOff':if(RT.music)Music.pause().catch(e=>musicErr(e));break;
+    case 'nextTrack':if(RT.music)Music.next().catch(e=>musicErr(e));break;
+    case 'remaining':{const r=restEstimate();say(r>=90?`Noch etwa ${Math.round(r/60)} Minuten`:`Noch etwa ${Math.round(r)} Sekunden`);break;}
+    case 'whatNow':say(whatNowText());break;
+    case 'how':{const k=curExKey()||s.ex;const h=HOW[k];if(h)say(h.move+' Achte auf: '+h.watch);break;}
+    case 'abort':openAbort();break;
+  }
+}
+
+// ---------- Spotify ----------
+function musicErr(e){$('musicLine').textContent='Spotify: '+(e&&e.message?e.message:e);}
+function mcall(p){if(p&&p.catch)p.catch(musicErr);}
+async function musicInit(){
+  const s=ST();
+  if(!Music.connected()||!(s.playlist||s.songWarm||s.songFin||s.songChal))return;
+  $('musicLine').textContent='Spotify verbindet …';
+  try{
+    const ok=await Music.connect();
+    if(!S)return;
+    if(!ok){$('musicLine').textContent='Spotify-Player nicht bereit (Premium und Anmeldung prüfen)';return;}
+    RT.music=true;$('musicLine').textContent='';
+    Music.setBase(+s.volume);
+    const cur=steps[idx];
+    if(cur.type==='warm'&&s.songWarm&&S.plan.warmSec){await Music.playTracks([s.songWarm.uri]);RT.playlistPending=true;}
+    else if(s.playlist)await Music.playContext(s.playlist.uri);
+    musicStep(cur,null,true);
+  }catch(e){musicErr(e);}
+}
+function musicStep(s,prevStep,init){
+  if(!RT.music)return;
+  const set=ST();
+  Music.setPhase(s.type==='rest'?'rest':(s.type==='cool'||s.kind==='end')?'cool':'work');
+  if(init)return;
+  if(s.kind==='set'&&!RT.pairTrack[s.pair]){
+    RT.pairTrack[s.pair]=1;
+    if(RT.playlistPending){RT.playlistPending=false;if(set.playlist)mcall(Music.playContext(set.playlist.uri));}
+    else if(set.newTrackPerPair)mcall(Music.next());
+  }
+  if(s.kind==='finisher'&&set.songFin&&S.plan.finSongSec&&!RT.finPlayed){RT.finPlayed=1;RT.afterSong=true;mcall(Music.playTracks([set.songFin.uri]));}
+  if(s.kind==='challenge'&&set.songChal&&!RT.chalPlayed){RT.chalPlayed=1;RT.afterSong=true;mcall(Music.playTracks([set.songChal.uri]));}
+  if(s.type==='cool'&&s.kind==='timed'&&RT.afterSong){RT.afterSong=false;if(set.playlist)mcall(Music.playContext(set.playlist.uri));}
 }
 
 // ---------- Buttons ----------
@@ -532,83 +1193,312 @@ $('mainBtn').addEventListener('click',()=>{
   if(s.kind==='end')return endSession();
   running?pause():start();
 });
-$('skip').addEventListener('click',()=>{ if(steps[idx].kind==='end')return; advance(false); if(!running&&steps[idx].kind!=='set'&&steps[idx].kind!=='end')start(); });
-$('prev').addEventListener('click',()=>{ if(idx===0)return; idx--; S.idx=idx; const s=steps[idx]; remaining=s.dur||0; endAt=performance.now()+remaining*1000; if(s.kind==='set')setStart=Date.now(); render(); });
-$('rPlus').addEventListener('click',()=>{repVal++;$('reps').textContent=repVal;});
-$('rMinus').addEventListener('click',()=>{if(repVal>0)repVal--;$('reps').textContent=repVal;});
-function wtChange(d){
-  const st=steps[idx]; const k=st.kind==='finisher'?'thruster':st.ex; if(!WT[k])return;
-  wtVal=Math.max(0,Math.min(WMAX,(wtVal||0)+d)); $('wval').textContent=wtText(k,wtVal);
-  if(st.kind==='finisher'){S.finisher.w=wtVal;} else {S.wts[k]=wtVal;}
-  store.weights[k]=wtVal; save();
-}
+$('skip').addEventListener('click',()=>{if(steps[idx].kind==='end')return;advance(true);if(!running&&steps[idx].kind!=='end')start();});
+$('prev').addEventListener('click',()=>{if(idx===0)return;storeCounter();goTo(idx-1,false);});
+function repSet(v){repVal=Math.max(0,v);$('reps').textContent=repVal;storeCounter();}
+$('rPlus').addEventListener('click',()=>repSet(repVal+1));
+$('rMinus').addEventListener('click',()=>repSet(repVal-1));
+function wtChange(d){const st=steps[idx];const k=st.kind==='finisher'?'thruster':exOf(st);if(!k||!WT[k])return;if(weightAdj(k,d,true))$('wval').textContent=wtText(k,wtVal);}
 $('wPlus').addEventListener('click',()=>wtChange(2.5));
 $('wMinus').addEventListener('click',()=>wtChange(-2.5));
-$('btnAbort').addEventListener('click',abortSession);
+$('btnAbort').addEventListener('click',()=>openAbort());
 $('how').addEventListener('click',e=>{if(e.target.tagName==='A')return;howOpen=!howOpen;if(howKey)$('how').innerHTML=howHTML(howKey);});
+$('feelBox').addEventListener('click',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f)setFeel(f);});
+$('hardPanel').addEventListener('click',e=>{
+  const h=e.target.dataset&&e.target.dataset.h;if(!h)return;
+  const s=steps[idx];if(s.kind!=='set')return;const k=exOf(s);
+  if(h==='w'){weightAdj(k,-2.5,false);hardOpen=false;render();}
+  else if(h==='v'){doSwap(s.ex);render();}
+  else if(h==='skip')skipSet();
+  else if(h==='round')cutRound();
+});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)requestWake();});
 
+// Tastatur am PC
+document.addEventListener('keydown',e=>{
+  if(!$('viewMain').classList.contains('active')||!S||$('ovAbort').classList.contains('on'))return;
+  const t=e.target,tag=t&&t.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const s=steps[idx];
+  let handled=true;
+  if(e.code==='Space'||e.key===' '){$('mainBtn').click();}
+  else if(e.key==='ArrowUp'){if($('repBox').classList.contains('on'))repSet(repVal+1);}
+  else if(e.key==='ArrowDown'){if($('repBox').classList.contains('on'))repSet(repVal-1);}
+  else if(e.key==='ArrowRight'){$('skip').click();}
+  else if(e.key==='ArrowLeft'){$('prev').click();}
+  else if(e.key==='p'||e.key==='P'){if(s.kind!=='end')running?pause():start();}
+  else handled=false;
+  if(handled){e.preventDefault();if(document.activeElement&&document.activeElement.tagName==='BUTTON')document.activeElement.blur();}
+});
+
 // ---------- Startansicht ----------
+function chipRow(el,vals,labels,cur,onSel){
+  el.innerHTML=vals.map((v,i)=>`<div class="chip${v===cur?' sel':''}" data-v="${i}">${labels[i]}</div>`).join('');
+  el.querySelectorAll('[data-v]').forEach(c=>c.onclick=()=>onSel(vals[+c.dataset.v]));
+}
+function renderCheckin(){
+  const on=ST().checkin;$('checkinCard').style.display=on?'':'none';if(!on)return;
+  chipRow($('ciSleep'),[1,2,3,4,5],['1','2','3','4','5'],ci.sleep,v=>{ci.sleep=v;renderCheckin();});
+  chipRow($('ciSore'),[0,1,2],['keiner','leicht','stark'],ci.sore,v=>{ci.sore=v;renderCheckin();});
+  chipRow($('ciEnergy'),[1,2,3,4,5],['1','2','3','4','5'],ci.energy,v=>{ci.energy=v;renderCheckin();});
+  chipRow($('ciTime'),[15,20,30],['15 min','20 min','30 min'],ci.time,v=>{ci.time=v;renderCheckin();});
+}
+function painInfo(){
+  for(let i=store.sessions.length-1;i>=0;i--){
+    const s=store.sessions[i];
+    if(s.aborted&&s.aborted.reason==='schmerz'&&s.aborted.ex){
+      if(store.sessions.slice(i+1).some(x=>x.day===s.day))return null;
+      return s;
+    }
+  }
+  return null;
+}
 function renderStart(){
-  if(!store.overrideWeek)sel.week=autoWeek(); else sel.week=store.overrideWeek;
+  if(!store.overrideWeek)sel.week=autoWeek();else sel.week=store.overrideWeek;
   if(!sel.dayManual)sel.day=nextDay();
   const W=WEEK[sel.week];
-  $('chipA').classList.toggle('sel',sel.day==='A'); $('chipB').classList.toggle('sel',sel.day==='B');
+  $('chipA').classList.toggle('sel',sel.day==='A');$('chipB').classList.toggle('sel',sel.day==='B');
   document.querySelectorAll('[data-w]').forEach(c=>c.classList.toggle('sel',+c.dataset.w===sel.week));
+  $('chipNormal').classList.toggle('sel',!sel.light);$('chipLight').classList.toggle('sel',sel.light);
+  $('lightInfo').textContent=sel.light?`Leichter: ${Math.max(2,W.rounds-1)} Runden, alle Hantelgewichte 2,5 kg weniger, eine Wiederholung mehr Reserve.`:'';
   const n=store.sessions.length;
-  $('stInfo').textContent=`${n} Einheiten bisher. Woche ${sel.week}${sel.week===3?'+':''}: ${W.rounds} Runden pro Paar, Satzende bei ${W.rir}. ${W.fin.kind==='walk'?'Kein Finisher, stattdessen 3 min Gehen.':'Finisher '+fmt(W.fin.dur)+' AMRAP.'}`;
+  $('stInfo').textContent=`${n} Einheiten bisher. Woche ${sel.week}${sel.week===3?'+':''}: ${W.rounds} Runden pro Paar, Satzende bei ${W.rir[0]}–${W.rir[1]} Wdh. in Reserve. ${W.fin.kind==='walk'?'Kein Finisher, stattdessen 3 min Gehen.':'Finisher '+fmt(W.fin.dur)+' AMRAP.'}`;
   $('btnResume').style.display=store.cur?'':'none';
-  $('meta').innerHTML=n?`Zuletzt: ${fmtDate(store.sessions[n-1].date)} · Tag ${store.sessions[n-1].day}`:'Noch keine Einheit';
-  document.body.className='warm'; $('progressBar').style.width='0';
+  $('metaL').textContent='';
+  $('meta').textContent=n?`Zuletzt: ${fmtDate(store.sessions[n-1].date)} · Tag ${store.sessions[n-1].day}`:'Noch keine Einheit';
+  setType('warm');$('progressBar').style.width='0';
+  $('startErr').style.display='none';
+  // Coach-Notiz
+  $('coachCard').style.display=store.coachNote?'':'none';$('coachNote').textContent=store.coachNote||'';
+  // Schmerz-Hinweis
+  const p=painInfo();
+  $('painCard').style.display=p?'':'none';
+  if(p){
+    const a=p.aborted,ex=EX[a.ex],v=LIGHTER[a.ex],o=a.orig||a.ex;
+    let t=`Letzte Einheit Tag ${p.day} wegen Schmerz abgebrochen bei ${ex.name}${a.text?' („'+a.text+'“)':''}.`;
+    if(v)t+=` Vorschlag: ${EX[v].name} statt ${ex.name}.`;else t+=` Für ${ex.name} gibt es keine leichtere Variante: Gewicht deutlich reduzieren oder die Sätze überspringen.`;
+    if(p.day!==sel.day)t+=` Gilt für Tag ${p.day}.`;
+    $('painText').textContent=t;
+    $('painRow').innerHTML='';
+    if(v&&p.day===sel.day){
+      const on=sel.swaps[o]===v;
+      $('painRow').innerHTML=`<button class="small" id="painSwap">${on?'Variante übernommen':'Variante übernehmen'}</button>`;
+      $('painSwap').onclick=()=>{if(sel.swaps[o]===v)delete sel.swaps[o];else sel.swaps[o]=v;renderStart();};
+    }
+  }
+  renderProg();
+  renderCheckin();
 }
-$('chipA').onclick=()=>{sel.day='A';sel.dayManual=true;renderStart();};
-$('chipB').onclick=()=>{sel.day='B';sel.dayManual=true;renderStart();};
+$('chipA').onclick=()=>{sel.day='A';sel.dayManual=true;sel.swaps={};renderStart();};
+$('chipB').onclick=()=>{sel.day='B';sel.dayManual=true;sel.swaps={};renderStart();};
+$('chipNormal').onclick=()=>{sel.light=false;renderStart();};
+$('chipLight').onclick=()=>{sel.light=true;renderStart();};
 document.querySelectorAll('[data-w]').forEach(c=>c.onclick=()=>{store.overrideWeek=+c.dataset.w;save();renderStart();});
-$('btnStartSession').onclick=()=>{startSession(false);};
+$('btnStartSession').onclick=()=>{beginSession();};
 $('btnResume').onclick=()=>{S=store.cur;startSession(true);};
 $('btnHistory').onclick=()=>{renderHistory();showView('viewHistory');};
+$('btnSettings').onclick=()=>{renderSettings();showView('viewSettings');};
 $('btnBack').onclick=()=>{showView('viewStart');renderStart();};
+$('btnIntroOk').onclick=()=>{save();showView('viewStart');renderStart();};
+
+// ---------- Progressionscheck alle 12 Einheiten ----------
+let progRes=null,progBusy=false,progErr='';
+function progDue(){return store.sessions.length>=12&&store.sessions.length-(store.progDone||0)>=12;}
+function renderProg(){
+  const due=progDue();$('progCard').style.display=due?'':'none';if(!due)return;
+  $('progInfo').textContent=`${store.sessions.length-(store.progDone||0)} Einheiten seit dem letzten Check. Der Coach wertet den Verlauf aus und schlägt Gewichte und Stufen vor.`;
+  let body='';
+  if(progErr)body+=`<p class="line err">${esc(progErr)}</p>`;
+  if(progRes){
+    body+=`<p class="say">${esc(progRes.say)}</p>`;
+    const ks=Object.keys(progRes.changes);
+    body+=ks.length?'<ul>'+ks.map(k=>{const c=progRes.changes[k],parts=[];if(c.weight!=null&&WT[k])parts.push(wtText(k,c.weight));if(c.stage!=null)parts.push('Stufe '+c.stage+' ('+STAGES[c.stage]+')');return `<li>${EX[k]?EX[k].name:esc(k)}: ${parts.join(', ')}</li>`;}).join('')+'</ul>':'<p class="line">Keine Änderungen vorgeschlagen.</p>';
+  }
+  $('progBody').innerHTML=body;
+  const row=$('progRow');
+  if(!Coach.ready()){row.innerHTML='<span class="line" style="margin:0">Braucht den Anthropic-API-Schlüssel (Einstellungen).</span><button class="small" id="progSkip">Überspringen</button>';}
+  else if(progRes){row.innerHTML=`<button class="small" id="progApply">${Object.keys(progRes.changes).length?'Alle übernehmen':'Abschließen'}</button><button class="small ghost" id="progSkip">Verwerfen</button>`;}
+  else row.innerHTML=`<button class="small" id="progRun" ${progBusy?'disabled':''}>${progBusy?'Coach rechnet …':'Progressionscheck starten'}</button><button class="small ghost" id="progSkip">Überspringen</button>`;
+  if($('progRun'))$('progRun').onclick=runProgression;
+  if($('progSkip'))$('progSkip').onclick=()=>{store.progDone=store.sessions.length;progRes=null;progErr='';save();renderStart();};
+  if($('progApply'))$('progApply').onclick=()=>{
+    for(const k in progRes.changes){const c=progRes.changes[k];if(c.weight!=null&&WT[k])store.weights[k]=clampW(c.weight);if(c.stage!=null)store.stages[k]=c.stage;}
+    if(progRes.note)store.coachNote=progRes.note;
+    store.progDone=store.sessions.length;progRes=null;save();renderStart();
+  };
+}
+async function runProgression(){
+  progBusy=true;progErr='';renderProg();
+  try{progRes=await Coach.progression(lastN(12),store.stages,store.weights);speak(progRes.say,true);}
+  catch(e){progErr='Coach nicht erreichbar ('+e.message+')';}
+  progBusy=false;renderProg();
+}
+
+// ---------- Einstellungen ----------
+function renderSettings(){
+  const s=ST();
+  document.querySelectorAll('[data-s]').forEach(el=>{const k=el.dataset.s;if(el.type==='checkbox')el.checked=!!s[k];else el.value=s[k]==null?'':s[k];});
+  $('volVal').textContent=Math.round(s.volume*100)+' %';
+  $('voiceSupport').textContent=Voice.supported()?'':'Dieser Browser unterstützt keine Spracherkennung (Chrome oder Edge verwenden).';
+  $('spRedirect').textContent=Music.redirectUri();
+  renderSpotify();
+}
+function renderSpotify(){
+  const s=ST(),con=Music.connected();
+  $('spStatus').textContent=con?'angemeldet':'nicht angemeldet';
+  $('btnSpLogout').style.display=con?'':'none';
+  $('btnSpLogin').textContent=con?'Neu anmelden':'Bei Spotify anmelden';
+  const pl=$('spPlaylist');
+  if(!pl.dataset.loaded){pl.innerHTML='<option value="">– keine –</option>'+(s.playlist?`<option value="${esc(s.playlist.uri)}" selected>${esc(s.playlist.name)}</option>`:'');}
+  document.querySelectorAll('.song').forEach(renderSong);
+}
+function renderSong(el){
+  const slot=el.dataset.slot,s=ST(),song=s[slot];
+  const title=el.querySelector('label').outerHTML;
+  el.innerHTML=title+
+    (song?`<div class="row" style="margin-top:4px"><span style="flex:1;font-size:14px">${esc(song.name)} – ${esc(song.artist||'')} (${fmt(song.duration/1000)})</span><button class="small ghost" data-act="rm">entfernen</button></div>
+      <label class="f" style="margin-top:6px">BPM (optional, Bewegungstakt der Figur)<input type="number" min="40" max="240" data-act="bpm" value="${song.bpm||''}"></label>`:'')+
+    `<div class="row" style="margin-top:6px"><input type="text" placeholder="Lied suchen" data-act="q" style="flex:1"><button class="small" data-act="search">Suchen</button></div><div class="res"></div>`;
+  el.querySelector('[data-act="search"]').onclick=async()=>{
+    const q=el.querySelector('[data-act="q"]').value.trim();if(!q)return;
+    const res=el.querySelector('.res');
+    if(!Music.connected()){res.innerHTML='<span class="line err">Erst bei Spotify anmelden.</span>';return;}
+    res.innerHTML='<span class="line">Suche …</span>';
+    try{
+      const items=await Music.search(q);
+      res.innerHTML=items.length?'':'<span class="line">Keine Treffer.</span>';
+      items.forEach(t=>{const b=document.createElement('button');b.textContent=`${t.name} – ${t.artist} (${fmt(t.duration/1000)})`;b.onclick=()=>{ST()[slot]={uri:t.uri,name:t.name,artist:t.artist,duration:t.duration,bpm:null};save();renderSong(el);};res.appendChild(b);});
+    }catch(e){res.innerHTML=`<span class="line err">Spotify: ${esc(e.message)}</span>`;}
+  };
+  el.querySelector('[data-act="q"]').addEventListener('keydown',e=>{if(e.key==='Enter')el.querySelector('[data-act="search"]').click();});
+  const rm=el.querySelector('[data-act="rm"]');if(rm)rm.onclick=()=>{ST()[slot]=null;save();renderSong(el);};
+  const bpm=el.querySelector('[data-act="bpm"]');if(bpm)bpm.oninput=()=>{const v=+bpm.value;ST()[slot].bpm=v>=40&&v<=240?v:null;save();};
+}
+document.querySelectorAll('[data-s]').forEach(el=>{
+  const ev=el.type==='checkbox'||el.tagName==='SELECT'?'change':'input';
+  el.addEventListener(ev,()=>{
+    const k=el.dataset.s,s=ST();
+    if(el.type==='checkbox')s[k]=el.checked;
+    else if(el.type==='range'){s[k]=+el.value;$('volVal').textContent=Math.round(s[k]*100)+' %';Music.setBase(s[k]);}
+    else s[k]=el.value.trim();
+    if(k==='model'&&!s.model)s.model='';
+    save();applyConfig();
+  });
+});
+$('btnCoachTest').onclick=async()=>{
+  const l=$('coachTestLine');l.classList.remove('err');
+  if(!Coach.ready()){l.textContent='Kein gültiger Schlüssel eingetragen.';l.classList.add('err');return;}
+  l.textContent='Teste …';
+  try{const ok=await Coach.test();l.textContent=ok?'Verbindung steht.':'Antwort unerwartet.';if(!ok)l.classList.add('err');}
+  catch(e){l.textContent=e.message;l.classList.add('err');}
+};
+$('btnSpLogin').onclick=async()=>{
+  $('spLine').textContent='';$('spLine').classList.remove('err');
+  applyConfig();
+  try{await Music.login();}catch(e){$('spLine').textContent=e.message;$('spLine').classList.add('err');}
+};
+$('btnSpLogout').onclick=()=>{Music.logout();store.spTok=null;save();renderSpotify();};
+$('btnSpLists').onclick=async()=>{
+  const l=$('spLine');l.classList.remove('err');
+  if(!Music.connected()){l.textContent='Erst bei Spotify anmelden.';l.classList.add('err');return;}
+  l.textContent='Lade Playlists …';
+  try{
+    const ps=await Music.playlists(),cur=ST().playlist,pl=$('spPlaylist');
+    pl.innerHTML='<option value="">– keine –</option>'+ps.map(p=>`<option value="${esc(p.uri)}"${cur&&cur.uri===p.uri?' selected':''}>${esc(p.name)} (${p.tracks})</option>`).join('');
+    pl.dataset.loaded='1';l.textContent=ps.length+' Playlists geladen.';
+  }catch(e){l.textContent='Spotify: '+e.message;l.classList.add('err');}
+};
+$('spPlaylist').onchange=()=>{
+  const o=$('spPlaylist').selectedOptions[0];
+  ST().playlist=o&&o.value?{uri:o.value,name:o.textContent.replace(/ \(\d+\)$/,'')}:null;save();
+};
+$('btnSetBack').onclick=()=>{if(!ST().model){ST().model='claude-sonnet-5-5';save();applyConfig();}showView('viewStart');renderStart();};
 
 // ---------- Verlauf ----------
 function sessionText(s,html){
   const lines=[];
-  DAYS[s.day].flat().forEach(k=>{
-    const v=s.sets[k]; if(!v)return;
-    const prev=(()=>{const i=store.sessions.indexOf(s);for(let j=i-1;j>=0;j--){const p=store.sessions[j];if(p.day===s.day&&p.sets[k]&&(p.stage[k]||0)===(s.stage[k]||0))return p.sets[k];}return null;})();
-    const vals=v.map((x,i)=>{if(x==null)return '–';if(!html||!prev||prev[i]==null)return String(x);return x>prev[i]?`<i>${x}</i>`:x<prev[i]?`<s>${x}</s>`:String(x);});
-    lines.push(`${EX[k].name}${(s.stage[k]||0)?' (Stufe '+s.stage[k]+')':''}: ${vals.join(' · ')}${EX[k].unit==='s'?' s':''}${s.wts&&s.wts[k]!=null?' @ '+wtText(k,s.wts[k]):''}`);
+  const keys=[];
+  origKeys(s.day).forEach(o=>{let k=o;const seen=new Set();while(k&&!seen.has(k)){seen.add(k);if(s.sets[k]||(s.feel&&s.feel[k]))keys.push([k,o]);k=LIGHTER[k];}});
+  const si=store.sessions.indexOf(s);
+  keys.forEach(([k,o])=>{
+    const v=s.sets[k]||[],fl=(s.feel&&s.feel[k])||[];
+    const prevS=lastSessionLike(k,s.stage[k]||0,si<0?store.sessions.length:si);
+    const prev=prevS?prevS.sets[k]:null;
+    const n=Math.max(v.length,fl.length);
+    const vals=[];for(let i=0;i<n;i++){const x=v[i];
+      if(x==null){vals.push('–');continue;}
+      if(!html||!prev||prev[i]==null)vals.push(String(x));
+      else vals.push(x>prev[i]?`<i>${x}</i>`:x<prev[i]?`<s>${x}</s>`:String(x));}
+    const hard=fl.map((f,i)=>f==='hart'?i+1:0).filter(Boolean);
+    let fb='';
+    if(hard.length)fb=(html?' · <em>':' · ')+'zu hart in Satz '+hard.join(', ')+(html?'</em>':'');
+    else if(fl.length&&fl.every(f=>f==='leicht'))fb=' · leicht';
+    const name=EX[k]?EX[k].name:k;
+    lines.push(`${name}${k!==o?' (statt '+EX[o].name+')':''}${(s.stage[k]||0)?' (Stufe '+s.stage[k]+')':''}: ${vals.join(' · ')}${EX[k]&&EX[k].unit==='s'?' s':''}${s.wts&&s.wts[k]!=null?' @ '+wtText(k,s.wts[k]):''}${fb}`);
   });
   if(s.finisher&&s.finisher.kind==='amrap')lines.push(`Finisher: ${s.finisher.rounds} Runden in ${fmt(s.finisher.dur)}${s.finisher.w!=null?' @ '+wtText('thruster',s.finisher.w):''}`);
+  if(s.challenge)lines.push(`Challenge: ${s.challenge.reps} Liegestütze${s.challenge.song?' („'+s.challenge.song+'“)':''}`);
+  const extra=[];
+  if(s.light)extra.push('Tag leichter');
+  if(s.checkin)extra.push(`Check-in: Schlaf ${s.checkin.sleep}, Muskelkater ${['keiner','leicht','stark'][s.checkin.sore]||s.checkin.sore}, Energie ${s.checkin.energy}, ${s.checkin.time} min`);
+  if(s.plan&&(s.plan.weightDelta||s.plan.rirShift||(s.plan.skipPairs||[]).length))extra.push(`Plan: ${s.plan.rounds} Runden${s.plan.weightDelta?', '+num(s.plan.weightDelta)+' kg':''}${s.plan.rirShift?', +'+s.plan.rirShift+' Reserve':''}${(s.plan.skipPairs||[]).length?', ohne Paar '+s.plan.skipPairs.join(', '):''}`);
+  if(s.activeMs)extra.push('Dauer '+fmt(s.activeMs/1000));
+  if(extra.length)lines.push(extra.join(' · '));
+  if(s.aborted)lines.push((html?'<em>':'')+'A'+abortText(s.aborted,html).slice(1)+(html?'</em>':''));
+  if(s.coachSay)lines.push('Coach: '+(html?esc(s.coachSay):s.coachSay));
   return lines;
 }
 function renderHistory(){
-  const L=$('histList'); L.innerHTML=''; $('confirmDel').style.display='none';
+  const L=$('histList');L.innerHTML='';$('confirmDel').style.display='none';
+  setType('warm');$('metaL').textContent='';
   if(!store.sessions.length){L.innerHTML='<div class="sess">Noch keine Einheit gespeichert.</div>';return;}
   [...store.sessions].reverse().forEach(s=>{
     const d=document.createElement('div');d.className='sess';
-    d.innerHTML=`<div class="h"><span>${fmtDate(s.date)} · Tag ${s.day} · Woche ${s.week}</span><span>${s.plus} Plus</span></div><div class="d">${sessionText(s,true).join('<br>')}</div>`;
+    const right=s.aborted?`<span class="ab">abgebrochen</span>`:`<span>${s.plus} Plus</span>`;
+    d.innerHTML=`<div class="h"><span>${fmtDate(s.date)} · Tag ${s.day} · Woche ${s.week}</span>${right}</div><div class="d">${sessionText(s,true).join('<br>')}</div>`;
     L.appendChild(d);
   });
 }
 $('btnCopy').onclick=()=>{
-  const txt=store.sessions.map(s=>`${new Date(s.date).toLocaleDateString('de-DE')} Tag ${s.day} Woche ${s.week} (${s.plus} Plus)\n  `+sessionText(s,false).join('\n  ')).join('\n\n');
+  const txt=store.sessions.map(s=>`${new Date(s.date).toLocaleDateString('de-DE')} Tag ${s.day} Woche ${s.week} (${s.aborted?abortText(s.aborted):s.plus+' Plus'})\n  `+sessionText(s,false).join('\n  ')).join('\n\n');
   try{navigator.clipboard.writeText(txt).then(()=>{$('btnCopy').textContent='Kopiert';setTimeout(()=>$('btnCopy').textContent='Protokoll kopieren',1500);}).catch(()=>{$('btnCopy').textContent='Kopieren nicht möglich';});}catch(e){$('btnCopy').textContent='Kopieren nicht möglich';}
 };
 $('btnDel').onclick=()=>{$('confirmDel').style.display='block';};
-$('btnDelYes').onclick=()=>{store.sessions=[];store.stages={};store.weights={};store.overrideWeek=null;store.cur=null;save();renderHistory();renderStart();};
+$('btnDelYes').onclick=()=>{store.sessions=[];store.stages={};store.weights={};store.overrideWeek=null;store.cur=null;store.coachNote='';store.progDone=0;save();renderHistory();renderStart();};
+
+// ---------- Erklärungs-Panel ----------
+(function(){
+  let min=false;try{min=localStorage.getItem('hiit30.xpmin')==='1';}catch(e){}
+  const apply=()=>{$('explainPanel').classList.toggle('min',min);$('xpToggle').textContent=min?'einblenden':'ausblenden';};
+  apply();
+  $('xpHead').onclick=()=>{min=!min;try{localStorage.setItem('hiit30.xpmin',min?'1':'0');}catch(e){}apply();};
+})();
 
 // ---------- Planübersicht ----------
 (function(){
+  const r=k=>{const e=EX[k];return `${e.range.join('–')}${e.unit==='s'?' s':''}${e.side?' '+e.side:''}`;};
   let h='';
   ['A','B'].forEach(d=>{
-    h+=`<h4>Tag ${d}</h4><ol>`+DAYS[d].map((p,i)=>`<li>${String.fromCharCode(65+i)}1 ${EX[p[0]].name} (${EX[p[0]].range.join('–')}${EX[p[0]].unit==='s'?' s':''}${EX[p[0]].side?' '+EX[p[0]].side:''}) / ${String.fromCharCode(65+i)}2 ${EX[p[1]].name} (${EX[p[1]].range.join('–')}${EX[p[1]].unit==='s'?' s':''}${EX[p[1]].side?' '+EX[p[1]].side:''})</li>`).join('')+'</ol>';
+    h+=`<h4>Tag ${d}</h4><ol>`+DAYS[d].map((p,i)=>`<li>${String.fromCharCode(65+i)}1 ${EX[p[0]].name} (${r(p[0])}) / ${String.fromCharCode(65+i)}2 ${EX[p[1]].name} (${r(p[1])})</li>`).join('')+'</ol>';
   });
-  h+='<h4>Ablauf</h4><ol><li>Aufwärmen 4 × 60 s</li><li>3 Paare, je 2–3 Runden, 25 s Wechsel</li><li>Finisher: 5 Thruster + 5 Burpees, AMRAP (ab Woche 2)</li><li>Ausklang 90 s</li></ol>';
+  h+='<h4>Leichtere Varianten</h4><ol>'+Object.entries(LIGHTER).map(([a,b])=>`<li>${EX[a].name} → ${EX[b].name} (${r(b)})</li>`).join('')+'</ol>';
+  h+='<h4>Ablauf</h4><ol><li>Aufwärmen 4 × 60 s (oder Länge des Aufwärm-Lieds)</li><li>3 Paare, je 2–3 Runden, 25 s Wechsel</li><li>Finisher: 5 Thruster + 5 Burpees, AMRAP (ab Woche 2)</li><li>Ausklang 90 s</li></ol>';
   h+='<h4>Einstieg</h4><ol><li>Woche 1: 2 Runden, 3–4 in Reserve, kein Finisher</li><li>Woche 2: 3 Runden, 2–3 in Reserve, Finisher 2 min locker</li><li>Ab Woche 3: 3 Runden, 1–2 in Reserve, Finisher 3 min</li></ol>';
   $('plan').innerHTML=h;
 })();
 
-renderStart();
+// ---------- Start ----------
+if(firstRun)showView('viewIntro');
+else{showView('viewStart');renderStart();}
+// Spotify-Rückleitung (?code=)
+if(new URLSearchParams(location.search).get('code')){
+  Music.handleRedirect().then(ok=>{
+    if(!ok)return;
+    if(firstRun)save();
+    renderSettings();showView('viewSettings');$('spLine').textContent='Bei Spotify angemeldet.';
+  }).catch(e=>{renderSettings();showView('viewSettings');$('spLine').textContent=e.message;$('spLine').classList.add('err');});
+}
 </script>
 </body>
 </html>
