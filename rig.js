@@ -117,7 +117,8 @@ const Rig=(function(){
 
   // ---- Aufbau ----
   let renderer,scene,camera,rig,J,dbL,dbR,dbOne,container,cur=null,t0=0,az=35,drag=null,raf=null;
-  const skin=0xdfe3e8, skin2=0xb9c0c9, accent=0xe4572e;
+  // Atlas-Farben (DESIGN.md): Haut, etwas dunklere Haut, Tinte für Hanteln
+  const skin=0xeac9a2, skin2=0xd9b48c, accent=0x3a2619;
   function capsule(len,r,color){
     const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color,roughness:.6});
     const cyl=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,14),m);cyl.position.y=-len/2;cyl.castShadow=true;g.add(cyl);
@@ -126,7 +127,7 @@ const Rig=(function(){
     return g;
   }
   function dumbbell(){
-    const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color:accent,roughness:.4});const mb=new THREE.MeshStandardMaterial({color:0x777d86,roughness:.4});
+    const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color:accent,roughness:.4});const mb=new THREE.MeshStandardMaterial({color:0x7d6249,roughness:.9});
     const bar=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.3,10),mb);bar.rotation.x=Math.PI/2;g.add(bar);
     [-.12,.12].forEach(z=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.05,16),m);p.rotation.x=Math.PI/2;p.position.z=z;p.castShadow=true;g.add(p);});
     return g;
@@ -204,14 +205,14 @@ const Rig=(function(){
   }
   function init(el){
     container=el;
-    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));renderer.shadowMap.enabled=true;
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));renderer.setClearColor(0x000000,0);
     el.appendChild(renderer.domElement);
     scene=new THREE.Scene();
     camera=new THREE.PerspectiveCamera(38,1,.1,20);
-    scene.add(new THREE.HemisphereLight(0xffffff,0x334455,.9));
-    const sun=new THREE.DirectionalLight(0xffffff,.9);sun.position.set(2,4,3);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-2;sun.shadow.camera.right=2;sun.shadow.camera.top=2;sun.shadow.camera.bottom=-2;scene.add(sun);
-    const floor=new THREE.Mesh(new THREE.CircleGeometry(1.6,48),new THREE.MeshStandardMaterial({color:0x262b33,roughness:1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
-    const mat=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.9),new THREE.MeshStandardMaterial({color:0x2f3640,roughness:1}));mat.rotation.x=-Math.PI/2;mat.position.y=.004;mat.receiveShadow=true;scene.add(mat);
+    // weiches, gleichmäßiges Licht, keine Schatten, nur eine feine Bodenlinie
+    scene.add(new THREE.HemisphereLight(0xffffff,0xb8a68c,1.0));
+    const sun=new THREE.DirectionalLight(0xffffff,.35);sun.position.set(2,4,3);scene.add(sun);
+    const fl=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.4,0,0),new THREE.Vector3(1.4,0,0)]),new THREE.LineBasicMaterial({color:0x3a2619}));scene.add(fl);
     build();resize();window.addEventListener('resize',resize);
     const pos=e=>(e.touches?e.touches[0].clientX:e.clientX);
     el.addEventListener('pointerdown',e=>{drag={x:e.clientX,az};el.setPointerCapture&&el.setPointerCapture(e.pointerId);});
