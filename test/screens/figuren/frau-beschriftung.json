@@ -2,13 +2,16 @@
  {
   "k": "kniehebe",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "kniehebe",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Wadenmuskel"
@@ -18,6 +21,7 @@
  {
   "k": "kniehebe",
   "v": "back",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "3 Rumpf"
@@ -27,13 +31,16 @@
  {
   "k": "walk",
   "v": "side",
+  "when": "turn",
   "labels": 4,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "walk",
   "v": "front",
+  "when": "turn",
   "labels": 2,
   "hidden": [
    "2 Hintere Oberschenkel",
@@ -44,6 +51,7 @@
  {
   "k": "walk",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Quadrizeps"
@@ -53,13 +61,16 @@
  {
   "k": "sqa",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "sqa",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "1 Quadrizeps",
@@ -70,6 +81,7 @@
  {
   "k": "sqa",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "4 Rumpf"
@@ -79,13 +91,16 @@
  {
   "k": "squatbw",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "squatbw",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "1 Quadrizeps",
@@ -96,6 +111,7 @@
  {
   "k": "squatbw",
   "v": "back",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "3 Adduktoren",
@@ -106,13 +122,16 @@
  {
   "k": "goblet",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "goblet",
   "v": "front",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Quadrizeps",
@@ -124,6 +143,7 @@
  {
   "k": "goblet",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "3 Adduktoren"
@@ -133,13 +153,16 @@
  {
   "k": "thruster",
   "v": "side",
+  "when": "turn",
   "labels": 7,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "thruster",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "2 Gesäßmuskel",
@@ -150,6 +173,7 @@
  {
   "k": "thruster",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "3 Vorderer Deltamuskel",
@@ -160,17 +184,19 @@
  {
   "k": "press",
   "v": "side",
+  "when": "turn",
   "labels": 7,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "press",
   "v": "front",
-  "labels": 4,
+  "when": "turn",
+  "labels": 5,
   "hidden": [
    "2 Seitlicher Deltamuskel",
-   "3 Trizeps",
    "4 Oberer Rücken"
   ],
   "clipped": []
@@ -178,8 +204,10 @@
  {
   "k": "press",
   "v": "back",
-  "labels": 6,
+  "when": "turn",
+  "labels": 5,
   "hidden": [
+   "1 Vorderer Deltamuskel",
    "5 Rumpf"
   ],
   "clipped": []
@@ -187,13 +215,16 @@
  {
   "k": "chest",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "chest",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "3 Oberer Rücken"
@@ -203,23 +234,26 @@
  {
   "k": "chest",
   "v": "back",
-  "labels": 3,
+  "when": "turn",
+  "labels": 4,
   "hidden": [
-   "1 Brustmuskel",
-   "2 Vorderer Deltamuskel"
+   "1 Brustmuskel"
   ],
   "clipped": []
  },
  {
   "k": "splitsquat",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "splitsquat",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "2 Gesäßmuskel"
@@ -229,6 +263,7 @@
  {
   "k": "splitsquat",
   "v": "back",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "3 Rumpf",
@@ -239,13 +274,16 @@
  {
   "k": "lunge",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "lunge",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Gesäßmuskel",
@@ -256,6 +294,7 @@
  {
   "k": "lunge",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "4 Adduktoren"
@@ -265,13 +304,16 @@
  {
   "k": "lungebw",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "lungebw",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Gesäßmuskel",
@@ -282,6 +324,7 @@
  {
   "k": "lungebw",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "4 Adduktoren"
@@ -291,13 +334,16 @@
  {
   "k": "rdl",
   "v": "side",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "rdl",
   "v": "front",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Hintere Oberschenkel",
@@ -309,6 +355,7 @@
  {
   "k": "rdl",
   "v": "back",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
   "clipped": []
@@ -316,19 +363,21 @@
  {
   "k": "row",
   "v": "side",
+  "when": "turn",
   "labels": 7,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "row",
   "v": "front",
-  "labels": 2,
+  "when": "turn",
+  "labels": 3,
   "hidden": [
    "1 Breiter Rückenmuskel",
    "2 Oberer Rücken",
    "3 Bizeps",
-   "4 Rückenstrecker",
    "5 Hintere Oberschenkel"
   ],
   "clipped": []
@@ -336,6 +385,7 @@
  {
   "k": "row",
   "v": "back",
+  "when": "turn",
   "labels": 7,
   "hidden": [],
   "clipped": []
@@ -343,16 +393,19 @@
  {
   "k": "row1",
   "v": "side",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Oberer Rücken",
    "3 Bizeps"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "row1",
   "v": "front",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Breiter Rückenmuskel",
@@ -364,6 +417,7 @@
  {
   "k": "row1",
   "v": "back",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
   "clipped": []
@@ -371,15 +425,18 @@
  {
   "k": "slrdl",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "1 Hintere Oberschenkel"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "slrdl",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "1 Hintere Oberschenkel",
@@ -390,6 +447,7 @@
  {
   "k": "slrdl",
   "v": "back",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
   "clipped": []
@@ -397,22 +455,26 @@
  {
   "k": "burpee",
   "v": "side",
+  "when": "turn",
   "labels": 7,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "burpee",
   "v": "front",
+  "when": "turn",
   "labels": 6,
   "hidden": [
-   "1 Quadrizeps"
+   "3 Trizeps"
   ],
   "clipped": []
  },
  {
   "k": "burpee",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "2 Brustmuskel",
@@ -423,13 +485,16 @@
  {
   "k": "hipflex",
   "v": "side",
+  "when": "turn",
   "labels": 4,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "hipflex",
   "v": "front",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "2 Gesäßmuskel"
@@ -439,6 +504,7 @@
  {
   "k": "hipflex",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Quadrizeps"
@@ -448,16 +514,18 @@
  {
   "k": "bridge2",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "bridge2",
   "v": "front",
-  "labels": 3,
+  "when": "turn",
+  "labels": 4,
   "hidden": [
-   "1 Gesäßmuskel",
    "3 Rumpf"
   ],
   "clipped": []
@@ -465,6 +533,7 @@
  {
   "k": "bridge2",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Gesäßmuskel",
@@ -475,16 +544,18 @@
  {
   "k": "bridge2w",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "bridge2w",
   "v": "front",
-  "labels": 3,
+  "when": "turn",
+  "labels": 4,
   "hidden": [
-   "1 Gesäßmuskel",
    "3 Rumpf"
   ],
   "clipped": []
@@ -492,6 +563,7 @@
  {
   "k": "bridge2w",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Gesäßmuskel",
@@ -502,19 +574,21 @@
  {
   "k": "bridge1",
   "v": "side",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Gesäßmuskel",
    "2 Hintere Oberschenkel"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "bridge1",
   "v": "front",
-  "labels": 3,
+  "when": "turn",
+  "labels": 4,
   "hidden": [
-   "1 Gesäßmuskel",
    "3 Schräge Bauchmuskeln"
   ],
   "clipped": []
@@ -522,6 +596,7 @@
  {
   "k": "bridge1",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Gesäßmuskel",
@@ -532,15 +607,16 @@
  {
   "k": "floorpress",
   "v": "side",
-  "labels": 4,
-  "hidden": [
-   "2 Trizeps"
-  ],
-  "clipped": []
+  "when": "turn",
+  "labels": 5,
+  "hidden": [],
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "floorpress",
   "v": "front",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Brustmuskel",
@@ -551,6 +627,7 @@
  {
   "k": "floorpress",
   "v": "back",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Trizeps"
@@ -560,13 +637,16 @@
  {
   "k": "deadbug",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "deadbug",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -574,6 +654,7 @@
  {
   "k": "deadbug",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -581,13 +662,16 @@
  {
   "k": "deadbuglegs",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "deadbuglegs",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -595,6 +679,7 @@
  {
   "k": "deadbuglegs",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -602,16 +687,20 @@
  {
   "k": "pushup",
   "v": "side",
-  "labels": 4,
+  "when": "turn",
+  "labels": 3,
   "hidden": [
    "1 Brustmuskel",
+   "3 Vorderer Deltamuskel",
    "4 Rumpf"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "pushup",
   "v": "front",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "3 Vorderer Deltamuskel",
@@ -622,6 +711,7 @@
  {
   "k": "pushup",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Brustmuskel",
@@ -633,16 +723,20 @@
  {
   "k": "kneepushup",
   "v": "side",
-  "labels": 4,
+  "when": "turn",
+  "labels": 3,
   "hidden": [
    "1 Brustmuskel",
+   "3 Vorderer Deltamuskel",
    "4 Rumpf"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "kneepushup",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "3 Vorderer Deltamuskel"
@@ -652,6 +746,7 @@
  {
   "k": "kneepushup",
   "v": "back",
+  "when": "turn",
   "labels": 3,
   "hidden": [
    "1 Brustmuskel",
@@ -663,15 +758,18 @@
  {
   "k": "sideplank",
   "v": "side",
+  "when": "turn",
   "labels": 5,
   "hidden": [
    "2 Gesäßmuskel"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "sideplank",
   "v": "front",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
   "clipped": []
@@ -679,6 +777,7 @@
  {
   "k": "sideplank",
   "v": "back",
+  "when": "turn",
   "labels": 6,
   "hidden": [],
   "clipped": []
@@ -686,15 +785,18 @@
  {
   "k": "sideplankknee",
   "v": "side",
+  "when": "turn",
   "labels": 4,
   "hidden": [
    "2 Gesäßmuskel"
   ],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "sideplankknee",
   "v": "front",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -702,6 +804,7 @@
  {
   "k": "sideplankknee",
   "v": "back",
+  "when": "turn",
   "labels": 5,
   "hidden": [],
   "clipped": []
@@ -709,13 +812,16 @@
  {
   "k": "catcow",
   "v": "side",
+  "when": "turn",
   "labels": 0,
   "hidden": [],
-  "clipped": []
+  "clipped": [],
+  "anchors_wrong": []
  },
  {
   "k": "catcow",
   "v": "front",
+  "when": "turn",
   "labels": 0,
   "hidden": [],
   "clipped": []
@@ -723,8 +829,84 @@
  {
   "k": "catcow",
   "v": "back",
+  "when": "turn",
   "labels": 0,
   "hidden": [],
+  "clipped": []
+ },
+ {
+  "k": "pushup",
+  "v": "side",
+  "when": "start",
+  "labels": 4,
+  "hidden": [
+   "1 Brustmuskel",
+   "4 Rumpf"
+  ],
+  "clipped": []
+ },
+ {
+  "k": "kneepushup",
+  "v": "side",
+  "when": "start",
+  "labels": 4,
+  "hidden": [
+   "1 Brustmuskel",
+   "4 Rumpf"
+  ],
+  "clipped": []
+ },
+ {
+  "k": "burpee",
+  "v": "side",
+  "when": "start",
+  "labels": 7,
+  "hidden": [],
+  "clipped": []
+ },
+ {
+  "k": "catcow",
+  "v": "side",
+  "when": "start",
+  "labels": 0,
+  "hidden": [],
+  "clipped": []
+ },
+ {
+  "k": "row",
+  "v": "side",
+  "when": "start",
+  "labels": 7,
+  "hidden": [],
+  "clipped": []
+ },
+ {
+  "k": "row1",
+  "v": "side",
+  "when": "start",
+  "labels": 4,
+  "hidden": [
+   "2 Oberer Rücken",
+   "3 Bizeps"
+  ],
+  "clipped": []
+ },
+ {
+  "k": "rdl",
+  "v": "side",
+  "when": "start",
+  "labels": 6,
+  "hidden": [],
+  "clipped": []
+ },
+ {
+  "k": "slrdl",
+  "v": "side",
+  "when": "start",
+  "labels": 5,
+  "hidden": [
+   "1 Hintere Oberschenkel"
+  ],
   "clipped": []
  }
 ]

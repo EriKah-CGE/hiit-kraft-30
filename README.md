@@ -100,8 +100,8 @@ Für eine natürlichere Stimme unter https://elevenlabs.io einen API-Schlüssel 
 Zwei Figuren, passend zu den späteren Profilen: Mann (180 cm, etwa 82 kg, sportlich) und Frau (etwa 166 cm, normale Statur). Bis es Profile gibt, ist der Mann Standard; umschalten in den Einstellungen unter „Figur“.
 
 - Körper: erzeugt mit [MPFB 2](https://static.makehumancommunity.org/mpfb.html) (MakeHuman-Erweiterung für Blender, Version 2.0.17, Blender 5.2). Das Plugin selbst steht unter GPL-3.0, die damit erzeugten MakeHuman-Körper (Basismesh, Formziele, Rig „game_engine“ mit Gewichten) sind CC0 und liegen nicht unter der GPL. Keine weiteren fremden Assets: Augen, Haarknoten und Hanteln sind im Skript gebaut.
-- Oberfläche: matte Haut `#EAC9A2`, eng anliegende Sportkleidung in Sepia (Mann Shorts, Frau Shorts und Sport-Top), ruhige geschlossene Augen, feine Tintenkontur (Hülle mit konstanter Pixelbreite im Shader).
-- Muskelmaske: Farbkanal `COLOR_0` je Fläche, R = Muskelgruppe (ID wie `MUSCLES` in `exercises-anatomy.js`, Wert/20), G = Kleidung, B = Körperseite (1 links, 0 rechts). Gruppen: Brust, vordere und seitliche Schulter, Trizeps, Bizeps, oberer Rücken, breiter Rückenmuskel, unterer Rücken, gerader und schräge Bauchmuskeln, Gesäß, Quadrizeps, hintere Oberschenkel, Adduktoren, Waden. Die Einteilung erfolgt im Skript über Knochengewichte, Höhe und Flächennormale und wird danach geglättet; sie ist eine Atlas-Näherung, keine exakte Anatomie.
+- Oberfläche: matte Haut `#EAC9A2`, eng anliegende Sportkleidung in Sepia (beide Figuren: kurzärmeliges Shirt `--cloth-top` und Shorts `--cloth-shorts`, Farben in `index.html` unter `:root`), ruhige geschlossene Augen, feine Tintenkontur (Hülle mit konstanter Pixelbreite im Shader). Arbeitende Muskeln färben Shirt und Shorts an ihrer Stelle mit.
+- Muskelmaske: Textur `mask_<figur>` (2048 × 2048, im GLB als Basisfarbtextur), erzeugt von `tools/blender/mask.py`. Kanäle: R = Muskelgruppe (ID wie `MUSCLES` in `exercises-anatomy.js`, Wert/20), G = Kleidung (1 Shorts, 2 Shirt, 3 Auge, 4 Haar), B = Körperseite (1 links, 0 rechts). Für jedes Texel wird der Punkt auf dem Körper in Ruhepose bestimmt und über glatte Regeln in Gliedmaßen- bzw. Rumpfkoordinaten (Länge entlang des Knochens, Winkel um die Achse) einer Gruppe zugeordnet; so entstehen geschlossene Flächen mit Kurven als Grenzen statt Netzkanten. `figure.js` liest die Textur ungefiltert und mischt die Farben von vier Nachbartexeln: scharfe, nicht treppige Übergänge. Gruppen: Brust, vordere und seitliche Schulter, Trizeps, Bizeps, oberer Rücken, breiter Rückenmuskel, unterer Rücken, gerader und schräge Bauchmuskeln, Gesäß, Quadrizeps, hintere Oberschenkel, Adduktoren, Waden. Die Formen sind eine Atlas-Näherung, keine exakte Anatomie; Grenzen ändert man in `mask.py` (`classify`). Zusätzlich trägt das Farbattribut `COLOR_0` je Fläche dieselbe Einteilung, nur für die Beschriftungsanker.
 - Animationen: alle Übungen inklusive Varianten (bridge1 bridge2 bridge2w burpee chest deadbug deadbuglegs floorpress goblet hipflex kneepushup kniehebe lunge lungebw press pushup rdl row row1 sideplank sideplankknee slrdl splitsquat sqa squatbw thruster walk, dazu catcow für den zweiten Teil von „Hüftbrücke + Katze-Kuh“). Sie liegen hintereinander in einer Animation „all“ (24 Bilder/s); Start und Länge jeder Übung, Kamera-Rahmen, Hanteln und Umkehrpunkt stehen als JSON in den Extras des Rigs (`hiit`), `figure.js` schneidet daraus die Clips. Probesätze zeigen den Split Squat.
 - Beschriftung: Die Ankerpunkte der Muskeln sind Vertices nahe dem Schwerpunkt der Gruppe und werden über die Knochengewichte mitbewegt; Formhinweise hängen an Gelenken des Rigs. Liegt ein Muskel auf der abgewandten Seite, wird seine Beschriftung ausgeblendet.
 
@@ -148,3 +148,12 @@ node test/e2e.mjs .
 ```
 
 Prüft Start, Check-in, Sätze, Varianten, Abbruch, Protokoll, Einstellungen, Coach (gemockte API), Sprachbefehle und das Laden alter Daten in 1600×900 und 390×844. Kontaktbögen aller Übungen am Umkehrpunkt (beide Figuren, drei Ansichten) liegen in `test/screens/figuren/`, die Bildschirme in 1440×900 und 1920×1080 in `test/screens/`.
+
+Kontaktbögen neu erzeugen (Playwright, Python mit Pillow):
+
+```
+node test/figuren.cjs . out/fig man 1440 900 "" --start pushup,kneepushup,burpee,catcow,row,row1,rdl,slrdl
+python test/sheet.py out/fig "man-*-side.png" test/screens/figuren/mann-side.png 6
+```
+
+`figuren.cjs` schreibt zusätzlich `<figur>-report.json`: sichtbare, verdeckte und abgeschnittene Beschriftungen je Ansicht und die Ankerprüfung (liegt jeder Beschriftungsanker in der Maske auf seiner Muskelgruppe).
