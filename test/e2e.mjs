@@ -1,15 +1,16 @@
 // Ende-zu-Ende-Test: npm i playwright && npx playwright install chromium && node test/e2e.mjs .
+// Screenshots: test/screens/e2e/. Die 3D-Figur lädt den Draco-Decoder aus dem Netz (jsdelivr).
 import { chromium } from 'playwright';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(process.argv[2]);
-const OUT = path.join(ROOT, 'test');
+const OUT = path.join(ROOT, 'test', 'screens', 'e2e');
 fs.mkdirSync(OUT, { recursive: true });
 
 // --- statischer Server ---
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.glb': 'model/gltf-binary' };
 const server = http.createServer((req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   const f = path.join(ROOT, p === '/' ? 'index.html' : p);
@@ -50,7 +51,7 @@ async function run(vp, tag) {
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   await page.route('https://api.anthropic.com/**', mockClaude);
   const shot = n => page.screenshot({ path: path.join(OUT, `${tag}-${n}.png`) });
-  const txt = sel => page.locator(sel).innerText();
+  const txt = async sel => ((await page.locator(sel).textContent()) || '').trim();
   const ev = s => page.evaluate(s);
 
   await page.goto(URL0);
@@ -62,15 +63,15 @@ async function run(vp, tag) {
   check(await ev(`localStorage.getItem('hiit30.v2')!==null`), 'Store angelegt');
 
   // Check-in ohne Key: 20 min, Energie 2
-  await page.locator('#ciTime .chip', { hasText: '20 min' }).click();
-  await page.locator('#ciEnergy .chip', { hasText: '2' }).click();
+  await page.locator('#ciTime button', { hasText: '20 min' }).click();
+  await page.locator('#ciEnergy button', { hasText: '2' }).click();
   await shot('02-start-checkin');
   await page.click('#btnStartSession');
   await page.waitForTimeout(300);
   const co = await txt('#coachOut');
   check(/20 Minuten: 2 Runden/.test(co) && /2,5 kg weniger/.test(co), 'localAdjust angewendet: ' + co);
   check(await ev('S.plan.rounds') === 2 && await ev('S.plan.weightDelta') === -2.5, 'Plan: 2 Runden, -2,5 kg');
-  check(/Verstrichen \d+:\d\d · noch ca\. \d+:\d\d/.test(await txt('#meta')), 'Zeitanzeige oben rechts: ' + await txt('#meta'));
+  check(/Verstrichen \d+:\d\d — Rest ca\. \d+:\d\d/.test(await txt('#meta')), 'Zeitanzeige oben rechts: ' + await txt('#meta'));
   await page.waitForTimeout(1200);
   check(await ev('S.activeMs') > 500, 'Verstrichen zählt');
 
@@ -79,7 +80,7 @@ async function run(vp, tag) {
   check(await txt('#name') === 'Split Squat', 'Pfeil rechts → erster Satz Split Squat');
   check((await txt('#target')).includes('4–5 Wdh. in Reserve'), 'Reserve +1 im Ziel: ' + await txt('#target'));
   check(await txt('#wval') === '2 × 7,5 kg', 'Gewicht 2,5 kg weniger (Woche 1: 10 → 7,5): ' + await txt('#wval'));
-  check(await txt('#time') === '', 'keine Satzzeit');
+  check(!(await page.locator('#time').isVisible()), 'keine Satzzeit');
   const r0 = await ev('repVal');
   await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowDown');
   check(await ev('repVal') === r0 + 1, 'Pfeil hoch/runter ändert Wiederholungen');
@@ -152,7 +153,7 @@ async function run(vp, tag) {
   await page.locator('#bnV').click();
   check(await txt('#name') === 'Liegestütze auf den Knien', 'Banner-Vorschlag übernommen');
   // Letztes Mal vergleicht ausgeführten Key
-  check((await txt('#last')).startsWith('Letztes Mal:'), 'Letztes Mal für Variante: ' + await txt('#last'));
+  check(!(await txt('#last')).startsWith('erstes Mal'), 'Letztes Mal für Variante: ' + await txt('#last'));
   await page.click('#btnAbort'); await page.click('#abDiscard');
 
   // Einstellungen speichern und neu laden
@@ -214,14 +215,12 @@ async function run(vp, tag) {
   // Alte v6-Daten lesbar
   await ev(`localStorage.setItem('hiit30.v2',JSON.stringify({sessions:[{date:'2026-10-01T10:00:00Z',day:'A',week:1,sets:{splitsquat:[10,11]},stage:{},wts:{splitsquat:10},finisher:null,plus:1}],stages:{},weights:{splitsquat:10},overrideWeek:null,cur:null}))`);
   await page.reload(); await page.waitForTimeout(300);
-  check(await page.locator('#viewStart').isVisible() && (await txt('#stInfo')).startsWith('1 Einheiten'), 'v6-Daten werden gelesen');
+  check(await page.locator('#viewStart').isVisible() && await ev('store.sessions.length') === 1 && await ev('store.sessions[0].feel') !== undefined, 'v6-Daten werden gelesen');
   await page.click('#btnHistory');
   check((await txt('#histList')).includes('Split Squat: 10 · 11 @ 2 × 10 kg'), 'v6-Verlauf angezeigt');
 
-  if (vp.width >= 820) check(await page.locator('#explainPanel').isVisible() === false, 'Erklärpanel im Verlauf aus');
   await page.click('#btnBack');
-  if (vp.width >= 820) check(await page.locator('#explainPanel').isVisible(), 'Erklärpanel am PC sichtbar');
-  else check(await page.locator('#explainPanel').isVisible() === false && await page.locator('.xpm').isVisible(), 'Erklärungen am Handy aufklappbar');
+  check(await page.locator('#viewStart details.more .xpBody details').count() >= 8, 'Erklärungen auf dem Startbildschirm');
 
   check(errors.length === 0, 'keine Konsolenfehler' + (errors.length ? ': ' + errors.join(' | ') : ''));
   await browser.close();

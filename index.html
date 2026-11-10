@@ -4,391 +4,587 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HIIT Kraft 30</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;family=Spectral:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
 <style>
-:root{--bg:#121417;--card:#1c2026;--fg:#f2f3f5;--mute:#9aa3ad;--work:#e4572e;--rest:#3a86ff;--warm:#f4b942;--cool:#4cc38a;--accent:var(--work)}
+/* ===== Gestaltung nach design/DESIGN.md: Farben und Schriften nur hier ===== */
+:root{
+  --paper:#EBDDC3;          /* Papier, Hintergrund */
+  --ink:#3A2619;            /* Tinte: Text, Rahmen, primäre Buttons */
+  --rule:#C9AF88;           /* Hilfslinien, Tabellentrenner */
+  --muscle:#B23A1E;         /* Muskel aktiv, Fehler */
+  --muscle-support:#E3A57C; /* Muskel unterstützend */
+  --skin:#EAC9A2;           /* Haut der Figur */
+  --accent-text:#9C3518;    /* Vergleich, aktueller Tag */
+  --muted:#7D6249;          /* gedämpfter Text */
+  --pressed:#D9CFC0;        /* gewählte Rückmeldung */
+  --f-display:'Archivo','Arial Narrow',sans-serif;   /* schmal, 800–900, Großbuchstaben */
+  --f-label:'Spectral',Georgia,serif;                /* Beschriftungen, Köpfe, Buttons */
+  --f-text:'IBM Plex Sans','Segoe UI',sans-serif;    /* Fließtext, Tabellen */
+  --pad-x:2.75rem;--pad-y:1.75rem;--gap:2rem;
+}
+/* 1 rem = 16 px bei 1440 × 900, wächst mit Breite und Höhe (1920 × 1080 ≈ 19 px, 2560 × 1440 ≈ 26 px) */
+html{font-size:clamp(15px,min(1.1111vw,1.7778vh),40px)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-user-select:none;user-select:none}
-body.work{--accent:var(--work)} body.rest{--accent:var(--rest)} body.warm{--accent:var(--warm)} body.cool{--accent:var(--cool)} body.fin{--accent:#c94bd1}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px 8px;font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums}
-header b{color:var(--fg);font-weight:600}
-#meta{text-align:right}
-#progress{height:6px;background:#2a2f37;margin:0 16px;border-radius:3px;overflow:hidden}
-#progressBar{height:100%;width:0;background:var(--accent);transition:width .4s linear,background .3s}
+body{min-height:100vh;min-height:100dvh;background:var(--paper);color:var(--ink);font-family:var(--f-text);font-size:.9375rem;line-height:1.4;font-variant-numeric:tabular-nums;display:flex;flex-direction:column;padding:var(--pad-y) var(--pad-x)}
+a{color:var(--ink)}a:hover{color:var(--accent-text)}
+[hidden]{display:none!important}
+/* Typografie */
+.lbl,.kicker,.sh,dt,th,.cap{font-family:var(--f-label);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.kicker{letter-spacing:.08em}
+.sh{letter-spacing:.08em;border-bottom:1px solid var(--ink);padding-bottom:.375rem}
+.display{font-family:var(--f-display);font-stretch:75%;font-weight:900;text-transform:uppercase;line-height:.95;font-size:4.75rem;margin:.25rem 0 .875rem;overflow-wrap:anywhere}
+.num{font-family:var(--f-display);font-stretch:62%;font-weight:800;line-height:.9;font-variant-numeric:tabular-nums}
+.sub{font-size:.9375rem;margin-bottom:.5rem}
+.note{font-size:.875rem;color:var(--muted)}
+.note:empty,.err:empty{display:none}
+.acc{color:var(--accent-text);font-weight:600}
+.err{color:var(--muscle);border-left:3px solid var(--muscle);padding-left:.75rem;font-size:.9375rem}
+.say{border-left:3px solid var(--muscle);padding-left:.875rem;font-size:.9375rem;line-height:1.5;margin-top:.625rem}
+/* Kopf, Fuß */
+#hdr{display:flex;align-items:baseline;gap:1.75rem;border-bottom:2px solid var(--ink);padding-bottom:.75rem;flex-wrap:wrap}
+#hdr .brand{font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:1.375rem;letter-spacing:.04em;text-transform:uppercase}
+#metaL{font-family:var(--f-label);font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase}
+#meta{margin-left:auto;font-family:var(--f-label);font-size:.8125rem}
+.foot{border-top:2px solid var(--ink);padding-top:.75rem;display:flex;gap:1.5rem;align-items:baseline;font-size:.875rem;flex-wrap:wrap}
+/* Ansichten */
 .view{display:none;flex:1;flex-direction:column;min-height:0}
 .view.active{display:flex}
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 16px 10px;gap:6px;overflow:auto;min-height:0}
-#phase{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;text-align:center}
-#name{font-size:25px;font-weight:700;text-align:center;line-height:1.15}
-#hint{font-size:13px;color:var(--mute);text-align:center;max-width:420px;line-height:1.3}
-#how{width:100%;max-width:440px;background:var(--card);border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.35;color:var(--fg);display:none;-webkit-user-select:text;user-select:text}
-#how.on{display:block}
-#how div{margin:3px 0}
-#how b{color:var(--accent);font-weight:700;margin-right:4px}
-#how .more{color:var(--rest);font-size:12px;margin-left:6px}
-#how a{display:inline-block;margin-top:6px;color:var(--rest);font-size:13px;text-decoration:none}
-#fig{width:min(48vw,190px);flex:none;aspect-ratio:1;background:var(--card);border-radius:22px;overflow:hidden;touch-action:none;cursor:grab}
-#fig canvas{width:100%!important;height:100%!important;display:block}
-#figHint{font-size:12px;color:var(--mute);margin-top:-2px}
-#time{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent);transition:color .3s}
-#time:empty{display:none}
-#timeRow{display:flex;align-items:center;justify-content:center;gap:20px}
-#hrBox{display:none;flex-direction:column;align-items:center;line-height:1;--z:var(--mute)}
-#hrBox.on{display:flex}
-#hrVal{font-size:48px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--z);transition:color .3s}
-#hrZone{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--z);margin-top:5px}
-#lines{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--mute);text-align:center}
-#lines div:empty{display:none}
-#target{font-size:15px;color:var(--fg);text-align:center}
-#bpmRow{display:none;align-items:center;justify-content:center;gap:10px;margin-top:2px}
-#bpmRow.on{display:flex}
-#bpmVal{font-variant-numeric:tabular-nums}
-#bpmSrc a,.set a{color:var(--rest);text-decoration:none}
-#bpmSrc{font-size:12px}
-#wbox{display:none;align-items:center;gap:10px}
-#wbox.on{display:flex}
-.wb{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;background:#2a2f37;color:var(--fg);border:0;padding:0}
-#wval{font-size:18px;font-weight:700;min-width:110px;text-align:center}
-#last{font-size:14px;color:var(--mute);text-align:center;min-height:18px}
-#next{font-size:15px;color:var(--mute);text-align:center;min-height:18px}
-#repBox{display:none;align-items:center;gap:14px}
-#repBox.on{display:flex}
-.rb{width:64px;height:64px;border-radius:50%;font-size:34px;font-weight:700;background:#2a2f37;color:var(--fg);border:0}
-#reps{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;min-width:120px;text-align:center;line-height:1;color:var(--accent)}
-#feelBox{display:none;gap:8px}
-#feelBox.on{display:flex}
-#feelBox button{padding:10px 14px;font-size:15px;border-radius:12px}
-#feelBox button.sel{background:var(--accent)}
-#hardPanel{display:none;flex-wrap:wrap;gap:8px;justify-content:center;max-width:440px;background:var(--card);border-radius:14px;padding:10px}
-#hardPanel.on{display:flex}
-#hardPanel button{padding:10px 12px;font-size:14px}
-#plus{font-size:18px;font-weight:700;color:var(--cool);min-height:22px;text-align:center}
-#banner{display:none;background:#2a2f37;border-radius:12px;padding:10px 12px;font-size:14px;max-width:440px;text-align:center;line-height:1.35}
-#banner.on{display:block}
-#banner button{margin:8px 4px 0;padding:10px 14px;font-size:15px}
-.controls{display:flex;gap:10px;padding:10px 16px 14px;justify-content:center;align-items:stretch}
-button{border:0;border-radius:14px;padding:16px 16px;font-size:17px;font-weight:600;color:var(--fg);background:#2a2f37;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .3s}
-button.primary{background:var(--accent);flex:1;max-width:260px}
-button.ghost{background:transparent;color:var(--mute);font-weight:500}
-button.small{padding:9px 12px;font-size:14px;border-radius:10px}
-button:disabled{opacity:.5;cursor:default}
-button:active{transform:scale(.97)}
-input[type=text],input[type=password],input[type=number],select,textarea{background:#2a2f37;color:var(--fg);border:0;border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;-webkit-user-select:text;user-select:text;min-width:0}
-textarea{resize:vertical;min-height:54px}
-#coachOut{font-size:14px;color:var(--fg);text-align:center;padding:0 16px 6px;line-height:1.35}
-#coachOut:empty{display:none}
-#coachOut.err{color:var(--work)}
-.coachRow{display:flex;gap:8px;padding:0 16px 12px;justify-content:center}
-.coachRow input{flex:1;max-width:520px}
-.coachRow button{padding:10px 14px;font-size:15px}
-.start details,#explainMobile{margin:0 16px 20px;background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
-summary{cursor:pointer;font-weight:600;color:var(--mute);list-style:none}
-summary::-webkit-details-marker{display:none}
-.start details ol{padding-left:20px;margin-top:6px;color:var(--mute)}
-.start details li{margin:4px 0}
-.start details h4{margin-top:12px;color:var(--fg);font-size:14px}
-.start details p{color:var(--mute);margin-top:8px;line-height:1.35}
-.xt{margin-top:6px}
-.xt summary{color:var(--fg);font-weight:600;font-size:inherit}
-.xt p{color:var(--mute);margin:4px 0 6px;line-height:1.35;-webkit-user-select:text;user-select:text}
-#explainMobile{width:100%;max-width:440px;margin:6px 0 0}
-#explainPanel{display:none}
-/* Start */
-.start{flex:1;display:flex;flex-direction:column;padding:16px;gap:14px;overflow:auto}
-.card{background:var(--card);border-radius:16px;padding:14px 16px}
-.card h2{font-size:20px;margin-bottom:6px}
-.card h3{font-size:16px;margin-bottom:6px}
-.card p{color:var(--mute);font-size:14px;line-height:1.4}
-.card .say{color:var(--fg)}
-.card ul{padding-left:20px;color:var(--mute);font-size:14px;margin-top:6px;line-height:1.45}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
-.row .lbl{color:var(--mute);font-size:14px;min-width:96px}
-.chip{padding:10px 14px;border-radius:12px;background:#2a2f37;font-size:15px;color:var(--mute);cursor:pointer}
-.chip.sel{background:var(--accent);color:var(--fg)}
-.ci .chip{padding:8px 12px;font-size:14px}
-.big{font-size:19px;padding:18px}
-.start button{flex:none;max-width:none}
-.line{font-size:14px;color:var(--mute);margin-top:8px;line-height:1.35}
-.line.err{color:var(--work)}
-/* Einstellungen */
-.set label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mute);margin-top:10px}
-.set label.t{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:10px;cursor:pointer}
-.set label.t input{width:20px;height:20px;accent-color:var(--cool)}
-.set .res{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-.set .res button{text-align:left;font-size:14px;padding:9px 12px;font-weight:500}
-.set code{font-size:13px;color:var(--fg);word-break:break-all;-webkit-user-select:text;user-select:text}
-.set input[type=range]{width:100%;accent-color:var(--cool)}
-/* Verlauf */
-.hist{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.sess{background:var(--card);border-radius:14px;padding:12px 14px;font-size:14px}
-.sess .h{display:flex;justify-content:space-between;font-weight:600;gap:10px}
-.sess .h span:last-child{color:var(--cool)}
-.sess .h span.ab{color:var(--work)}
-.sess .d{color:var(--mute);margin-top:6px;line-height:1.5;font-variant-numeric:tabular-nums}
-.sess .d i{color:var(--cool);font-style:normal}
-.sess .d s{color:var(--work);text-decoration:none}
-.sess .d em{color:var(--work);font-style:normal}
-#confirmDel{display:none;color:var(--work);font-size:14px;padding:8px 0}
-/* Dialog */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
-.overlay.on{display:flex}
-.dlg{background:var(--card);border-radius:16px;padding:16px;max-width:460px;width:100%;display:flex;flex-direction:column;gap:10px}
-.dlg h2{font-size:20px}
-.dlg .row{margin-top:0}
-.intro ol{padding-left:22px;color:var(--fg);line-height:1.5;font-size:15px}
-.intro li{margin:6px 0}
+.grid2{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:0}
+.grid2>.col{display:flex;flex-direction:column;min-width:0;min-height:0}
+.grid2>.col:first-child{border-right:1px solid var(--ink);padding:1.75rem var(--gap) 1.25rem 0}
+.grid2>.col:last-child{padding:1.75rem 0 1.25rem var(--gap)}
+/* Buttons und Felder */
+button{font:500 .8125rem var(--f-label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:transparent;border:1px solid var(--ink);border-radius:0;min-height:2.75rem;padding:0 .875rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:hover{background:var(--pressed)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+button:disabled{color:var(--muted);border-color:var(--rule);cursor:default;background:transparent}
+button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600;letter-spacing:.08em}
+button.primary:hover{background:#2a1b11}
+button.primary:disabled{background:var(--muted);border-color:var(--muted);color:var(--paper)}
+button.txt{border:0;min-height:2.75rem;padding:0 .25rem;text-decoration:underline;text-underline-offset:.25em;text-decoration-color:var(--rule)}
+button.txt:hover{background:transparent;color:var(--accent-text)}
+button.sq{width:2.75rem;height:2.75rem;padding:0;font:400 1.25rem var(--f-text);letter-spacing:0}
+.bar{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);border:1px solid var(--ink)}
+.bar>button{border:0;border-left:1px solid var(--ink);min-height:2.5rem;padding:0 .5rem}
+.bar>button:first-child{border-left:0}
+.bar>button.on{background:var(--ink);color:var(--paper)}
+.bar.soft>button{font:500 .875rem var(--f-text);text-transform:none;letter-spacing:0;min-height:3rem}
+.bar.soft>button.on{background:var(--pressed);color:var(--ink);font-weight:600}
+dd .bar{border:0;border-left:1px solid var(--rule)}
+input[type=text],input[type=password],input[type=number],select,textarea{font:400 .9375rem var(--f-text);color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--ink);border-radius:0;padding:.5rem 0;min-width:0;width:100%}
+select{padding-right:1rem}
+textarea{border:1px solid var(--ink);padding:.5rem;resize:vertical;min-height:4rem}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+input[type=checkbox]{width:1.125rem;height:1.125rem;accent-color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+/* Datenpaare */
+dl.dl{display:grid;grid-template-columns:8.75rem minmax(0,1fr);border-top:1px solid var(--ink);font-size:.9375rem}
+dl.dl>dt{padding:.625rem 0;border-bottom:1px solid var(--rule)}
+dl.dl>dd{padding:.625rem 0;border-bottom:1px solid var(--rule);min-width:0}
+dl.dl>dd.ctl{padding:0}
+dl.dl>dt[hidden]+dd{display:none}
+/* Tabellen */
+table.tbl{width:100%;border-collapse:collapse;font-size:.9375rem}
+table.tbl th{text-align:left;padding:.5rem .5rem .5rem 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+table.tbl td{padding:.625rem .5rem .625rem 0;border-bottom:1px solid var(--rule);vertical-align:baseline}
+table.tbl tr:last-child td{border-bottom:1px solid var(--ink)}
+table.tbl .nr{font-family:var(--f-label);width:2.75rem}
+table.tbl .ex{font-weight:600}
+table.tbl .r{text-align:right;padding-right:0}
+/* Blöcke rechts auf dem Start */
+.blk{min-width:0}
+.blk p{font-size:.9375rem;margin-top:.5rem}
+.blk ul{margin:.5rem 0 0 1.25rem;font-size:.9375rem}
+.rowBtns{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.625rem;align-items:center}
 
-/* ---------- Breite Bildschirme (PC) ---------- */
-@media (min-width: 820px){
-  header{font-size:18px;padding:16px 32px 10px}
-  #progress{margin:0 32px}
-  main{display:grid;grid-template-columns:minmax(380px,520px) minmax(380px,560px);grid-template-areas:
-    "phase phase" "name name" "fig target" "fig wbox" "fig last" "fig time" "fig lines" "fig reps" "fig feel" "fig hard" "fig plus" "fighint banner" "how banner" "hint next";
-    column-gap:40px;row-gap:10px;justify-content:center;align-content:safe center;align-items:center;justify-items:center;padding:12px 32px}
-  #phase{grid-area:phase;font-size:16px}
-  #name{grid-area:name;font-size:40px}
-  #hint{grid-area:hint;font-size:15px}
-  #how{grid-area:how;font-size:16px;max-width:none;padding:12px 16px}
-  #fig{grid-area:fig;width:min(44vh,440px);align-self:center}
-  #figHint{grid-area:fighint;font-size:14px}
-  #target{grid-area:target;font-size:20px}
-  #wbox{grid-area:wbox}
-  .wb{width:52px;height:52px;font-size:28px}
-  #wval{font-size:24px;min-width:150px}
-  #last{grid-area:last;font-size:18px}
-  #timeRow{grid-area:time;gap:32px}
-  #time{font-size:120px}
-  #hrVal{font-size:80px}
-  #hrZone{font-size:15px}
-  #lines{grid-area:lines;font-size:15px}
-  #repBox{grid-area:reps;gap:24px}
-  .rb{width:88px;height:88px;font-size:44px}
-  #reps{font-size:104px;min-width:170px}
-  #feelBox{grid-area:feel}
-  #feelBox button{font-size:17px;padding:12px 18px}
-  #hardPanel{grid-area:hard;max-width:520px}
-  #plus{grid-area:plus;font-size:22px}
-  #banner{grid-area:banner;font-size:16px;max-width:none}
-  #next{grid-area:next;font-size:18px}
-  #explainMobile,.xpm{display:none}
-  .controls{padding:14px 32px 12px}
-  .controls button{font-size:21px;padding:20px 28px}
-  button.primary{max-width:360px}
-  .start button.primary{max-width:none}
-  #coachOut{font-size:17px}
-  .coachRow input{font-size:16px}
-  .start{max-width:760px;width:100%;margin:0 auto;padding:28px 24px;gap:18px}
-  .card h2{font-size:26px}.card p{font-size:17px}.chip{font-size:17px;padding:12px 18px}
-  .ci .chip{font-size:15px;padding:9px 14px}
-  .big{font-size:22px;padding:22px}
-  .start details{max-width:760px;width:100%;margin:0 auto 24px;font-size:16px}
-  .hist{max-width:760px;width:100%;margin:0 auto}.sess{font-size:16px}
-  #viewHistory .controls{padding-bottom:8px}
-  body.xp #explainPanel{display:block;position:fixed;right:16px;bottom:16px;width:250px;max-height:60vh;overflow:auto;background:var(--card);border-radius:14px;padding:10px 12px;font-size:13px;z-index:5;box-shadow:0 4px 18px rgba(0,0,0,.4)}
-  #explainPanel .xh{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--fg);cursor:pointer}
-  #explainPanel .xh span{color:var(--mute);font-weight:500;font-size:12px}
-  #explainPanel.min .xb{display:none}
+/* ===== Start ===== */
+#viewStart .col:last-child{gap:1.5rem}
+#viewStart .display{font-size:5.75rem;line-height:.92;margin:.25rem 0}
+.selRow{display:flex;gap:.75rem;flex-wrap:wrap;margin:.5rem 0 1.25rem}
+.selRow .bar>button{min-height:2.5rem;padding:0 .875rem}
+.startBar{margin-top:auto;padding-top:1.5rem;display:grid;grid-template-columns:minmax(0,1fr) auto;border-top:1px solid var(--ink);align-items:center}
+.startBar .msg{padding:.875rem 0;font-size:.875rem}
+.startBar .primary{min-height:3.75rem;padding:0 2.5rem;font-size:.9375rem}
+.links{display:flex;gap:1.25rem;flex-wrap:wrap;align-items:center;margin-top:.5rem}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;font-family:var(--f-label);font-size:.75rem}
+.week>div{padding:.5rem 0;border-right:1px solid var(--rule)}
+.week>div:last-child{border-right:0}
+.week i{display:block;margin:.375rem auto 0;width:.875rem;height:.875rem}
+.week .done i{background:var(--ink)}
+.week .today{color:var(--accent-text);font-weight:600}
+.week .today i{border:2px solid var(--muscle)}
+.week .today.done i{background:var(--ink)}
+#chart svg{width:100%;display:block;margin-top:.5rem}
+details.more{font-size:.9375rem}
+details.more[open]{flex-basis:100%;order:9;border-top:1px solid var(--ink);padding-top:.25rem}
+details.more summary{cursor:pointer;font-family:var(--f-label);font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;padding:.75rem .25rem;list-style:none;text-decoration:underline;text-underline-offset:.25em;text-decoration-color:var(--rule)}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:' +'}
+details.more[open] summary::after{content:' −'}
+details.more h4{font-family:var(--f-label);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;margin-top:.875rem;font-weight:600}
+details.more ol{padding-left:1.25rem;margin-top:.25rem}
+details.more p{margin-top:.5rem;color:var(--muted)}
+.xt{border-bottom:1px solid var(--rule)}
+.xt summary{cursor:pointer;list-style:none;padding:.5rem 0;font-weight:600}
+.xt summary::-webkit-details-marker{display:none}
+.xt p{padding-bottom:.5rem;color:var(--ink)!important;margin:0!important}
+
+/* ===== Training ===== */
+#segBar{display:flex;border-bottom:1px solid var(--ink);font-family:var(--f-label);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase}
+#segBar>div{padding:.375rem .5rem;border-left:1px solid var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#segBar>div:first-child{border-left:0}
+#segBar>div.done{background:var(--ink);color:var(--paper)}
+.ciDl{grid-template-columns:7.5rem minmax(0,1fr)}
+.startGrid{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}
+.paneWork{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+.paneWork>.col:first-child{padding-top:1.25rem;padding-bottom:1rem;gap:.625rem}
+.paneWork>.col:last-child{padding-top:1.25rem;padding-bottom:1rem}
+.paneRest{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+.figHost{flex:1 1 0;min-height:12rem;position:relative}
+/* Training passt auf den Bildschirm: feste Höhe, rechte Spalte scrollt bei Bedarf */
+body.fit{height:100vh;height:100dvh;overflow:hidden}
+body.fit #viewMain .grid2{grid-template-rows:minmax(0,1fr)}
+body.fit #workInfo,body.fit #paneRest>.col{overflow-y:auto;overflow-x:hidden}
+#fig{height:100%;max-width:100%;aspect-ratio:1;margin:0 auto;touch-action:none;cursor:grab}
+#fig canvas{width:100%!important;height:100%!important;display:block}
+.figFoot{display:flex;justify-content:space-between;align-items:center;gap:1rem;border-top:1px solid var(--ink);padding-top:.625rem;flex-wrap:wrap}
+.cap{font-size:.75rem;text-transform:none;letter-spacing:0}
+.cap.err{font-family:var(--f-text);font-size:.8125rem}
+#viewSw{display:flex}
+#viewSw button{font-size:.75rem;padding:0 .875rem;border-left:0}
+#viewSw button:first-child{border-left:1px solid var(--ink)}
+#viewSw button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+#viewSw .gap{width:.5rem}
+#viewSw .gap+button{border-left:1px solid var(--ink)}
+#workInfo .display{margin-bottom:.875rem}
+#hint{margin:-.5rem 0 .625rem}
+#wbox{display:flex;align-items:center;justify-content:space-between;padding:.375rem 0}
+#wbox .w{font-weight:600}
+#wbox .sq{font-size:1.25rem}
+#wbox .sq+.sq{border-left:0}
+#time{font-size:9.375rem;text-align:center;padding:1rem 0 .5rem}
+#time.small{font-size:4.5rem;padding:.5rem 0 0}
+#workInfo.dual #reps{font-size:7rem}
+#workInfo.dual #repBox{padding-top:.5rem}
+#repBox{display:flex;align-items:center;justify-content:space-between;padding:1.125rem 0 .625rem}
+#repBox .rb{width:4rem;height:4rem;font:400 1.75rem var(--f-text);letter-spacing:0;padding:0}
+#repBox .rb.plus{background:var(--ink);color:var(--paper)}
+#reps{font-size:9.375rem;text-align:center}
+#repLbl{font-family:var(--f-label);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+#feelBox{margin-bottom:.75rem}
+#hardPanel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--ink);border-top:0;margin:-.75rem 0 .75rem}
+#hardPanel button{border:0;border-top:1px solid var(--rule);border-left:1px solid var(--rule);font:500 .875rem var(--f-text);text-transform:none;letter-spacing:0;padding:.25rem .5rem}
+#hardPanel button:nth-child(odd){border-left:0}
+#hardPanel button:nth-child(-n+2){border-top:0}
+#hardPanel button:last-child:nth-child(odd){grid-column:1/-1}
+.banner button{font:500 .875rem var(--f-text);text-transform:none;letter-spacing:0}
+#hardPanel:empty{display:none}
+.banner{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:.625rem 0;margin-bottom:.75rem;font-size:.9375rem;line-height:1.45}
+.banner button{margin:.5rem .5rem 0 0}
+.banner:empty{display:none}
+#mainBtn{min-height:4rem;font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.04em}
+#mainBtn small{font:400 .8125rem var(--f-label);text-transform:none;letter-spacing:0}
+.ctrl{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.25rem}
+.ctrl .txt:last-child{margin-left:auto}
+#nextBox{margin-top:auto;padding-top:1rem;font-size:.875rem}
+#next>div{display:flex;justify-content:space-between;gap:1rem;padding:.5rem 0;border-bottom:1px solid var(--rule)}
+#next>div span:last-child{font-family:var(--f-label);font-size:.8125rem;white-space:nowrap}
+.how3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;padding-top:.75rem;font-size:.875rem}
+.how3 .lbl{display:block;margin-bottom:.25rem}
+.how3 a{font-size:.8125rem}
+/* Wechsel */
+#rTime{font-size:16.25rem;line-height:.85;margin:.75rem 0 .5rem;font-weight:900}
+.rbar{height:.625rem;border:1px solid var(--ink);margin-bottom:1.5rem}
+.rbar>div{height:100%;background:var(--ink);width:0}
+#hrWait{margin:-1rem 0 1rem}
+.rBtns{margin-top:auto}
+.rBtns>button{min-height:3.25rem}
+.rBtns>button.go{background:var(--ink);color:var(--paper);font-weight:600}
+#paneRest .col:last-child .display{margin-bottom:.5rem}
+#paneRest .figHost{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);min-height:16rem;margin-top:.5rem}
+#rNextSub{font-size:.9375rem}
+/* Fuß im Training */
+.mainFoot{display:flex;border-top:2px solid var(--ink);font-size:.875rem}
+.mainFoot>div{padding:.75rem 1rem 0;border-left:1px solid var(--ink);min-width:0}
+.mainFoot>div.first{border-left:0;padding-left:0}
+.mainFoot>div:last-child{padding-right:0}
+#fHr{flex:0 0 auto;display:flex;align-items:baseline;gap:.625rem;flex-wrap:wrap}
+#hrVal{font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:2.125rem;line-height:1}
+#hrZone{font-weight:600}
+#fMusic{flex:1.4 1 0;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+#musicLine{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bpmRow{display:flex;align-items:center;gap:.5rem}
+#bpmSrc{font-size:.75rem;width:100%}
+#bpmSrc:empty{display:none}
+#fCoach{flex:1.4 1 0;display:flex;gap:1rem;align-items:flex-start;padding-bottom:.25rem}
+#fCoach .ct{flex:1 1 auto;min-width:0}
+#fCoach .coachRow{flex:0 1 22rem;margin:0}
+#coachOut{margin:.25rem 0}
+#coachOut:empty,#lastSay:empty{display:none}
+#lastSay{margin-top:.125rem}
+#coachOut.err{color:var(--muscle)}
+.coachRow{display:flex;gap:.5rem;margin:.25rem 0 0;align-items:end}
+.coachRow input{flex:1;padding:.25rem 0}
+.coachRow button{min-height:2.25rem}
+#voiceLine:empty,#hrLine:empty{display:none}
+#hrLine{color:var(--muscle);width:100%}
+
+/* ===== Einstellungen ===== */
+.setGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--gap);padding:1.75rem 0 1.25rem}
+.setGrid>div{display:flex;flex-direction:column;gap:1.75rem;min-width:0}
+.setGrid>div:first-child{border-right:1px solid var(--ink);padding-right:var(--gap)}
+.set{font-size:.9375rem}
+.set label.f{display:flex;flex-direction:column;gap:.125rem;margin-top:.75rem;font-family:var(--f-label);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.set label.f input,.set label.f select{font-family:var(--f-text);text-transform:none;letter-spacing:0;font-size:.9375rem}
+.set label.t{display:flex;align-items:center;gap:.625rem;margin-top:.75rem;cursor:pointer}
+.set .line{font-size:.875rem;color:var(--muted);margin-top:.5rem}
+.set .line.err{color:var(--muscle)}
+.set .line:empty{display:none}
+.set code{font-size:.8125rem;word-break:break-all;user-select:text}
+.set .res{display:flex;flex-direction:column;margin-top:.375rem}
+.set .res button{text-align:left;text-transform:none;letter-spacing:0;font:400 .875rem var(--f-text);border:0;border-bottom:1px solid var(--rule)}
+.set .row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.75rem}
+.set .row .line{margin-top:0}
+.set .song{margin-top:.5rem}
+.set .lbl{display:block;margin-top:.75rem;margin-bottom:.25rem}
+.pageFoot{border-top:2px solid var(--ink);padding:.75rem 0;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;background:var(--paper);margin-bottom:calc(-1 * var(--pad-y))}
+.pageFoot .primary{min-height:3.25rem;padding:0 2.5rem}
+.pageFoot .primary:first-child{margin-left:0}
+
+/* ===== Protokoll ===== */
+.hist{flex:1;padding:1.5rem 0 1.25rem}
+.sess{display:grid;grid-template-columns:15rem minmax(0,1fr);border-bottom:1px solid var(--rule);padding:.75rem 0;gap:1.5rem}
+.sess .h{font-family:var(--f-label);font-size:.8125rem;letter-spacing:.04em}
+.sess .h b{display:block;font-family:var(--f-display);font-stretch:75%;font-weight:800;font-size:1.25rem;letter-spacing:.02em;text-transform:uppercase}
+.sess .h .pl{color:var(--accent-text);font-weight:600}
+.sess .h .ab{color:var(--muscle);font-weight:600}
+.sess .d{font-size:.9375rem;line-height:1.55;user-select:text}
+.sess .d i{color:var(--accent-text);font-style:normal;font-weight:600}
+.sess .d s{color:var(--muscle);text-decoration:none}
+.sess .d em{color:var(--muscle);font-style:normal}
+#confirmDel{color:var(--muscle)}
+
+/* ===== Intro ===== */
+.intro{max-width:52rem;padding:2rem 0}
+.intro ol{margin:1rem 0 2rem 1.5rem;font-size:1.0625rem;line-height:1.55}
+.intro li{margin:.5rem 0}
+.intro .primary{min-height:3.75rem;padding:0 2.5rem;font-size:.9375rem}
+
+/* ===== Dialog ===== */
+.overlay{position:fixed;inset:0;background:rgba(235,221,195,.82);display:none;align-items:center;justify-content:center;z-index:20;padding:1rem}
+.overlay.on{display:flex}
+.dlg{background:var(--paper);border:2px solid var(--ink);padding:1.5rem 1.75rem;max-width:34rem;width:100%;display:flex;flex-direction:column;gap:.875rem}
+.dlg h2{font-family:var(--f-display);font-stretch:75%;font-weight:900;font-size:2.5rem;text-transform:uppercase;line-height:.95}
+.dlg .acts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.dlg .acts .primary{grid-column:1/-1;min-height:3.25rem}
+
+/* ===== Schmale Bildschirme: Spalten stapeln ===== */
+@media (max-width:900px){
+  :root{--pad-x:16px;--pad-y:12px;--gap:0px}
+  html{font-size:15px}
+  .grid2,.startGrid,.paneWork,.paneRest{grid-template-columns:minmax(0,1fr)}
+  .grid2>.col:first-child{border-right:0;padding:1rem 0;border-bottom:1px solid var(--ink)}
+  .grid2>.col:last-child{padding:1rem 0}
+  .setGrid{grid-template-columns:minmax(0,1fr)}
+  .setGrid>div:first-child{border-right:0;padding-right:0}
+  .display,#viewStart .display{font-size:3rem}
+  #reps,#time{font-size:6rem}
+  body.fit{height:auto;overflow:visible}
+  body.fit #workInfo,body.fit #paneRest>.col{overflow:visible}
+  #rTime{font-size:8rem}
+  .figHost{min-height:18rem}
+  .mainFoot{flex-wrap:wrap}
+  .mainFoot>div{border-left:0;padding-left:0;flex:1 1 100%}
+  .how3{grid-template-columns:minmax(0,1fr)}
+  .sess{grid-template-columns:minmax(0,1fr);gap:.25rem}
+  table.tbl .mus{display:none}
 }
-@media (min-width: 1500px){ main{padding-right:290px} }
 </style>
 </head>
-<body class="warm">
-<header><span><b>HIIT Kraft 30</b> <span id="metaL"></span></span><span id="meta"></span></header>
-<div id="progress"><div id="progressBar"></div></div>
+<body>
+<header id="hdr"><span class="brand">HIIT Kraft 30</span><span id="metaL"></span><span id="meta"></span></header>
 
 <!-- ERSTER START -->
 <div id="viewIntro" class="view">
-  <div class="start intro">
-    <div class="card">
-      <h2>So läuft eine Einheit</h2>
-      <ol>
-        <li>Eine Einheit dauert etwa 30 Minuten: Aufwärmen, drei Übungspaare im Wechsel, Finisher und Ausklang.</li>
-        <li>Pro Satz machst du so viele Wiederholungen, bis nur noch die angezeigte Reserve übrig wäre, und trägst die Zahl mit + und − ein.</li>
-        <li>Nach jedem Satz gibst du mit Leicht, Passt oder Zu hart Rückmeldung; bei Zu hart bietet die App weniger Gewicht, eine leichtere Variante oder das Überspringen an.</li>
-        <li>Jeder Satz wird mit dem letzten Mal verglichen, und sobald alle Sätze die Obergrenze erreichen, schlägt die App mehr Gewicht oder die nächste Stufe vor.</li>
-        <li>Claude-Coach, Sprachsteuerung und Spotify lassen sich in den Einstellungen verbinden, ohne sie läuft alles lokal im Browser.</li>
-      </ol>
-    </div>
-    <button id="btnIntroOk" class="primary big">Verstanden</button>
-  </div>
+  <section class="intro">
+    <div class="kicker">Einführung</div>
+    <h1 class="display">So läuft eine Einheit</h1>
+    <ol>
+      <li>Eine Einheit dauert etwa 30 Minuten: Aufwärmen, drei Übungspaare im Wechsel, Finisher und Ausklang.</li>
+      <li>Pro Satz machst du so viele Wiederholungen, bis nur noch die angezeigte Reserve übrig wäre, und trägst die Zahl mit + und − ein.</li>
+      <li>Nach jedem Satz gibst du mit Leicht, Passt oder Zu hart Rückmeldung; bei Zu hart bietet die App weniger Gewicht, eine leichtere Variante oder das Überspringen an.</li>
+      <li>Jeder Satz wird mit dem letzten Mal verglichen, und sobald alle Sätze die Obergrenze erreichen, schlägt die App mehr Gewicht oder die nächste Stufe vor.</li>
+      <li>Claude-Coach, Sprachsteuerung und Spotify lassen sich in den Einstellungen verbinden, ohne sie läuft alles lokal im Browser.</li>
+    </ol>
+    <button id="btnIntroOk" class="primary">Verstanden</button>
+  </section>
 </div>
 
 <!-- START -->
 <div id="viewStart" class="view">
-  <div class="start">
-    <div class="card">
-      <h2 id="stTitle">Nächste Einheit</h2>
-      <p id="stInfo"></p>
-      <div class="row">
-        <div class="chip" id="chipA">Tag A</div><div class="chip" id="chipB">Tag B</div>
+  <main class="grid2 startGrid">
+    <section class="col" aria-label="Heutige Einheit">
+      <div class="kicker" id="stKicker"></div>
+      <h1 class="display" id="stTitle"></h1>
+      <div class="sub" id="stInfo"></div>
+      <div class="selRow">
+        <div class="bar" role="group" aria-label="Tafel"><button id="chipA">Tafel A</button><button id="chipB">Tafel B</button></div>
+        <div class="bar" role="group" aria-label="Woche"><button data-w="1">Woche 1</button><button data-w="2">Woche 2</button><button data-w="3">Woche 3+</button></div>
+        <div class="bar" role="group" aria-label="Heute"><button id="chipNormal">Normal</button><button id="chipLight">Leichter</button></div>
       </div>
-      <div class="row">
-        <div class="chip" data-w="1">Woche 1</div><div class="chip" data-w="2">Woche 2</div><div class="chip" data-w="3">Woche 3+</div>
+      <p class="note" id="lightInfo" style="margin:-.75rem 0 1rem"></p>
+      <table class="tbl" aria-label="Übungen">
+        <thead><tr><th>Nr.</th><th>Übung</th><th class="mus">Muskeln</th><th>Ziel</th><th>Gewicht</th><th class="r">Zuletzt</th></tr></thead>
+        <tbody id="planBody"></tbody>
+      </table>
+      <p class="err" id="startErr" style="margin-top:1rem" hidden></p>
+      <div class="startBar">
+        <div class="msg" id="startMsg">Drück die Leertaste.</div>
+        <button id="btnStartSession" class="primary">Training starten</button>
       </div>
-      <div class="row">
-        <span class="lbl">Heute</span><div class="chip" id="chipNormal">Normal</div><div class="chip" id="chipLight">Leichter</div>
+      <div class="links">
+        <button id="btnResume" class="txt" hidden>Angefangene Einheit fortsetzen</button>
+        <button id="btnHistory" class="txt">Protokoll</button>
+        <button id="btnSettings" class="txt">Einstellungen</button>
+      <details class="more"><summary>Plan</summary>
+        <div id="plan"></div>
+        <p>Startgewichte Woche 1: Split Squat und Ausfallschritte 2 × 10 kg, einbeiniges Kreuzheben 2 × 7,5 kg, Floor Press und Rudern 2 × 12,5 kg, Schulterdrücken 2 × 8 kg, einarmiges Rudern und Goblet 15 kg, Hüftbrücke 10 kg, Thruster 2 × 8 kg. Die App schlägt ab Woche 2 die höheren Werte vor und merkt sich, was du zuletzt genommen hast.</p>
+        <p>Paare im Wechsel: Satz A1 bis zur Reserve, 25 s Wechsel, Satz A2, 25 s Wechsel, dann die nächste Runde. Wenn alle Sätze die Obergrenze erreichen, bietet die App mehr Gewicht oder die nächste Stufe an (3 s exzentrisch, 1,5er-Wiederholungen, Rest-Pause).</p>
+        <p>Ernährung: 130–180 g Protein pro Tag, Defizit etwa 300–400 kcal, Zielgewicht minus 0,25–0,5 kg pro Woche im Wochenschnitt.</p>
+      </details>
+      <details class="more"><summary>Erklärungen</summary><div class="xpBody"></div></details>
       </div>
-      <p class="line" id="lightInfo"></p>
-    </div>
-    <div class="card" id="healthCard" style="display:none"><h3>Erholung</h3><p class="say" id="healthNight"></p><p class="line" id="healthTrend"></p></div>
-    <div class="card" id="coachCard" style="display:none"><h3>Coach</h3><p class="say" id="coachNote"></p></div>
-    <div class="card" id="painCard" style="display:none"><h3>Hinweis Schmerz</h3><p class="say" id="painText"></p><div class="row" id="painRow"></div></div>
-    <div class="card" id="progCard" style="display:none">
-      <h3>Progressionscheck</h3>
-      <p id="progInfo"></p>
-      <div id="progBody"></div>
-      <div class="row" id="progRow"></div>
-    </div>
-    <div class="card ci" id="checkinCard" style="display:none">
-      <h3>Check-in</h3>
-      <div class="row"><span class="lbl">Schlaf</span><span id="ciSleep" class="row" style="margin:0;gap:6px"></span></div>
-      <div class="row"><span class="lbl">Muskelkater</span><span id="ciSore" class="row" style="margin:0;gap:6px"></span></div>
-      <div class="row"><span class="lbl">Energie</span><span id="ciEnergy" class="row" style="margin:0;gap:6px"></span></div>
-      <div class="row"><span class="lbl">Zeit</span><span id="ciTime" class="row" style="margin:0;gap:6px"></span></div>
-      <div class="row"><input type="text" id="ciText" placeholder="Sonst noch was? (optional)" style="flex:1"></div>
-    </div>
-    <p class="line err" id="startErr" style="display:none"></p>
-    <div class="row" id="hrStartRow" style="margin-top:0;display:none"><button id="btnHrStart">Watch verbinden</button><span class="line" id="hrStartLine" style="margin:0"></span></div>
-    <button id="btnStartSession" class="primary big">Einheit starten</button>
-    <button id="btnResume" class="big" style="display:none">Angefangene Einheit fortsetzen</button>
-    <div class="row" style="margin-top:0"><button id="btnHistory" style="flex:1">Verlauf und Protokoll</button><button id="btnSettings" style="flex:1">Einstellungen</button></div>
-    <details>
-      <summary>Plan anzeigen</summary>
-      <div id="plan"></div>
-      <p>Startgewichte Woche 1: Split Squat und Ausfallschritte 2 × 10 kg, einbeiniges Kreuzheben 2 × 7,5 kg, Floor Press und Rudern 2 × 12,5 kg, Schulterdrücken 2 × 8 kg, einarmiges Rudern und Goblet 15 kg, Hüftbrücke 10 kg, Thruster 2 × 8 kg. Die App schlägt ab Woche 2 die höheren Werte vor und merkt sich, was du zuletzt genommen hast.</p>
-      <p>Paare im Wechsel: Satz A1 bis zur Reserve, 25 s Wechsel, Satz A2, 25 s Wechsel, dann die nächste Runde. Wenn alle Sätze die Obergrenze erreichen, bietet die App mehr Gewicht oder die nächste Stufe an (3 s exzentrisch, 1,5er-Wiederholungen, Rest-Pause).</p>
-      <p>Ernährung: 130–180 g Protein pro Tag, Defizit etwa 300–400 kcal, Zielgewicht minus 0,25–0,5 kg pro Woche im Wochenschnitt.</p>
-    </details>
-    <details class="xpm"><summary>Erklärungen</summary><div class="xpBody"></div></details>
-  </div>
+    </section>
+
+    <section class="col" aria-label="Check-in und Verlauf">
+      <div class="blk" id="painCard" hidden><div class="sh">Hinweis Schmerz</div><p class="say" id="painText"></p><div class="rowBtns" id="painRow"></div></div>
+      <div class="blk" id="progCard" hidden>
+        <div class="sh">Progressionscheck</div>
+        <p id="progInfo"></p>
+        <div id="progBody"></div>
+        <div class="rowBtns" id="progRow"></div>
+      </div>
+      <div class="blk" id="checkinCard" hidden>
+        <div class="sh">Check-in</div>
+        <dl class="dl ciDl" style="border-top:0">
+          <dt>Schlaf</dt><dd class="ctl"><div class="bar" id="ciSleep"></div></dd>
+          <dt id="ciHrvT" hidden>HRV</dt><dd id="ciHrv"></dd>
+          <dt>Muskelkater</dt><dd class="ctl"><div class="bar" id="ciSore"></div></dd>
+          <dt>Energie</dt><dd class="ctl"><div class="bar" id="ciEnergy"></div></dd>
+          <dt>Zeit</dt><dd class="ctl"><div class="bar" id="ciTime"></div></dd>
+          <dt>Beschwerden</dt><dd style="padding:.25rem 0"><input type="text" id="ciText" placeholder="keine angegeben" style="border-bottom:0"></dd>
+        </dl>
+      </div>
+      <div class="blk" id="healthCard" hidden><div class="sh">Erholung</div><p id="healthNight"></p><p class="note" id="healthTrend"></p></div>
+      <div class="blk" id="coachCard" hidden><div class="sh">Coach</div><p class="say" id="coachNote"></p></div>
+      <div class="blk"><div class="sh" id="weekHead">Diese Woche</div><div class="week" id="weekBar"></div></div>
+      <div class="blk" id="chart" hidden><div class="sh">Fortschritt · Wiederholungen gesamt</div><div id="chartSvg"></div></div>
+    </section>
+  </main>
+  <footer class="foot" id="stFoot" hidden>
+    <span class="lbl" id="stHrL" hidden>Puls</span><span id="stHr" hidden></span>
+    <span id="hrStartRow" hidden><button id="btnHrStart">Watch verbinden</button> <span id="hrStartLine" class="note"></span></span>
+    <span class="lbl" id="stMusicL" hidden>Musik</span><span id="stMusic" hidden></span>
+  </footer>
 </div>
 
-<!-- MAIN -->
+<!-- TRAINING -->
 <div id="viewMain" class="view">
-  <main>
-    <div id="phase"></div>
-    <div id="name"></div>
-    <div id="hint"></div>
-    <div id="how"></div>
-    <div id="fig"></div>
-    <div id="figHint">Figur mit dem Finger drehen</div>
-    <div id="target"></div>
-    <div id="wbox"><button class="wb" id="wMinus">−</button><span id="wval"></span><button class="wb" id="wPlus">+</button></div>
-    <div id="last"></div>
-    <div id="timeRow"><div id="time"></div><div id="hrBox"><div id="hrVal"></div><div id="hrZone"></div></div></div>
-    <div id="lines"><div id="hrWait"></div><div id="hrLine"></div><div id="voiceLine"></div><div id="musicLine"></div><div id="bpmRow"><span id="bpmVal"></span><button class="small" id="btnTap">Takt tippen</button></div><div id="bpmSrc"></div></div>
-    <div id="repBox"><button class="rb" id="rMinus">−</button><div id="reps">0</div><button class="rb" id="rPlus">+</button></div>
-    <div id="feelBox"><button data-f="leicht">Leicht</button><button data-f="passt">Passt</button><button data-f="hart">Zu hart</button></div>
-    <div id="hardPanel"></div>
-    <div id="plus"></div>
-    <div id="banner"></div>
-    <div id="next"></div>
-    <details id="explainMobile"><summary>Erklärungen</summary><div class="xpBody"></div></details>
+  <div id="segBar" aria-label="Fortschritt der Einheit"></div>
+
+  <main class="grid2 paneWork" id="paneWork">
+    <section class="col" aria-label="Abbildung der Übung">
+      <div class="figHost" id="figHostWork"><div id="fig"></div></div>
+      <div class="figFoot">
+        <span class="cap" id="figCap"></span>
+        <div id="viewSw" role="group" aria-label="Ansicht">
+          <button data-view="side" aria-pressed="false">Seite</button><button data-view="front" aria-pressed="false">Vorne</button><button data-view="back" aria-pressed="false">Hinten</button><span class="gap"></span><button id="slowBtn" aria-pressed="false">Zeitlupe</button>
+        </div>
+      </div>
+    </section>
+    <section class="col" id="workInfo" aria-label="Aktueller Schritt">
+      <div class="kicker" id="phase"></div>
+      <h1 class="display" id="name"></h1>
+      <p class="note" id="hint"></p>
+      <dl class="dl" id="infoDl">
+        <dt id="targetT">Ziel</dt><dd id="target"></dd>
+        <dt id="wboxT">Gewicht</dt><dd class="ctl"><div id="wbox"><span class="w" id="wval"></span><span><button class="sq" id="wMinus" aria-label="Gewicht verringern">−</button><button class="sq" id="wPlus" aria-label="Gewicht erhöhen">+</button></span></div></dd>
+        <dt id="lastT">Letztes Mal</dt><dd id="last"></dd>
+        <dt id="howStartT">Start</dt><dd id="howStart"></dd>
+        <dt id="howMoveT">Bewegung</dt><dd id="howMove"></dd>
+        <dt id="howWatchT">Achte auf</dt><dd id="howWatch"></dd>
+      </dl>
+      <div id="time" class="num"></div>
+      <div id="repBox">
+        <button class="rb" id="rMinus" aria-label="Eins weniger">−</button>
+        <div><div id="reps" class="num">0</div><div id="repLbl"></div></div>
+        <button class="rb plus" id="rPlus" aria-label="Eins mehr">+</button>
+      </div>
+      <div class="bar soft" id="feelBox" role="group" aria-label="Wie war der Satz"><button data-f="leicht">Leicht</button><button data-f="passt">Passt</button><button data-f="hart">Zu hart</button></div>
+      <div id="hardPanel"></div>
+      <div class="banner" id="banner"></div>
+      <button id="mainBtn" class="primary">Start</button>
+      <div class="ctrl">
+        <button id="prev" class="txt">Zurück</button>
+        <button id="pauseBtn" class="txt">Pause</button>
+        <button id="skip" class="txt">Weiter</button>
+        <button id="btnAbort" class="txt">Einheit abbrechen</button>
+      </div>
+      <div id="nextBox"><div class="sh">Danach</div><div id="next"></div></div>
+    </section>
   </main>
-  <div class="controls">
-    <button id="prev">Zurück</button>
-    <button id="mainBtn" class="primary">Start</button>
-    <button id="skip">Weiter</button>
-  </div>
-  <div id="coachOut"></div>
-  <div class="coachRow" id="coachRow"><input type="text" id="coachIn" placeholder="Coach fragen" autocomplete="off"><button id="coachSend">Senden</button></div>
-  <div class="controls" style="padding-top:0"><button id="btnAbort" class="ghost">Einheit abbrechen</button></div>
+
+  <main class="grid2 paneRest" id="paneRest" hidden>
+    <section class="col" aria-label="Wechsel">
+      <div class="kicker" id="rKicker">Wechsel</div>
+      <div id="rTime" class="num">0:00</div>
+      <div class="rbar"><div id="rBarFill"></div></div>
+      <p class="note" id="hrWait"></p>
+      <dl class="dl">
+        <dt id="rLastT">Letzter Satz</dt><dd id="rLast"></dd>
+        <dt id="rCmpT">Vergleich</dt><dd id="rCmp" class="acc"></dd>
+        <dt id="rHrT">Puls</dt><dd id="rHr"></dd>
+      </dl>
+      <div class="ctrl" style="margin:.75rem 0 1rem"><button id="rPrev" class="txt">Zurück</button><button id="btnAbort2" class="txt">Einheit abbrechen</button></div>
+      <div class="bar rBtns"><button id="btnRest15">+15 s</button><button id="btnRestPause">Pause</button><button id="btnRestGo" class="go">Jetzt weiter</button></div>
+    </section>
+    <section class="col" aria-label="Nächste Übung">
+      <div class="kicker" id="rNextK"></div>
+      <h1 class="display" id="rNextName"></h1>
+      <div id="rNextSub"></div>
+      <div class="banner" id="rBanner" style="margin:.5rem 0 0"></div>
+      <div class="figHost" id="figHostRest"></div>
+      <div class="cap" id="figCapRest" style="padding-top:.375rem"></div>
+      <div class="how3" id="rHow"></div>
+    </section>
+  </main>
+
+  <footer class="mainFoot">
+    <div id="fHr" hidden><span class="lbl">Puls</span><span id="hrVal"></span><span id="hrZone"></span><span id="hrLine"></span></div>
+    <div id="fMusic" hidden><span class="lbl">Musik</span><span id="musicLine"></span><span id="bpmRow" hidden><span id="bpmVal"></span><button id="btnTap">Takt</button></span><span id="bpmSrc"></span></div>
+    <div id="fCoach">
+      <div class="ct">
+      <span class="lbl" id="coachHead">Coach</span>
+      <div id="voiceLine" class="note"></div>
+      <div id="coachEx" class="note" hidden>„Coach, fertig dreizehn“ · „Coach, zu hart“</div>
+      <div id="lastSay"></div>
+      <div id="coachOut"></div>
+      </div>
+      <div class="coachRow" id="coachRow"><input type="text" id="coachIn" placeholder="Coach fragen" autocomplete="off"><button id="coachSend">Senden</button></div>
+    </div>
+  </footer>
 </div>
 
 <!-- EINSTELLUNGEN -->
 <div id="viewSettings" class="view">
-  <div class="start set">
-    <div class="card">
-      <h3>Claude-Coach</h3>
-      <label class="f">Anthropic-API-Schlüssel<input type="password" data-s="apiKey" autocomplete="off" placeholder="sk-ant-..."></label>
-      <label class="f">Modell<input type="text" data-s="model" autocomplete="off"></label>
-      <div class="row"><button class="small" id="btnCoachTest">Verbindung testen</button><span class="line" id="coachTestLine" style="margin:0"></span></div>
-      <label class="t"><input type="checkbox" data-s="checkin"> Check-in vor der Einheit</label>
-      <p class="line">Der Schlüssel bleibt im Speicher dieses Browsers und geht nur an api.anthropic.com.</p>
+  <div class="setGrid set">
+    <div>
+      <div class="blk">
+        <div class="sh">Claude-Coach</div>
+        <label class="f">Anthropic-API-Schlüssel<input type="password" data-s="apiKey" autocomplete="off" placeholder="sk-ant-..."></label>
+        <label class="f">Modell<input type="text" data-s="model" autocomplete="off"></label>
+        <div class="row"><button id="btnCoachTest">Verbindung testen</button><span class="line" id="coachTestLine"></span></div>
+        <label class="t"><input type="checkbox" data-s="checkin"> Check-in vor der Einheit</label>
+        <p class="note">Der Schlüssel bleibt im Speicher dieses Browsers und geht nur an api.anthropic.com.</p>
+      </div>
+      <div class="blk">
+        <div class="sh">Sprache</div>
+        <label class="t"><input type="checkbox" data-s="voice"> Sprachsteuerung (Aktivierungswort „Coach“)</label>
+        <p class="line" id="voiceSupport"></p>
+        <label class="t"><input type="checkbox" data-s="announce"> Ansagen</label>
+        <label class="f">Stimme<select data-s="tts"><option value="browser">Browser</option><option value="elevenlabs">ElevenLabs</option></select></label>
+        <label class="f">ElevenLabs-Schlüssel<input type="password" data-s="elKey" autocomplete="off"></label>
+        <label class="f">ElevenLabs Voice-ID<input type="text" data-s="elVoice" autocomplete="off" placeholder="leer = nPczCjzI2devNBz1zQrb (Brian)"></label>
+        <div class="row"><button type="button" id="ttsTest">Stimme testen</button><span class="line" id="ttsTestOut"></span></div>
+      </div>
+      <div class="blk">
+        <div class="sh">Figur</div>
+        <span class="lbl">Modell in der Abbildung</span>
+        <div class="bar" id="figSel" role="group" aria-label="Figur" style="max-width:20rem"><button data-fig="man">Mann</button><button data-fig="woman">Frau</button></div>
+      </div>
+      <div class="blk">
+        <div class="sh">Tempo (BPM)</div>
+        <p class="note">Ist das Tempo des laufenden Lieds bekannt, bewegt sich die Figur in den Sätzen im Takt: eine Wiederholung dauert 4 Schläge, bei Stufe 1 (Tempo) so viele Schläge, dass etwa 3 s runter und 1 s hoch herauskommen. Im Training lässt sich das Tempo mit „Takt“ oder der Taste T bestimmen.</p>
+        <label class="f">GetSongBPM-Schlüssel<input type="password" data-s="gsbKey" autocomplete="off"></label>
+        <p class="note">Schlägt das Tempo neuer Titel beim Liedwechsel automatisch nach, einmal pro Titel. Den kostenlosen Schlüssel gibt es unter <a href="https://getsongbpm.com/api" target="_blank" rel="noopener">getsongbpm.com/api</a>; als Website diese Adresse angeben, auf der der verlangte Rücklink steht: <code id="gsbSite"></code>. Getippte und hier eingetragene Werte haben Vorrang vor nachgeschlagenen.</p>
+        <p class="note">BPM-Daten von <a href="https://getsongbpm.com" target="_blank" rel="noopener">GetSongBPM.com</a></p>
+        <div class="row"><span class="line" id="bpmInfo"></span><button id="btnBpmRetry">Nicht gefundene erneut suchen</button></div>
+      </div>
     </div>
-    <div class="card">
-      <h3>Sprache</h3>
-      <label class="t"><input type="checkbox" data-s="voice"> Sprachsteuerung (Aktivierungswort „Coach“)</label>
-      <p class="line" id="voiceSupport"></p>
-      <label class="t"><input type="checkbox" data-s="announce"> Ansagen</label>
-      <label class="f">Stimme<select data-s="tts"><option value="browser">Browser</option><option value="elevenlabs">ElevenLabs</option></select></label>
-      <label class="f">ElevenLabs-Schlüssel<input type="password" data-s="elKey" autocomplete="off"></label>
-      <label class="f">ElevenLabs Voice-ID<input type="text" data-s="elVoice" autocomplete="off" placeholder="leer = nPczCjzI2devNBz1zQrb (Brian)"></label>
-      <div class="row"><button type="button" id="ttsTest">Stimme testen</button> <span class="line" id="ttsTestOut"></span></div>
-    </div>
-    <div class="card">
-      <h3>Apple Watch</h3>
-      <label class="t"><input type="checkbox" data-s="hrOn"> Live-Puls verwenden</label>
-      <p class="line">Auf der Watch die App HeartBLE starten und das Senden einschalten, dann hier verbinden. Geht nur in Chrome oder Edge (PC, Mac, Android), nicht in Safari und nicht auf dem iPhone. Die Geräteauswahl öffnet sich nur nach einem Klick, nach dem Neuladen der Seite also neu verbinden.</p>
-      <div class="row"><button class="small" id="btnHrConnect">Pulsgurt / Watch verbinden</button><button class="small ghost" id="btnHrDisconnect">Trennen</button><span class="line" id="hrStatus" style="margin:0"></span></div>
-      <label class="f">Ruhepuls<input type="number" min="30" max="120" data-s="hrRest" id="inHrRest"></label>
-      <label class="f">Maximalpuls (Vorgabe 220 − 34 = 186)<input type="number" min="120" max="230" data-s="hrMax"></label>
-      <p class="line" id="hrZonesLine"></p>
-      <label class="t"><input type="checkbox" data-s="hrPause"> Wechsel nach Puls</label>
-      <p class="line">Der Wechsel endet frühestens nach 15 s und spätestens nach 60 s, dazwischen, sobald der Puls unter 70 % des Maximalpulses fällt. Ohne Puls wie bisher 25 s.</p>
-    </div>
-    <div class="card">
-      <h3>Schlaf und Ruhewerte</h3>
-      <p class="line" style="margin-top:0">Ein iPhone-Kurzbefehl schickt jeden Morgen Schlaf, Ruhepuls, HRV, Schritte und aktive Energie an einen eigenen Server (Cloudflare Worker). Daraus füllt die App den Check-in vor und passt den Plan an. Anleitung: <a href="https://github.com/EriKah-CGE/hiit-kraft-30/blob/main/docs/kurzbefehl.md" target="_blank" rel="noopener">Kurzbefehl einrichten</a>.</p>
-      <label class="f">Health-Server-URL<input type="text" data-s="healthUrl" autocomplete="off"></label>
-      <label class="f">Health-Token<input type="password" data-s="healthToken" autocomplete="off"></label>
-      <div class="row"><button class="small" id="btnHealthTest">Verbindung testen</button><span class="line" id="healthTestLine" style="margin:0"></span></div>
-    </div>
-    <div class="card">
-      <h3>Spotify</h3>
-      <p class="line" style="margin-top:0">Spotify Premium nötig. In der Spotify-Entwicklerkonsole muss als Redirect-URI exakt diese Adresse eingetragen sein:<br><code id="spRedirect"></code></p>
-      <label class="f">Client-ID<input type="text" data-s="spClientId" autocomplete="off"></label>
-      <div class="row"><button class="small" id="btnSpLogin">Bei Spotify anmelden</button><button class="small" id="btnSpLogout">Abmelden</button><span class="line" id="spStatus" style="margin:0"></span></div>
-      <p class="line" id="spLine"></p>
-      <label class="f">Trainings-Playlist<select id="spPlaylist"></select></label>
-      <div class="row"><button class="small" id="btnSpLists">Playlists laden</button></div>
-      <div class="song" data-slot="songWarm"><label class="f">Aufwärm-Lied</label></div>
-      <div class="song" data-slot="songFin"><label class="f">Finisher-Lied</label></div>
-      <div class="song" data-slot="songChal"><label class="f">Challenge-Lied</label></div>
-      <label class="t"><input type="checkbox" data-s="newTrackPerPair"> Neues Lied je Paar</label>
-      <label class="t"><input type="checkbox" data-s="challenge"> Song-Challenge Liegestütze am Ende (ab Woche 2)</label>
-      <label class="f">Grundlautstärke <span id="volVal"></span><input type="range" min="0" max="1" step="0.05" data-s="volume"></label>
-    </div>
-    <div class="card">
-      <h3>Tempo (BPM)</h3>
-      <p class="line" style="margin-top:0">Ist das Tempo des laufenden Lieds bekannt, bewegt sich die Figur in den Sätzen im Takt: eine Wiederholung dauert 4 Schläge, bei Stufe 1 (Tempo) so viele Schläge, dass etwa 3 s runter und 1 s hoch herauskommen. Im Training lässt sich das Tempo mit „Takt tippen“ unter dem Timer oder der Taste T bestimmen.</p>
-      <label class="f">GetSongBPM-Schlüssel<input type="password" data-s="gsbKey" autocomplete="off"></label>
-      <p class="line">Schlägt das Tempo neuer Titel beim Liedwechsel automatisch nach, einmal pro Titel. Den kostenlosen Schlüssel gibt es unter <a href="https://getsongbpm.com/api" target="_blank" rel="noopener">getsongbpm.com/api</a>; als Website diese Adresse angeben, auf der der verlangte Rücklink steht: <code id="gsbSite"></code>. Getippte und hier eingetragene Werte haben Vorrang vor nachgeschlagenen.</p>
-      <p class="line">BPM-Daten von <a href="https://getsongbpm.com" target="_blank" rel="noopener">GetSongBPM.com</a></p>
-      <div class="row"><span class="line" id="bpmInfo" style="margin:0"></span><button class="small" id="btnBpmRetry">Nicht gefundene erneut suchen</button></div>
+    <div>
+      <div class="blk">
+        <div class="sh">Apple Watch</div>
+        <label class="t"><input type="checkbox" data-s="hrOn"> Live-Puls verwenden</label>
+        <p class="note">Auf der Watch die App HeartBLE starten und das Senden einschalten, dann hier verbinden. Geht nur in Chrome oder Edge (PC, Mac, Android), nicht in Safari und nicht auf dem iPhone. Die Geräteauswahl öffnet sich nur nach einem Klick, nach dem Neuladen der Seite also neu verbinden.</p>
+        <div class="row"><button id="btnHrConnect">Pulsgurt / Watch verbinden</button><button class="txt" id="btnHrDisconnect">Trennen</button><span class="line" id="hrStatus"></span></div>
+        <label class="f">Ruhepuls<input type="number" min="30" max="120" data-s="hrRest" id="inHrRest"></label>
+        <label class="f">Maximalpuls (Vorgabe 220 − 34 = 186)<input type="number" min="120" max="230" data-s="hrMax"></label>
+        <p class="line" id="hrZonesLine"></p>
+        <label class="t"><input type="checkbox" data-s="hrPause"> Wechsel nach Puls</label>
+        <p class="note">Der Wechsel endet frühestens nach 15 s und spätestens nach 60 s, dazwischen, sobald der Puls unter 70 % des Maximalpulses fällt. Ohne Puls wie bisher 25 s.</p>
+      </div>
+      <div class="blk">
+        <div class="sh">Schlaf und Ruhewerte</div>
+        <p class="note">Ein iPhone-Kurzbefehl schickt jeden Morgen Schlaf, Ruhepuls, HRV, Schritte und aktive Energie an einen eigenen Server (Cloudflare Worker). Daraus füllt die App den Check-in vor und passt den Plan an. Anleitung: <a href="https://github.com/EriKah-CGE/hiit-kraft-30/blob/main/docs/kurzbefehl.md" target="_blank" rel="noopener">Kurzbefehl einrichten</a>.</p>
+        <label class="f">Health-Server-URL<input type="text" data-s="healthUrl" autocomplete="off"></label>
+        <label class="f">Health-Token<input type="password" data-s="healthToken" autocomplete="off"></label>
+        <div class="row"><button id="btnHealthTest">Verbindung testen</button><span class="line" id="healthTestLine"></span></div>
+      </div>
+      <div class="blk">
+        <div class="sh">Spotify</div>
+        <p class="note">Spotify Premium nötig. In der Spotify-Entwicklerkonsole muss als Redirect-URI exakt diese Adresse eingetragen sein:<br><code id="spRedirect"></code></p>
+        <label class="f">Client-ID<input type="text" data-s="spClientId" autocomplete="off"></label>
+        <div class="row"><button id="btnSpLogin">Bei Spotify anmelden</button><button class="txt" id="btnSpLogout">Abmelden</button><span class="line" id="spStatus"></span></div>
+        <p class="line" id="spLine"></p>
+        <label class="f">Trainings-Playlist<select id="spPlaylist"></select></label>
+        <div class="row"><button id="btnSpLists">Playlists laden</button></div>
+        <div class="song" data-slot="songWarm"><label class="f">Aufwärm-Lied</label></div>
+        <div class="song" data-slot="songFin"><label class="f">Finisher-Lied</label></div>
+        <div class="song" data-slot="songChal"><label class="f">Challenge-Lied</label></div>
+        <label class="t"><input type="checkbox" data-s="newTrackPerPair"> Neues Lied je Paar</label>
+        <label class="t"><input type="checkbox" data-s="challenge"> Song-Challenge Liegestütze am Ende (ab Woche 2)</label>
+        <label class="f">Grundlautstärke <span id="volVal"></span><input type="range" min="0" max="1" step="0.05" data-s="volume"></label>
+      </div>
     </div>
   </div>
-  <div class="controls"><button id="btnSetBack" class="primary">Fertig</button></div>
+  <footer class="pageFoot"><button id="btnSetBack" class="primary">Fertig</button></footer>
 </div>
 
-<!-- VERLAUF -->
+<!-- PROTOKOLL -->
 <div id="viewHistory" class="view">
   <div class="hist" id="histList"></div>
-  <div class="controls">
-    <button id="btnBack">Zurück</button>
+  <footer class="pageFoot">
     <button id="btnCopy" class="primary">Protokoll kopieren</button>
-    <button id="btnDel" class="ghost">Löschen</button>
-  </div>
-  <div id="confirmDel" style="text-align:center">Wirklich den ganzen Verlauf löschen? <button id="btnDelYes" style="padding:8px 12px;font-size:14px;margin-left:8px">Ja, löschen</button></div>
+    <button id="btnBack">Zurück</button>
+    <button id="btnDel" class="txt" style="margin-left:auto">Löschen</button>
+    <span id="confirmDel" hidden>Wirklich den ganzen Verlauf löschen? <button id="btnDelYes">Ja, löschen</button></span>
+  </footer>
 </div>
 
 <!-- ABBRUCH -->
-<div class="overlay" id="ovAbort">
+<div class="overlay" id="ovAbort" role="dialog" aria-modal="true" aria-labelledby="abHead">
   <div class="dlg">
-    <h2>Einheit abbrechen</h2>
-    <p class="line" style="margin:0">Grund</p>
-    <div class="row" id="abReasons"></div>
+    <div class="kicker">Training</div>
+    <h2 id="abHead">Einheit abbrechen</h2>
+    <span class="lbl">Grund</span>
+    <div class="bar" id="abReasons"></div>
     <textarea id="abText" placeholder="Was war los? (optional)"></textarea>
-    <button id="abSave" class="primary" style="max-width:none">Abbrechen und speichern</button>
-    <button id="abBack">Zurück zum Training</button>
-    <button id="abDiscard" class="ghost">Verwerfen, nicht speichern</button>
+    <div class="acts">
+      <button id="abSave" class="primary">Abbrechen und speichern</button>
+      <button id="abBack">Zurück zum Training</button>
+      <button id="abDiscard" class="txt">Verwerfen, nicht speichern</button>
+    </div>
   </div>
 </div>
 
-<div id="explainPanel"><div class="xh" id="xpHead">Erklärungen <span id="xpToggle">ausblenden</span></div><div class="xb xpBody"></div></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 <script src="rig.js"></script>
+<script src="exercises-anatomy.js"></script>
+<script src="figure.js"></script>
 <script src="coach.js"></script>
 <script src="voice.js"></script>
 <script src="spotify.js"></script>
@@ -510,7 +706,7 @@ const EXPLAIN=[
 const KEY='hiit30.v2';
 // Vorgabe für den eigenen Health-Worker (Cloudflare), überschreibbar in den Einstellungen
 const HEALTH_URL_DEFAULT='';
-const DEF_SETTINGS={apiKey:'',model:'claude-sonnet-5-5',checkin:true,voice:false,announce:true,tts:'browser',elKey:'',elVoice:'',spClientId:'',playlist:null,songWarm:null,songFin:null,songChal:null,newTrackPerPair:false,challenge:false,volume:.8,gsbKey:'',hrOn:false,hrRest:'',hrMax:186,hrPause:false,hrDevice:'',healthUrl:HEALTH_URL_DEFAULT,healthToken:''};
+const DEF_SETTINGS={apiKey:'',model:'claude-sonnet-5-5',checkin:true,voice:false,announce:true,tts:'browser',elKey:'',elVoice:'',spClientId:'',playlist:null,songWarm:null,songFin:null,songChal:null,newTrackPerPair:false,challenge:false,volume:.8,figure:'man',gsbKey:'',hrOn:false,hrRest:'',hrMax:186,hrPause:false,hrDevice:'',healthUrl:HEALTH_URL_DEFAULT,healthToken:''};
 let firstRun=false;
 let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null,settings:{},spTok:null,coachNote:'',progDone:0,bpm:{},health:null};
 try{const s=localStorage.getItem(KEY);if(s)store=Object.assign(store,JSON.parse(s));else firstRun=true;}catch(e){}
@@ -556,15 +752,15 @@ function applyConfig(){
   Music.configure({clientId:s.spClientId,baseVolume:+s.volume});
   Health.configure({url:s.healthUrl||'',token:s.healthToken||''});
 }
-Voice.configure({onStatus:t=>{$('voiceLine').textContent='Sprachsteuerung: '+t;}});
+Voice.configure({onStatus:t=>{$('voiceLine').textContent='Sprachsteuerung: '+t;renderStartMsg();}});
 Voice.on({onCommand:(cmd,n)=>voiceCommand(cmd,n)});
 Music.configure({
   onTokens:t=>{store.spTok=t;save();},
   onState:st=>{
-    $('musicLine').textContent=st&&st.name?'Musik: '+st.name+(st.artist?' – '+st.artist:''):'';
+    $('musicLine').textContent=st&&st.name?st.name+(st.artist?' — '+st.artist:''):'';
     const id=st&&st.id||null;
     if(id!==curTrack.id){curTrack={id,name:st&&st.name||'',artist:st&&st.artist||''};Tempo.resetTap();tapN=0;bpmErr='';if(id)autoBpm(curTrack);}
-    renderBpm();updateCycle();
+    renderBpm();updateCycle();footVis();
   }
 });
 if(store.spTok)Music.setTokens(store.spTok);
@@ -626,7 +822,7 @@ function rebuild(){
   steps=buildSteps(S);
   const i=resolveIdx(ord),changed=steps[i].ord!==ord;
   idx=i;S.curOrd=steps[i].ord;save();
-  if(changed){RT.hrRest=false;remaining=steps[i].dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;if(steps[i].kind==='set')setStart=Date.now();render();enterStep(true);}
+  if(changed){RT.hrRest=false;RT.restTot=0;remaining=steps[i].dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;if(steps[i].kind==='set')setStart=Date.now();render();enterStep(true);}
   else render();
 }
 
@@ -712,7 +908,7 @@ function startSession(resume){
   hardOpen=false;
   S.idx=idx;store.cur=S;save();
   showView('viewMain');
-  coachOut('');$('voiceLine').textContent='';$('musicLine').textContent='';
+  coachOut('');$('voiceLine').textContent='';$('musicLine').textContent='';$('lastSay').textContent='';
   remaining=steps[idx].dur||0;running=false;
   if(steps[idx].kind==='set')setStart=Date.now();
   render();
@@ -732,9 +928,23 @@ function stopExtras(){
 }
 
 // ---------- Rendering ----------
+const VIEW_LABEL={side:'Seitenansicht',front:'Ansicht von vorn',back:'Ansicht von hinten'};
+const VIEW_HEAD={viewSettings:'Einstellungen',viewHistory:'Protokoll',viewIntro:'Einführung'};
+// Ansicht der Figur, nur Bedienkomfort: eigener Schlüssel, nicht im Datensatz hiit30.v2
+let VW={view:'side',slow:false};
+try{const v=JSON.parse(localStorage.getItem('hiit30.view')||'null');if(v&&VIEW_LABEL[v.view])VW.view=v.view;if(v&&v.slow)VW.slow=true;}catch(e){}
+function saveVW(){try{localStorage.setItem('hiit30.view',JSON.stringify(VW));}catch(e){}}
+function show(id,on){const el=$(id);if(el)el.hidden=!on;}
+// dt/dd-Paar ein- oder ausblenden
+function row(dtId,on){const dt=$(dtId);if(!dt)return;dt.hidden=!on;if(dt.nextElementSibling)dt.nextElementSibling.hidden=!on;}
+const todayText=()=>new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+const pairLetter=s=>String.fromCharCode(64+s.pair)+(s.slot+1);
+const minus=n=>String(n).replace('-','−');
+
 function showView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
-  document.body.classList.toggle('xp',id==='viewMain'||id==='viewStart');
+  document.body.classList.toggle('fit',id==='viewMain');
+  if(VIEW_HEAD[id]){$('metaL').textContent=VIEW_HEAD[id];$('meta').textContent=todayText();}
 }
 function setType(t){['work','rest','warm','cool','fin'].forEach(c=>document.body.classList.toggle(c,c===t));}
 function restEstimate(){
@@ -747,113 +957,216 @@ function restEstimate(){
 }
 function updateClock(){
   if(!S)return;
-  $('meta').textContent=`Verstrichen ${fmt((S.activeMs||0)/1000)} · noch ca. ${fmt(restEstimate())}`;
+  $('meta').textContent=`Verstrichen ${fmt((S.activeMs||0)/1000)} — Rest ca. ${fmt(restEstimate())}`;
 }
-function setFig(k){
-  if(typeof THREE==='undefined'||typeof Rig==='undefined'){$('fig').innerHTML='<div style="padding:20px;color:#9aa3ad;font-size:13px">3D-Figur konnte nicht geladen werden (Internet?)</div>';return;}
-  if(!$('fig').dataset.init){Rig.init($('fig'));$('fig').dataset.init='1';}
-  Rig.show(k);
+
+// ---------- Figur: figure.js (3D-Modell), sonst rig.js ----------
+const HAS_FIG=()=>typeof Figure!=='undefined'&&Figure&&typeof Figure.mount==='function';
+let figHost=null,figReady=false,figKey=null,figState={mode:'loading',error:null};
+function figStatus(st){if(st)figState=st;renderCaption();}
+function figPlace(host){
+  if(HAS_FIG()){
+    if(!figReady){
+      figReady=true;
+      try{Figure.onStatus(figStatus);Figure.setModel(ST().figure||'man');Figure.setView(VW.view);Figure.setSlow(VW.slow);}catch(e){figState={mode:'fallback',error:e.message};}
+    }
+    if(figHost!==host){figHost=host;Figure.mount(host);}
+    return 'fig';
+  }
+  figState={mode:'fallback',error:'figure.js fehlt'};
+  if(typeof THREE==='undefined'||typeof Rig==='undefined'){figState.error='Three.js nicht geladen (Internet?)';figHost=host;return null;}
+  const f=$('fig');
+  if(f.parentNode!==host)host.appendChild(f);
+  figHost=host;
+  if(!f.dataset.init){Rig.init(f);f.dataset.init='1';}else Rig.resize();
+  return 'rig';
 }
-function setHow(k){$('how').innerHTML=howHTML(k);$('how').classList.add('on');}
-function targetText(k){const ex=EX[k];return `Ziel ${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'s':'Wdh.'}${ex.side?' '+ex.side:''}`;}
+function rigView(){if(typeof Rig!=='undefined'&&Rig._setAz)Rig._setAz({side:90,front:0,back:180}[VW.view]);}
+function setFig(k,host){
+  const m=figPlace(host||$('figHostWork'));
+  const changed=figKey!==k;figKey=k;
+  if(m==='fig')Figure.show(k);
+  else if(m==='rig'){Rig.show(k);if(changed)rigView();}
+  renderCaption();
+}
+function renderCaption(){
+  const fb=figState&&figState.mode==='fallback',rest=figHost===$('figHostRest');
+  let t=figKey&&EX[figKey]?`Abb. ${rest?2:1} — ${EX[figKey].name}, ${VIEW_LABEL[VW.view]}${VW.slow?', Zeitlupe':''}.`:'';
+  if(figState&&figState.mode==='loading')t+=' 3D-Modell lädt …';
+  if(fb)t+=` 3D-Modell konnte nicht geladen werden${figState.error?': '+figState.error:''} — vereinfachte Figur.`;
+  ['figCap','figCapRest'].forEach(id=>{$(id).textContent=t;$(id).classList.toggle('err',fb);});
+  document.querySelectorAll('#viewSw [data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===VW.view)));
+  $('slowBtn').setAttribute('aria-pressed',String(VW.slow));
+}
+document.querySelectorAll('#viewSw [data-view]').forEach(b=>b.onclick=()=>{
+  VW.view=b.dataset.view;saveVW();
+  if(HAS_FIG())Figure.setView(VW.view);else rigView();
+  renderCaption();b.blur();
+});
+$('slowBtn').onclick=()=>{VW.slow=!VW.slow;saveVW();if(HAS_FIG())Figure.setSlow(VW.slow);renderCaption();$('slowBtn').blur();};
+
+function targetText(k){const ex=EX[k];return `${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'Sekunden':'Wiederholungen'}${ex.side?' '+ex.side:''}`;}
 function lastText(k,stg){
   const last=lastSessionLike(k,stg);
-  if(!last)return 'Erstes Mal mit dieser Übung';
+  if(!last)return 'erstes Mal mit dieser Übung';
   const v=last.sets[k],w=last.wts?last.wts[k]:null;
-  return 'Letztes Mal: '+v.map(x=>x==null?'–':x).join(' · ')+(EX[k].unit==='s'?' s':'')+(w!=null?' ('+wtText(k,w)+')':'');
+  return v.map(x=>x==null?'–':x).join(' · ')+(EX[k].unit==='s'?' s':'')+(w!=null?' mit '+wtText(k,w):'');
+}
+function setHowRows(k){
+  const h=HOW[k];['howStartT','howMoveT','howWatchT'].forEach(i=>row(i,!!h));if(!h)return;
+  $('howStart').textContent=h.start;$('howMove').textContent=h.move;
+  $('howWatch').innerHTML=`${esc(h.watch)} <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(h.yt)}" target="_blank" rel="noopener">Video (YouTube-Suche)</a>`;
+}
+function renderHow3(k){
+  const h=HOW[k];if(!h){$('rHow').innerHTML='';return;}
+  $('rHow').innerHTML=`<div><span class="lbl">Start</span>${esc(h.start)}</div><div><span class="lbl">Bewegung</span>${esc(h.move)}</div><div><span class="lbl">Achte auf</span>${esc(h.watch)}<br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(h.yt)}" target="_blank" rel="noopener">Video zur Übung (YouTube-Suche)</a></div>`;
+}
+// Fortschrittsleiste: Aufwärmen | Paar n | Finisher | Ausklang, nur was im Plan steht
+function segs(){
+  const out=[],add=(key,label,w)=>{let g=out.find(x=>x.key===key);if(!g){g={key,label,w,from:Infinity,to:-1};out.push(g);}return g;};
+  steps.forEach((s,i)=>{
+    if(s.kind==='end')return;
+    const g=s.type==='warm'?add('warm','Aufwärmen',1):s.pair?add('p'+s.pair,'Paar '+s.pair,3):(s.kind==='finisher'||s.kind==='challenge'||s.ex==='walk')?add('fin',s.ex==='walk'?'Gehen':'Finisher',1):add('cool','Ausklang',1);
+    g.from=Math.min(g.from,i);g.to=Math.max(g.to,i);
+  });
+  return out;
+}
+function renderSeg(){
+  $('segBar').innerHTML=segs().map(g=>{
+    let cls='',st='',lab=g.label;
+    if(idx>g.to)cls='done';
+    else if(idx>=g.from){const f=Math.round((idx-g.from)/(g.to-g.from+1)*100);st=`background:linear-gradient(90deg,var(--rule) ${f}%,transparent ${f}%);font-weight:600;`;if(g.w>1)lab+=' — läuft';}
+    return `<div class="${cls}" style="flex:${g.w} 1 0;${st}">${lab}</div>`;
+  }).join('');
+}
+function renderNext(){
+  const out=[];
+  for(let i=idx+1;i<steps.length&&out.length<2;i++){
+    const x=steps[i];if(x.kind==='rest')continue;
+    if(x.kind==='set'){const ex=EX[exOf(x)];out.push([`${pairLetter(x)} ${ex.name}${x.round>1?', Runde '+x.round:''}`,`${ex.range[0]}–${ex.range[1]} ${ex.unit==='s'?'s':'Wdh.'}${ex.side?' '+ex.side:''}`]);}
+    else if(x.kind==='end')out.push(['Abschluss','']);
+    else if(x.kind==='finisher')out.push(['Finisher: 5 Thruster + 5 Burpees',fmt(x.dur)]);
+    else if(x.kind==='challenge')out.push(['Song-Challenge Liegestütze',fmt(x.dur)]);
+    else out.push([x.ex==='probe'?'Probesätze':EX[x.ex].name,fmt(x.dur)]);
+  }
+  $('next').innerHTML=out.map(([a,b])=>`<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`).join('');
+  show('nextBox',out.length>0);
+}
+function renderRepLbl(){
+  const s=steps[idx];if(!s)return;
+  if(s.kind==='set'){
+    const k=exOf(s),ex=EX[k],last=lastSessionLike(k,S.stage[k]||0),lv=last&&last.sets[k]?last.sets[k][s.setIndex]:null;
+    let h=esc((ex.unit==='s'?'Sekunden':'Wdh.')+(ex.side?' '+ex.side:''));
+    if(lv!=null){const d=repVal-lv;h+=' · '+(d>0?`<span class="acc">+${d} zu letztem Mal</span>`:d<0?`${minus(d)} zu letztem Mal`:'wie letztes Mal');}
+    $('repLbl').innerHTML=h;
+  }
+  else if(s.kind==='finisher')$('repLbl').textContent='Runden';
+  else if(s.kind==='challenge')$('repLbl').textContent='Liegestütze';
+}
+function showTime(small){show('time',true);$('time').textContent=fmt(remaining);$('time').classList.toggle('small',!!small);}
+// Fußzeile im Training: Spalten nur, wenn es Daten gibt
+function footVis(){
+  const inS=!!S;
+  $('fMusic').hidden=!(inS&&(RT.music||$('musicLine').textContent));
+  $('fHr').hidden=!(inS&&((typeof HR!=='undefined'&&HR.current()!=null)||$('hrLine').textContent));
+  const v=inS&&ST().voice&&Voice.supported(),s=inS&&steps[idx];
+  $('coachHead').textContent=v&&Voice.isActive()?'Coach hört zu':'Coach';
+  $('coachEx').hidden=!(v&&s&&s.kind==='set');
+  let first=true;['fHr','fMusic','fCoach'].forEach(i=>{const el=$(i);el.classList.toggle('first',first&&!el.hidden);if(!el.hidden)first=false;});
 }
 
 function render(){
   const s=steps[idx];
   setType(s.type);
-  $('progressBar').style.width=(idx/(steps.length-1)*100)+'%';
-  $('metaL').textContent=`· Tag ${S.day} · Woche ${S.week}${S.light?' · leichter':''}`;
+  renderSeg();
+  $('metaL').textContent=`Tafel ${S.day} · Woche ${S.week} · Einheit ${store.sessions.length+1}${S.light?' · leichter':''}`;
   updateClock();
-  ['repBox','banner','how','wbox','feelBox','hardPanel'].forEach(i=>$(i).classList.remove('on'));
-  $('how').innerHTML='';$('plus').textContent='';$('last').textContent='';$('target').textContent='';$('next').textContent='';$('hint').textContent='';$('time').textContent='';
-  $('prev').style.display='';$('skip').style.display='';
-  $('coachRow').style.display=s.kind==='end'?'none':'';
-  $('btnAbort').style.display=s.kind==='end'?'none':'';
-  $('phase').textContent=s.kind==='rest'?'Wechsel · '+fmt(remaining):stepPhase(s);
-  if(!(s.kind==='rest'&&RT.hrRest))$('hrWait').textContent='';
+  const rest=s.kind==='rest';
+  $('paneWork').hidden=rest;$('paneRest').hidden=!rest;
+  $('coachRow').hidden=s.kind==='end';
+  if(!(rest&&RT.hrRest))$('hrWait').textContent='';
   renderHr();
+  if(rest){renderRest(s);updateCycle();footVis();return;}
+
+  $('banner').innerHTML='';$('hardPanel').innerHTML='';$('hint').textContent='';$('repLbl').textContent='';
+  ['targetT','wboxT','lastT','howStartT','howMoveT','howWatchT'].forEach(i=>row(i,false));
+  $('targetT').textContent='Ziel';$('lastT').textContent='Letztes Mal';
+  show('repBox',false);show('feelBox',false);show('time',false);
+  $('workInfo').classList.toggle('dual',s.kind==='finisher'||s.kind==='challenge');
+  $('pauseBtn').hidden=s.kind!=='set';$('pauseBtn').textContent=running?'Pause':'Fortsetzen';
+  $('prev').hidden=idx===0;$('skip').hidden=s.kind==='end';$('btnAbort').hidden=s.kind==='end';
+  $('phase').textContent=stepPhase(s);
+  renderNext();
 
   if(s.kind==='timed'){
-    const ex=EX[s.ex];
-    if(s.ex==='probe'){const fp=firstPairKeys();$('name').textContent='Probesätze: '+EX[fp[0]].name+', '+EX[fp[1]].name;setFig(fp[0]);}
-    else{$('name').textContent=ex.name;setFig(s.ex);}
-    setHow(s.ex);$('time').textContent=fmt(remaining);
-    $('mainBtn').textContent=running?'Pause':'Fortsetzen';
-    const n=steps[idx+1];if(n&&n.kind==='set')$('next').textContent='Danach: '+EX[exOf(n)].name;
-  }
-  else if(s.kind==='rest'){
-    const n=steps[idx+1];
-    if(n.kind==='set'){const k=exOf(n);$('name').textContent='Gleich: '+EX[k].name;setFig(k);setHow(k);$('target').textContent=targetText(k)+(WT[k]?' · '+wtText(k,S.wts[k]):'');}
-    else if(n.kind==='finisher'){$('name').textContent='Gleich: Finisher';$('hint').textContent='5 Thruster + 5 Burpees = 1 Runde, so viele Runden wie möglich';setFig('thruster');setHow('thruster');}
-    else if(n.ex){$('name').textContent='Gleich: '+EX[n.ex].name;setFig(n.ex);setHow(n.ex);}
-    else $('name').textContent='Gleich geschafft';
-    $('time').textContent=fmt(remaining);
-    $('plus').textContent=S.lastPlus||'';
+    if(s.ex==='probe'){const fp=firstPairKeys();$('name').textContent='Probesätze';$('hint').textContent=EX[fp[0]].name+', '+EX[fp[1]].name+': je 5–6 lockere Wiederholungen';setFig(fp[0]);}
+    else{$('name').textContent=EX[s.ex].name;setFig(s.ex);}
+    setHowRows(s.ex);showTime();
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
   }
   else if(s.kind==='set')renderSet(s);
   else if(s.kind==='finisher'){
-    $('name').textContent='5 Thruster + 5 Burpees';
-    $('hint').textContent='So viele Runden wie möglich. Jede volle Runde mit + zählen.'+(S.plan.finSongSec&&ST().songFin?' Bis zum Ende von „'+ST().songFin.name+'“.':'');
-    setFig('thruster');$('how').innerHTML='<div><b>Thruster</b> '+HOW.thruster.move+'</div><div><b>Burpee</b> '+HOW.burpee.move+'</div>';$('how').classList.add('on');
-    $('time').textContent=fmt(remaining);
+    $('name').textContent='Finisher';
+    row('targetT',true);$('target').textContent='5 Thruster + 5 Burpees = 1 Runde, so viele Runden wie möglich'+(S.plan.finSongSec&&ST().songFin?', bis zum Ende von „'+ST().songFin.name+'“':'');
+    setFig('thruster');
+    row('howMoveT',true);$('howMove').innerHTML='<b>Thruster</b> '+esc(HOW.thruster.move)+'<br><b>Burpee</b> '+esc(HOW.burpee.move);
     const lastFin=[...store.sessions].reverse().find(x=>x.finisher&&x.finisher.kind==='amrap');
-    $('last').textContent=lastFin?'Letzter Score: '+lastFin.finisher.rounds+' Runden'+(lastFin.finisher.w!=null?' ('+wtText('thruster',lastFin.finisher.w)+')':''):'';
+    row('lastT',!!lastFin);$('lastT').textContent='Letzter Score';
+    if(lastFin)$('last').textContent=lastFin.finisher.rounds+' Runden'+(lastFin.finisher.w!=null?' mit '+wtText('thruster',lastFin.finisher.w):'');
     if(!S.finisher)S.finisher={kind:'amrap',dur:s.dur,rounds:0,w:clampW(wtDefault('thruster',S.week)+S.plan.weightDelta)};
     if(S.wtAdj.thruster==null)S.wtAdj.thruster=S.finisher.w-wtDefault('thruster',S.week);
-    repVal=S.finisher.rounds;$('reps').textContent=repVal;$('repBox').classList.add('on');
-    $('target').textContent='Runden';
-    wtVal=S.finisher.w;$('wval').textContent=wtText('thruster',wtVal);$('wbox').classList.add('on');
+    wtVal=S.finisher.w;$('wval').textContent=wtText('thruster',wtVal);row('wboxT',true);
+    showTime(true);
+    repVal=S.finisher.rounds;$('reps').textContent=repVal;show('repBox',true);renderRepLbl();
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
   }
   else if(s.kind==='challenge'){
     const song=ST().songChal;
-    $('name').textContent='Liegestütze bis Liedende';
-    $('hint').textContent='So viele Liegestütze wie möglich, Pausen im Stütz oder auf den Knien sind erlaubt.'+(song?' Lied: „'+song.name+'“.':'');
-    setFig('pushup');setHow('pushup');
-    $('time').textContent=fmt(remaining);
+    $('name').textContent='Song-Challenge';
+    row('targetT',true);$('target').textContent='So viele Liegestütze wie möglich, Pausen im Stütz oder auf den Knien sind erlaubt.'+(song?' Lied: „'+song.name+'“.':'');
+    setFig('pushup');setHowRows('pushup');
     const lastC=[...store.sessions].reverse().find(x=>x.challenge);
-    $('last').textContent=lastC?'Letzter Challenge-Score: '+lastC.challenge.reps+' Liegestütze':'';
+    row('lastT',!!lastC);$('lastT').textContent='Letzter Score';if(lastC)$('last').textContent=lastC.challenge.reps+' Liegestütze';
+    showTime(true);
     if(!S.challenge)S.challenge={reps:0,dur:s.dur,song:song?song.name:''};
-    repVal=S.challenge.reps;$('reps').textContent=repVal;$('repBox').classList.add('on');
-    $('target').textContent='Liegestütze';
+    repVal=S.challenge.reps;$('reps').textContent=repVal;show('repBox',true);renderRepLbl();
     $('mainBtn').textContent=running?'Pause':'Fortsetzen';
   }
   else if(s.kind==='end'){
+    $('phase').textContent='Abschluss';
     $('name').textContent='Einheit geschafft';
     const n=Object.values(S.sets).reduce((a,v)=>a+v.filter(x=>x!=null).length,0);
     let t=`${n} Sätze protokolliert · ${S.plus} Plus gegenüber letztem Mal`;
     if(S.finisher&&S.finisher.kind==='amrap')t+=` · Finisher ${S.finisher.rounds} Runden`;
     if(S.challenge)t+=` · Challenge ${S.challenge.reps} Liegestütze`;
-    $('hint').textContent=t;setFig('walk');
-    $('target').textContent='Nächste Einheit frühestens übermorgen: Tag '+(S.day==='A'?'B':'A');
-    $('mainBtn').textContent='Speichern und schließen';$('skip').style.display='none';
+    if(S.activeMs)t+=` · Dauer ${fmt(S.activeMs/1000)}`;
+    row('targetT',true);$('targetT').textContent='Ergebnis';$('target').textContent=t;
+    row('lastT',true);$('lastT').textContent='Nächste Einheit';$('last').textContent='frühestens übermorgen: Tafel '+(S.day==='A'?'B':'A');
+    setFig('walk');
+    $('mainBtn').textContent='Speichern und schließen';
+    show('nextBox',false);
     renderSummary();
   }
-  updateCycle();
+  updateCycle();footVis();
 }
 
 function renderSet(s){
   const k=exOf(s),ex=EX[k],stg=S.stage[k]||0;
+  $('phase').textContent=`Paar ${s.pair} · Runde ${s.round}/${S.plan.rounds} · Übung ${pairLetter(s)}`;
   $('name').textContent=ex.name;
   const hints=[];
   if(k!==s.ex)hints.push('Variante statt '+EX[s.ex].name);
   if(ex.stages&&stg)hints.push('Stufe: '+STAGES[stg]);
   $('hint').textContent=hints.join(' · ');
-  setFig(k);setHow(k);
-  $('target').textContent=targetText(k)+' · '+rirText();
+  setFig(k);
+  row('targetT',true);$('target').textContent=targetText(k)+', '+rirText();
   const last=lastSessionLike(k,stg);
   const lastSets=last?last.sets[k]:null;
   const lastWt=last&&last.wts?last.wts[k]:null;
-  $('last').textContent=lastText(k,stg);
+  row('lastT',true);$('last').textContent=lastText(k,stg);
   if(WT[k]){
     if(S.wts[k]==null){S.wts[k]=clampW(wtDefault(k,S.week)+S.plan.weightDelta);S.wtAdj[k]=S.wts[k]-wtDefault(k,S.week);}
-    wtVal=S.wts[k];$('wval').textContent=wtText(k,wtVal);$('wbox').classList.add('on');
+    wtVal=S.wts[k];$('wval').textContent=wtText(k,wtVal);row('wboxT',true);
   }
   // Zähler nur beim Betreten des Satzes (oder Übungswechsel) neu setzen, nicht bei jedem Neuzeichnen
   if(RT.repFor!==s.id+':'+k){
@@ -861,12 +1174,12 @@ function renderSet(s){
     repVal=logged!=null?logged:(lastSets&&lastSets[s.setIndex]!=null?lastSets[s.setIndex]:ex.range[0]);
     RT.repFor=s.id+':'+k;
   }
-  $('reps').textContent=repVal;$('repBox').classList.add('on');
-  $('mainBtn').textContent='Satz fertig';
+  $('reps').textContent=repVal;show('repBox',true);renderRepLbl();
+  $('mainBtn').innerHTML='Satz fertig <small>— Leertaste</small>';
   // Rückmeldung
   const f=((S.feel[k]||[])[s.setIndex])||'passt';
-  $('feelBox').classList.add('on');
-  $('feelBox').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.dataset.f===f));
+  show('feelBox',true);
+  $('feelBox').querySelectorAll('button').forEach(b=>{const on=b.dataset.f===f;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});
   if(hardOpen)renderHard(s,k);
   // Banner nur vor dem ersten Satz dieser Übung
   const fresh=!S.sets[k]&&!S.feel[k]&&!(RT.bnDone&&RT.bnDone[k]);
@@ -877,8 +1190,7 @@ function renderSet(s){
     const opts=[];
     if(WT[k]&&S.wts[k]>2.5)opts.push(`<button id="bnW">2,5 kg weniger: ${wtText(k,clampW(S.wts[k]-2.5))}</button>`);
     if(LIGHTER[k])opts.push(`<button id="bnV">Variante: ${EX[LIGHTER[k]].name}</button>`);
-    $('banner').innerHTML=`Letztes Mal war ${ex.name} zu hart.${opts.length?' Vorschlag:':''}<br>${opts.join('')}`;
-    $('banner').classList.add('on');
+    $('banner').innerHTML=`<span class="lbl">Vorschlag</span><br>Letztes Mal war ${ex.name} zu hart.${opts.length?'<br>'+opts.join(''):''}`;
     const done=()=>{(RT.bnDone=RT.bnDone||{})[k]=1;};
     if($('bnW'))$('bnW').onclick=()=>{const base=wtDefault(k,S.week);store.weights[k]=clampW(base-2.5);S.wts[k]=clampW(S.wts[k]-2.5);done();save();render();};
     if($('bnV'))$('bnV').onclick=()=>{done();doSwap(s.ex);render();};
@@ -888,21 +1200,69 @@ function renderSet(s){
   const canWtUp=!!WT[k]&&lastWt!=null&&lastWt<WMAX;
   if(atTop&&canWtUp&&(S.wts[k]==null||S.wts[k]<=lastWt)){
     const nw=Math.min(WMAX,lastWt+2.5);
-    $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]}). Erst Gewicht erhöhen: <b>${wtText(k,nw)}</b>.<br><button id="wtUp">Gewicht übernehmen</button>`;
-    $('banner').classList.add('on');
+    $('banner').innerHTML=`<span class="lbl">Vorschlag</span><br>Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]}). Erst Gewicht erhöhen: <b>${wtText(k,nw)}</b>.<br><button id="wtUp">Gewicht übernehmen</button>`;
     $('wtUp').onclick=()=>{S.wts[k]=clampW(nw+(S.wtAdj[k]||0));store.weights[k]=nw;save();render();};
   } else if(ex.stages&&atTop&&!canWtUp&&stg<STAGES.length-1){
-    $('banner').innerHTML=`Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]})${WT[k]?' mit maximalem Gewicht':''}. Nächste Stufe: <b>${STAGES[stg+1]}</b>. Danach wieder am unteren Ende des Bereichs starten.<br><button id="stageUp">Stufe übernehmen</button>`;
-    $('banner').classList.add('on');
+    $('banner').innerHTML=`<span class="lbl">Vorschlag</span><br>Letztes Mal alle Sätze an der Obergrenze (${ex.range[1]})${WT[k]?' mit maximalem Gewicht':''}. Nächste Stufe: <b>${STAGES[stg+1]}</b>. Danach wieder am unteren Ende des Bereichs starten.<br><button id="stageUp">Stufe übernehmen</button>`;
     $('stageUp').onclick=()=>{store.stages[k]=stg+1;S.stage[k]=stg+1;save();render();};
   }
+}
+
+// ---------- Wechsel ----------
+function updRestTime(){
+  const s=steps[idx];if(!s||s.kind!=='rest')return;
+  $('rTime').textContent=fmt(remaining);
+  const tot=RT.restTot||s.dur||REST_SEC;
+  $('rBarFill').style.width=Math.max(0,Math.min(100,remaining/tot*100))+'%';
+}
+function hrTrend(){
+  const h=S&&S.hr;if(!h||h.length<2)return '';
+  const [t1,b1]=h[h.length-1];let b0=null;
+  for(let i=h.length-2;i>=0;i--){if(t1-h[i][0]>=5){b0=h[i][1];break;}}
+  if(b0==null)return '';
+  return b1-b0<=-3?'fallend':b1-b0>=3?'steigend':'gleichbleibend';
+}
+function renderRestHr(){
+  const b=HR.current();row('rHrT',b!=null);
+  if(b!=null){const tr=hrTrend();$('rHr').textContent=b+(tr?', '+tr:'')+' · Zone '+hrZone(b);}
+}
+function renderRest(s){
+  const n=steps[idx+1],p=steps[idx-1],host=$('figHostRest');
+  $('rKicker').textContent=RT.hrRest?`Wechsel · endet bei Puls unter ${hrRestThr()}`:'Wechsel';
+  updRestTime();
+  const pk=p&&p.kind==='set'?exOf(p):null,pv=pk?(S.sets[pk]||[])[p.setIndex]:null;
+  row('rLastT',pv!=null);
+  if(pv!=null){const ex=EX[pk],f=(S.feel[pk]||[])[p.setIndex];$('rLast').textContent=`${ex.name} ${pv}${ex.unit==='s'?' s':''}${ex.side?' '+ex.side:''}${WT[pk]&&S.wts[pk]!=null?', '+wtText(pk,S.wts[pk]):''}${f?', '+FEEL_LABEL[f]:''}`;}
+  row('rCmpT',!!S.lastPlus);$('rCmp').textContent=S.lastPlus||'';
+  renderRestHr();
+  $('rBanner').innerHTML='';
+  $('btnRestPause').textContent=running?'Pause':'Fortsetzen';
+  $('rPrev').hidden=idx===0;
+  if(n&&n.kind==='set'){
+    const k=exOf(n),ex=EX[k];
+    $('rNextK').textContent=`Gleich · Übung ${pairLetter(n)}`;
+    $('rNextName').textContent=ex.name;
+    $('rNextSub').textContent=`${targetText(k)}, ${rirText()}, ${WT[k]?(S.wts[k]!=null?wtText(k,S.wts[k]):''):'ohne Gewicht'}`;
+    if(k!==n.ex)$('rBanner').textContent='Variante statt '+EX[n.ex].name;
+    setFig(k,host);renderHow3(k);
+  }
+  else if(n&&n.kind==='finisher'){
+    $('rNextK').textContent='Gleich · Finisher';$('rNextName').textContent='Thruster + Burpees';
+    $('rNextSub').textContent='5 Thruster + 5 Burpees = 1 Runde, so viele Runden wie möglich in '+fmt(n.dur);
+    setFig('thruster',host);renderHow3('thruster');
+  }
+  else if(n&&n.ex){
+    $('rNextK').textContent='Gleich';$('rNextName').textContent=EX[n.ex].name;$('rNextSub').textContent=fmt(n.dur);
+    setFig(n.ex,host);renderHow3(n.ex);
+  }
+  else{$('rNextK').textContent='Gleich';$('rNextName').textContent='Geschafft';$('rNextSub').textContent='';$('rHow').innerHTML='';}
 }
 function renderHard(s,k){
   let h='';
   if(WT[k]&&S.wts[k]>2.5)h+='<button data-h="w">Gewicht −2,5 kg</button>';
   if(LIGHTER[k])h+=`<button data-h="v">Leichtere Variante: ${EX[LIGHTER[k]].name}</button>`;
   h+='<button data-h="skip">Satz überspringen</button><button data-h="round">Runde streichen</button>';
-  $('hardPanel').innerHTML=h;$('hardPanel').classList.add('on');
+  $('hardPanel').innerHTML=h;
 }
 function setFeel(f){
   const s=steps[idx];if(s.kind!=='set')return;
@@ -972,6 +1332,7 @@ function speak(text,coach,force){
   if(!text)return;
   const s=ST();
   if(!force&&!s.announce)return;
+  if(RT)RT.lastSay=text;$('lastSay').textContent='„'+text+'“';
   Music.duck(true);
   Voice.speak(text).then(()=>Music.duck(false),()=>Music.duck(false));
 }
@@ -1003,8 +1364,7 @@ function loop(){
   const sec=Math.ceil(remaining);
   if(sec<=3&&sec>0&&sec!==lastBeep){lastBeep=sec;beep(1000,90,.35);}
   if(remaining<=0){advance(true);return;}
-  $('time').textContent=fmt(remaining);
-  if(s.kind==='rest')$('phase').textContent='Wechsel · '+fmt(remaining);
+  if(s.kind==='rest'){updRestTime();renderRestHr();}else $('time').textContent=fmt(remaining);
 }
 function storeCounter(){
   const s=steps[idx];
@@ -1023,6 +1383,7 @@ function goTo(i,auto){
   remaining=n.dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;RT.repFor=null;
   RT.hrRest=n.kind==='rest'&&!!ST().hrPause&&HR.current()!=null;
   if(RT.hrRest){remaining=HR_REST_MAX;endAt=performance.now()+remaining*1000;}
+  RT.restTot=remaining;
   if(prevStep&&prevStep.kind==='finisher'&&n.kind!=='finisher'&&S.hrRecov==null)RT.finEndT=Math.floor((S.activeMs||0)/1000);
   if(auto)switchSound(n.kind);
   if(n.kind==='set')setStart=Date.now();
@@ -1083,7 +1444,7 @@ function openAbort(reason){
   renderReasons();$('ovAbort').classList.add('on');
 }
 function renderReasons(){
-  $('abReasons').innerHTML=Object.entries(REASONS).map(([k,v])=>`<div class="chip${abReason===k?' sel':''}" data-r="${k}">${v}</div>`).join('');
+  $('abReasons').innerHTML=Object.entries(REASONS).map(([k,v])=>`<button class="${abReason===k?'on':''}" aria-pressed="${abReason===k}" data-r="${k}">${v}</button>`).join('');
   $('abReasons').querySelectorAll('[data-r]').forEach(c=>c.onclick=()=>{abReason=c.dataset.r;renderReasons();});
   $('abSave').disabled=!abReason;
 }
@@ -1165,11 +1526,11 @@ async function endSummary(){
 function renderSummary(){
   const r=RT.summary;if(!r)return;
   const ks=Object.keys(r.next.weights||{}).filter(k=>WT[k]);
-  let h=`<b>Coach:</b> ${esc(r.say)}`;
+  let h=`<span class="lbl">Coach</span><br>${esc(r.say)}`;
   if(ks.length&&!RT.sumApplied){
     h+='<br>Nächstes Mal: '+ks.map(k=>`${EX[k]?EX[k].name:k} ${wtText(k,r.next.weights[k])}`).join(', ')+'<br><button id="sumApply">Übernehmen</button>';
   } else if(RT.sumApplied)h+='<br>Gewichte übernommen.';
-  $('banner').innerHTML=h;$('banner').classList.add('on');
+  $('banner').innerHTML=h;
   if($('sumApply'))$('sumApply').onclick=()=>{ks.forEach(k=>{store.weights[k]=clampW(r.next.weights[k]);});RT.sumApplied=true;save();render();};
 }
 
@@ -1186,7 +1547,12 @@ function whatNowText(){
   return 'Einheit geschafft';
 }
 function voiceCommand(cmd,n){
-  if(!S)return;
+  if(!S){
+    // Startbildschirm: „Coach, los“ startet die Einheit
+    const c0=Voice.classify(cmd);
+    if(c0&&c0.name==='resume'&&$('viewStart').classList.contains('active'))beginSession();
+    return;
+  }
   const c=Voice.classify(cmd);
   if(!c){askCoach(cmd,true);return;}
   const s=steps[idx],say=t=>speak(t,false,true);
@@ -1221,7 +1587,7 @@ function voiceCommand(cmd,n){
 }
 
 // ---------- Spotify ----------
-function musicErr(e){$('musicLine').textContent='Spotify: '+(e&&e.message?e.message:e);}
+function musicErr(e){$('musicLine').textContent='Spotify: '+(e&&e.message?e.message:e);footVis();}
 function mcall(p){if(p&&p.catch)p.catch(musicErr);}
 async function musicInit(){
   const s=ST();
@@ -1256,7 +1622,6 @@ function musicStep(s,prevStep,init){
 
 // ---------- Puls (Web Bluetooth) ----------
 const HR_REST_MIN=15,HR_REST_MAX=60;
-const ZONE_COL=['','#8aa4c8','#4cc38a','#f4b942','#f08a3e','#e4572e'];
 let hrStatus='';
 function hrRestVal(){const v=+ST().hrRest;if(v>=30&&v<=120)return v;const h=healthSum(),r=h&&h.last.restingHr;return r>=30&&r<=120?Math.round(r):60;}
 function hrMaxVal(){const v=+ST().hrMax;return v>=120&&v<=230?v:186;}
@@ -1265,11 +1630,12 @@ function hrZone(b){const r=hrRestVal(),m=hrMaxVal(),p=(b-r)/Math.max(1,m-r);retu
 function zoneFrom(z){const r=hrRestVal(),m=hrMaxVal();return Math.round(r+(m-r)*(z+4)/10);}
 function hrRestThr(){return Math.round(hrMaxVal()*.7);}
 function renderHr(){
-  const b=S?HR.current():null,box=$('hrBox');
-  box.classList.toggle('on',b!=null);
+  const b=S?HR.current():null;
+  footVis();
   if(b==null)return;
-  const z=hrZone(b);box.style.setProperty('--z',ZONE_COL[z]);
-  $('hrVal').textContent=b;$('hrZone').textContent='Puls · Zone '+z;
+  const z=hrZone(b);
+  $('hrVal').textContent=b;$('hrZone').textContent='Zone '+z;
+  $('hrZone').style.color=z>=4?'var(--muscle)':z===3?'var(--accent-text)':'var(--ink)';
 }
 // jede Sekunde aktiver Zeit ein Wert; Satz-, Finisher- und Challenge-Werte laufend als Durchschnitt und Maximum
 function hrSample(){
@@ -1321,7 +1687,7 @@ HR.on({
     if(!lost)$('hrLine').textContent='';
     if(S)renderHr();
     if($('viewSettings').classList.contains('active'))renderHrSettings();
-    if($('viewStart').classList.contains('active'))renderHrStart();
+    if($('viewStart').classList.contains('active')){renderHrStart();renderStartFoot();}
   }
 });
 async function hrConnect(lineEl){
@@ -1341,7 +1707,7 @@ function renderHrSettings(){
 }
 function renderHrStart(){
   const show=!!ST().hrOn&&!HR.connected();
-  $('hrStartRow').style.display=show?'':'none';
+  $('hrStartRow').hidden=!show;
   if(!show)return;
   $('btnHrStart').style.display=HR.supported()?'':'none';
   if(!HR.supported())$('hrStartLine').textContent='Live-Puls: Web Bluetooth fehlt in diesem Browser (Chrome oder Edge verwenden).';
@@ -1373,7 +1739,7 @@ function healthCtx(){
 }
 function renderHealth(){
   const h=healthSum();
-  $('healthCard').style.display=h?'':'none';
+  $('healthCard').hidden=!h;
   if(!h)return;
   const L=h.last,A=h.avg7,parts=[];
   if(L.sleepHours!=null)parts.push(fmtH(L.sleepHours)+' h Schlaf');
@@ -1426,7 +1792,7 @@ function tapBeat(){
 }
 function renderBpm(){
   const on=!!(S&&RT.music&&curTrack.id);
-  $('bpmRow').classList.toggle('on',on);
+  $('bpmRow').hidden=!on;
   $('bpmSrc').innerHTML=on&&(ST().gsbKey||'').trim()?GSB_LINK:'';
   if(!on)return;
   const e=store.bpm[curTrack.id];let t;
@@ -1448,7 +1814,7 @@ function updateCycle(){
       c=(S.stage[k]||0)===1?(Math.max(1,Math.round(3/beat))+Math.max(1,Math.round(1/beat)))*beat:4*beat;
     }
   }
-  if(c!==cycleSet){cycleSet=c;if(typeof Rig!=='undefined')Rig.setCycle(c);}
+  if(c!==cycleSet){cycleSet=c;if(HAS_FIG())Figure.setCycle(c);else if(typeof Rig!=='undefined')Rig.setCycle(c);}
 }
 function renderBpmInfo(){
   const v=Object.values(store.bpm),n=v.filter(e=>e&&e.bpm).length,miss=v.filter(e=>e&&!e.bpm).length;
@@ -1469,14 +1835,23 @@ $('mainBtn').addEventListener('click',()=>{
 });
 $('skip').addEventListener('click',()=>{if(steps[idx].kind==='end')return;advance(true);if(!running&&steps[idx].kind!=='end')start();});
 $('prev').addEventListener('click',()=>{if(idx===0)return;storeCounter();goTo(idx-1,false);});
-function repSet(v){repVal=Math.max(0,v);$('reps').textContent=repVal;storeCounter();}
+function repSet(v){repVal=Math.max(0,v);$('reps').textContent=repVal;storeCounter();renderRepLbl();}
 $('rPlus').addEventListener('click',()=>repSet(repVal+1));
 $('rMinus').addEventListener('click',()=>repSet(repVal-1));
 function wtChange(d){const st=steps[idx];const k=st.kind==='finisher'?'thruster':exOf(st);if(!k||!WT[k])return;if(weightAdj(k,d,true))$('wval').textContent=wtText(k,wtVal);}
 $('wPlus').addEventListener('click',()=>wtChange(2.5));
 $('wMinus').addEventListener('click',()=>wtChange(-2.5));
 $('btnAbort').addEventListener('click',()=>openAbort());
-$('how').addEventListener('click',e=>{if(e.target.tagName==='A')return;howOpen=!howOpen;if(howKey)$('how').innerHTML=howHTML(howKey);});
+$('btnAbort2').addEventListener('click',()=>openAbort());
+$('pauseBtn').addEventListener('click',()=>{if(!S||steps[idx].kind==='end')return;running?pause():start();});
+// Wechsel: +15 s, Pause, sofort weiter
+$('btnRest15').addEventListener('click',()=>{
+  const s=steps[idx];if(!S||s.kind!=='rest')return;
+  remaining+=15;endAt+=15000;RT.restTot=Math.max(RT.restTot||s.dur||REST_SEC,remaining);lastBeep=-1;updRestTime();
+});
+$('btnRestPause').addEventListener('click',()=>{if(!S)return;running?pause():start();});
+$('btnRestGo').addEventListener('click',()=>$('skip').click());
+$('rPrev').addEventListener('click',()=>$('prev').click());
 $('feelBox').addEventListener('click',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f)setFeel(f);});
 $('hardPanel').addEventListener('click',e=>{
   const h=e.target.dataset&&e.target.dataset.h;if(!h)return;
@@ -1490,30 +1865,41 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 // Tastatur am PC
 document.addEventListener('keydown',e=>{
-  if(!$('viewMain').classList.contains('active')||!S||$('ovAbort').classList.contains('on'))return;
   const t=e.target,tag=t&&t.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable))return;
   if(e.ctrlKey||e.metaKey||e.altKey)return;
+  // Startbildschirm: Leertaste startet die Einheit
+  if($('viewStart').classList.contains('active')&&(e.code==='Space'||e.key===' ')&&!(tag==='BUTTON'&&t.id!=='btnStartSession')&&!(t&&t.closest&&t.closest('summary'))){
+    e.preventDefault();beginSession();return;
+  }
+  if(!$('viewMain').classList.contains('active')||!S||$('ovAbort').classList.contains('on'))return;
   const s=steps[idx];
   let handled=true;
   if(e.code==='Space'||e.key===' '){$('mainBtn').click();}
-  else if(e.key==='ArrowUp'){if($('repBox').classList.contains('on'))repSet(repVal+1);}
-  else if(e.key==='ArrowDown'){if($('repBox').classList.contains('on'))repSet(repVal-1);}
+  else if(e.key==='ArrowUp'){if(!$('repBox').hidden&&!$('paneWork').hidden)repSet(repVal+1);}
+  else if(e.key==='ArrowDown'){if(!$('repBox').hidden&&!$('paneWork').hidden)repSet(repVal-1);}
   else if(e.key==='ArrowRight'){$('skip').click();}
   else if(e.key==='ArrowLeft'){$('prev').click();}
   else if(e.key==='p'||e.key==='P'){if(s.kind!=='end')running?pause():start();}
-  else if(e.key==='t'||e.key==='T'){if($('bpmRow').classList.contains('on'))tapBeat();else handled=false;}
+  else if(e.key==='t'||e.key==='T'){if(!$('bpmRow').hidden)tapBeat();else handled=false;}
   else handled=false;
   if(handled){e.preventDefault();if(document.activeElement&&document.activeElement.tagName==='BUTTON')document.activeElement.blur();}
 });
 
 // ---------- Startansicht ----------
 function chipRow(el,vals,labels,cur,onSel){
-  el.innerHTML=vals.map((v,i)=>`<div class="chip${v===cur?' sel':''}" data-v="${i}">${labels[i]}</div>`).join('');
+  el.innerHTML=vals.map((v,i)=>`<button class="${v===cur?'on':''}" aria-pressed="${v===cur}" data-v="${i}">${labels[i]}</button>`).join('');
   el.querySelectorAll('[data-v]').forEach(c=>c.onclick=()=>onSel(vals[+c.dataset.v]));
 }
 function renderCheckin(){
-  const on=ST().checkin;$('checkinCard').style.display=on?'':'none';if(!on)return;
+  const on=ST().checkin;$('checkinCard').hidden=!on;if(!on)return;
+  // Werte aus Health (falls vorhanden) als eigene Zeile, nichts erfinden
+  const h=healthSum(),hp=[];
+  if(h){const L=h.last;if(L.sleepHours!=null)hp.push(fmtH(L.sleepHours)+' h Schlaf');if(L.hrv!=null)hp.push('HRV '+r0(L.hrv)+' ms');if(L.restingHr!=null)hp.push('Ruhepuls '+r0(L.restingHr));}
+  row('ciHrvT',hp.length>0);$('ciHrvT').textContent='Letzte Nacht';$('ciHrv').textContent=hp.join(' · ');
+  // Vergleich mit dem 7-Tage-Mittel aus renderHealth in dieselbe Zeile, eigener Block nur ohne Check-in
+  if(hp.length&&$('healthTrend').textContent){const n=document.createElement('div');n.className='note';n.textContent=$('healthTrend').textContent;$('ciHrv').appendChild(n);}
+  $('healthCard').hidden=true;
   chipRow($('ciSleep'),[1,2,3,4,5],['1','2','3','4','5'],ci.sleep,v=>{ci.sleep=v;ci.sleepManual=true;renderCheckin();});
   chipRow($('ciSore'),[0,1,2],['keiner','leicht','stark'],ci.sore,v=>{ci.sore=v;renderCheckin();});
   chipRow($('ciEnergy'),[1,2,3,4,5],['1','2','3','4','5'],ci.energy,v=>{ci.energy=v;renderCheckin();});
@@ -1529,36 +1915,101 @@ function painInfo(){
   }
   return null;
 }
+// Geschätzte Dauer der Einheit in Minuten aus dem Plan (Sätze mit SET_EST)
+function planMinutes(day,week,light){
+  const P=basePlan(week);if(light)P.rounds=Math.max(2,P.rounds-1);
+  const st=buildSteps({plan:P,day,week,cut:[]});
+  return Math.round(st.reduce((t,x)=>t+(x.kind==='set'?SET_EST:(x.dur||0)),0)/60);
+}
+function planKeys(day){return origKeys(day).map(o=>sel.swaps[o]||o);}
+function renderPlanTable(){
+  const day=sel.day,week=sel.week,d=sel.light?-2.5:0;
+  $('planBody').innerHTML=DAYS[day].map((pair,pi)=>pair.map((o,si)=>{
+    const k=sel.swaps[o]||o,ex=EX[k],last=lastSessionLike(k,stageOf(k));
+    const v=last&&last.sets[k]?last.sets[k].filter(x=>x!=null):[];
+    const unit=ex.unit==='s'?' s':'';
+    const w=WT[k]?wtText(k,clampW(wtDefault(k,week)+d)):'–';
+    return `<tr><td class="nr">${String.fromCharCode(65+pi)}${si+1}</td><td class="ex">${esc(ex.name)}${k!==o?' <span class="note">(statt '+esc(EX[o].name)+')</span>':''}</td><td class="mus">${esc(typeof anatomyShort==='function'?anatomyShort(k):'')}</td><td>${ex.range[0]}–${ex.range[1]}${unit}${ex.side?' '+ex.side:''}</td><td>${w}</td><td class="r">${v.length?v.join(' · ')+unit:'–'}</td></tr>`;
+  }).join('')).join('');
+}
+// Wochenleiste: Montag bis Sonntag der laufenden Kalenderwoche, gefüllt = Einheit gespeichert
+function renderWeek(){
+  const now=new Date(),mon=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
+  const key=d=>d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+  const done=new Set(store.sessions.map(s=>key(new Date(s.date))));
+  // ISO-Kalenderwoche
+  const t=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));
+  const kw=Math.ceil(((t-Date.UTC(t.getUTCFullYear(),0,1))/864e5+1)/7);
+  $('weekHead').textContent='Diese Woche · KW '+kw;
+  $('weekBar').innerHTML=['MO','DI','MI','DO','FR','SA','SO'].map((n,i)=>{
+    const d=new Date(mon);d.setDate(mon.getDate()+i);
+    const c=[done.has(key(d))?'done':'',key(d)===key(now)?'today':''].join(' ').trim();
+    return `<div class="${c}" title="${d.toLocaleDateString('de-DE')}">${n}<i></i></div>`;
+  }).join('');
+}
+// Fortschrittskurve: Wiederholungen je Einheit (ohne Halteübungen in Sekunden), letzte bis zu 8 Einheiten
+function renderChart(){
+  const all=store.sessions.map((s,i)=>({i,ab:!!s.aborted,v:Object.entries(s.sets||{}).filter(([k])=>!(EX[k]&&EX[k].unit==='s')).reduce((a,[,arr])=>a+(arr||[]).reduce((x,y)=>x+(+y||0),0),0)})).slice(-8);
+  $('chart').hidden=all.length<2;if(all.length<2)return;
+  const W=420,H=110,top=20,bot=90,max=Math.max(...all.map(p=>p.v)),min=Math.min(...all.map(p=>p.v)),span=Math.max(1,max-min);
+  const x=j=>Math.round(30+j*(W-60)/(all.length-1)),y=v=>Math.round(bot-(v-min)/span*(bot-top));
+  const pts=all.map((p,j)=>x(j)+','+y(p.v)).join(' '),lp=all[all.length-1];
+  $('chartSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H+6}" role="img" aria-label="Wiederholungen pro Einheit: ${all.map(p=>p.v).join(', ')}">
+<g stroke="#C9AF88" stroke-width="1"><line x1="0" y1="${top}" x2="${W}" y2="${top}"/><line x1="0" y1="55" x2="${W}" y2="55"/><line x1="0" y1="${bot}" x2="${W}" y2="${bot}"/></g>
+<polyline points="${pts}" fill="none" stroke="#B23A1E" stroke-width="2"/>
+<g stroke-width="2">${all.map((p,j)=>`<circle cx="${x(j)}" cy="${y(p.v)}" r="4" fill="#EBDDC3" stroke="${p.ab?'#7D6249':'#B23A1E'}"><title>Einheit ${p.i+1}: ${p.v}${p.ab?' (abgebrochen)':''}</title></circle>`).join('')}</g>
+<g font-family="Spectral, serif" font-size="11" fill="#3A2619">${all.map((p,j)=>`<text x="${x(j)}" y="${H+4}" text-anchor="middle">E${p.i+1}</text>`).join('')}<text x="${x(all.length-1)+8}" y="${Math.max(12,y(lp.v)-6)}">${lp.v}</text></g></svg>`;
+}
+function renderStartMsg(){
+  if(!$('startMsg'))return;
+  const v=ST().voice&&Voice.supported();
+  $('startMsg').textContent=v?'Sag „Coach, los“ oder drück die Leertaste.':'Drück die Leertaste oder den Knopf.';
+}
+function renderStartFoot(){
+  const s=ST(),hr=!!s.hrOn,mu=Music.connected();
+  $('stHrL').hidden=!hr;$('stHr').hidden=!hr||!HR.connected();
+  if(hr&&HR.connected()){const b=HR.current();$('stHr').textContent='verbunden'+(HR.deviceName()?' ('+HR.deviceName()+')':'')+(b!=null?' · '+b:'');}
+  $('stMusicL').hidden=!mu;$('stMusic').hidden=!mu;
+  if(mu)$('stMusic').textContent=s.playlist?'Playlist „'+s.playlist.name+'“':'Spotify verbunden, keine Playlist gewählt';
+  $('stFoot').hidden=!hr&&!mu;
+}
 function renderStart(){
   if(!store.overrideWeek)sel.week=autoWeek();else sel.week=store.overrideWeek;
   if(!sel.dayManual)sel.day=nextDay();
   const W=WEEK[sel.week];
-  $('chipA').classList.toggle('sel',sel.day==='A');$('chipB').classList.toggle('sel',sel.day==='B');
-  document.querySelectorAll('[data-w]').forEach(c=>c.classList.toggle('sel',+c.dataset.w===sel.week));
-  $('chipNormal').classList.toggle('sel',!sel.light);$('chipLight').classList.toggle('sel',sel.light);
+  const pr=(el,on)=>{el.classList.toggle('on',on);el.setAttribute('aria-pressed',String(on));};
+  pr($('chipA'),sel.day==='A');pr($('chipB'),sel.day==='B');
+  document.querySelectorAll('[data-w]').forEach(c=>pr(c,+c.dataset.w===sel.week));
+  pr($('chipNormal'),!sel.light);pr($('chipLight'),sel.light);
   $('lightInfo').textContent=sel.light?`Leichter: ${Math.max(2,W.rounds-1)} Runden, alle Hantelgewichte 2,5 kg weniger, eine Wiederholung mehr Reserve.`:'';
   const n=store.sessions.length;
-  $('stInfo').textContent=`${n} Einheiten bisher. Woche ${sel.week}${sel.week===3?'+':''}: ${W.rounds} Runden pro Paar, Satzende bei ${W.rir[0]}–${W.rir[1]} Wdh. in Reserve. ${W.fin.kind==='walk'?'Kein Finisher, stattdessen 3 min Gehen.':'Finisher '+fmt(W.fin.dur)+' AMRAP.'}`;
-  $('btnResume').style.display=store.cur?'':'none';
-  $('metaL').textContent='';
-  $('meta').textContent=n?`Zuletzt: ${fmtDate(store.sessions[n-1].date)} · Tag ${store.sessions[n-1].day}`:'Noch keine Einheit';
-  setType('warm');$('progressBar').style.width='0';
-  $('startErr').style.display='none';
+  const keys=planKeys(sel.day),d=sel.light?-2.5:0;
+  const kgs=[...new Set(keys.filter(k=>WT[k]).map(k=>clampW(wtDefault(k,sel.week)+d)))].sort((a,b)=>a-b);
+  const rounds=sel.light?Math.max(2,W.rounds-1):W.rounds;
+  $('stKicker').textContent=`Heute · Einheit ${n+1} · Woche ${sel.week}${sel.week===3?'+':''}`;
+  $('stTitle').textContent='Tafel '+sel.day;
+  $('stInfo').textContent=`ca. ${planMinutes(sel.day,sel.week,sel.light)} Minuten · ${rounds} Runden · ${keys.length} Übungen · Hanteln ${kgs.map(num).join(', ')} kg, Matte · ${W.rir[0]}–${W.rir[1]} Wdh. in Reserve · ${W.fin.kind==='walk'?'kein Finisher, 3 min Gehen':'Finisher '+fmt(W.fin.dur)}`;
+  renderPlanTable();
+  $('btnResume').hidden=!store.cur;
+  $('metaL').textContent=`Woche ${sel.week}${sel.week===3?'+':''}`;
+  $('meta').textContent=todayText();
+  setType('warm');
+  $('startErr').hidden=true;
   // Coach-Notiz
-  $('coachCard').style.display=store.coachNote?'':'none';$('coachNote').textContent=store.coachNote||'';
+  $('coachCard').hidden=!store.coachNote;$('coachNote').textContent=store.coachNote||'';
   // Schmerz-Hinweis
   const p=painInfo();
-  $('painCard').style.display=p?'':'none';
+  $('painCard').hidden=!p;
   if(p){
     const a=p.aborted,ex=EX[a.ex],v=LIGHTER[a.ex],o=a.orig||a.ex;
-    let t=`Letzte Einheit Tag ${p.day} wegen Schmerz abgebrochen bei ${ex.name}${a.text?' („'+a.text+'“)':''}.`;
+    let t=`Letzte Einheit Tafel ${p.day} wegen Schmerz abgebrochen bei ${ex.name}${a.text?' („'+a.text+'“)':''}.`;
     if(v)t+=` Vorschlag: ${EX[v].name} statt ${ex.name}.`;else t+=` Für ${ex.name} gibt es keine leichtere Variante: Gewicht deutlich reduzieren oder die Sätze überspringen.`;
-    if(p.day!==sel.day)t+=` Gilt für Tag ${p.day}.`;
+    if(p.day!==sel.day)t+=` Gilt für Tafel ${p.day}.`;
     $('painText').textContent=t;
     $('painRow').innerHTML='';
     if(v&&p.day===sel.day){
       const on=sel.swaps[o]===v;
-      $('painRow').innerHTML=`<button class="small" id="painSwap">${on?'Variante übernommen':'Variante übernehmen'}</button>`;
+      $('painRow').innerHTML=`<button id="painSwap" class="${on?'primary':''}">${on?'Variante übernommen':'Variante übernehmen'}</button>`;
       $('painSwap').onclick=()=>{if(sel.swaps[o]===v)delete sel.swaps[o];else sel.swaps[o]=v;renderStart();};
     }
   }
@@ -1566,7 +2017,13 @@ function renderStart(){
   renderHrStart();
   renderProg();
   renderCheckin();
+  renderWeek();
+  renderChart();
+  renderStartMsg();
+  renderStartFoot();
   loadHealth(false);
+  // Sprachsteuerung schon auf dem Startbildschirm, damit „Coach, los“ startet
+  if(!S&&ST().voice&&Voice.supported()&&!Voice.isActive())try{Voice.start();}catch(e){}
 }
 $('chipA').onclick=()=>{sel.day='A';sel.dayManual=true;sel.swaps={};renderStart();};
 $('chipB').onclick=()=>{sel.day='B';sel.dayManual=true;sel.swaps={};renderStart();};
@@ -1584,20 +2041,20 @@ $('btnIntroOk').onclick=()=>{save();showView('viewStart');renderStart();};
 let progRes=null,progBusy=false,progErr='';
 function progDue(){return store.sessions.length>=12&&store.sessions.length-(store.progDone||0)>=12;}
 function renderProg(){
-  const due=progDue();$('progCard').style.display=due?'':'none';if(!due)return;
+  const due=progDue();$('progCard').hidden=!due;if(!due)return;
   $('progInfo').textContent=`${store.sessions.length-(store.progDone||0)} Einheiten seit dem letzten Check. Der Coach wertet den Verlauf aus und schlägt Gewichte und Stufen vor.`;
   let body='';
-  if(progErr)body+=`<p class="line err">${esc(progErr)}</p>`;
+  if(progErr)body+=`<p class="err">${esc(progErr)}</p>`;
   if(progRes){
     body+=`<p class="say">${esc(progRes.say)}</p>`;
     const ks=Object.keys(progRes.changes);
-    body+=ks.length?'<ul>'+ks.map(k=>{const c=progRes.changes[k],parts=[];if(c.weight!=null&&WT[k])parts.push(wtText(k,c.weight));if(c.stage!=null)parts.push('Stufe '+c.stage+' ('+STAGES[c.stage]+')');return `<li>${EX[k]?EX[k].name:esc(k)}: ${parts.join(', ')}</li>`;}).join('')+'</ul>':'<p class="line">Keine Änderungen vorgeschlagen.</p>';
+    body+=ks.length?'<ul>'+ks.map(k=>{const c=progRes.changes[k],parts=[];if(c.weight!=null&&WT[k])parts.push(wtText(k,c.weight));if(c.stage!=null)parts.push('Stufe '+c.stage+' ('+STAGES[c.stage]+')');return `<li>${EX[k]?EX[k].name:esc(k)}: ${parts.join(', ')}</li>`;}).join('')+'</ul>':'<p class="note">Keine Änderungen vorgeschlagen.</p>';
   }
   $('progBody').innerHTML=body;
   const row=$('progRow');
-  if(!Coach.ready()){row.innerHTML='<span class="line" style="margin:0">Braucht den Anthropic-API-Schlüssel (Einstellungen).</span><button class="small" id="progSkip">Überspringen</button>';}
-  else if(progRes){row.innerHTML=`<button class="small" id="progApply">${Object.keys(progRes.changes).length?'Alle übernehmen':'Abschließen'}</button><button class="small ghost" id="progSkip">Verwerfen</button>`;}
-  else row.innerHTML=`<button class="small" id="progRun" ${progBusy?'disabled':''}>${progBusy?'Coach rechnet …':'Progressionscheck starten'}</button><button class="small ghost" id="progSkip">Überspringen</button>`;
+  if(!Coach.ready()){row.innerHTML='<span class="note">Braucht den Anthropic-API-Schlüssel (Einstellungen).</span><button id="progSkip">Überspringen</button>';}
+  else if(progRes){row.innerHTML=`<button id="progApply">${Object.keys(progRes.changes).length?'Alle übernehmen':'Abschließen'}</button><button class="txt" id="progSkip">Verwerfen</button>`;}
+  else row.innerHTML=`<button id="progRun" ${progBusy?'disabled':''}>${progBusy?'Coach rechnet …':'Progressionscheck starten'}</button><button class="txt" id="progSkip">Überspringen</button>`;
   if($('progRun'))$('progRun').onclick=runProgression;
   if($('progSkip'))$('progSkip').onclick=()=>{store.progDone=store.sessions.length;progRes=null;progErr='';save();renderStart();};
   if($('progApply'))$('progApply').onclick=()=>{
@@ -1620,8 +2077,10 @@ function renderSettings(){
   $('volVal').textContent=Math.round(s.volume*100)+' %';
   $('voiceSupport').textContent=Voice.supported()?'':'Dieser Browser unterstützt keine Spracherkennung (Chrome oder Edge verwenden).';
   $('spRedirect').textContent=Music.redirectUri();$('gsbSite').textContent=Music.redirectUri();
-  renderSpotify();renderBpmInfo();renderHrSettings();
+  renderSpotify();renderBpmInfo();renderHrSettings();renderFigSel();
 }
+function renderFigSel(){document.querySelectorAll('#figSel [data-fig]').forEach(b=>{const on=b.dataset.fig===(ST().figure||'man');b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});}
+document.querySelectorAll('#figSel [data-fig]').forEach(b=>b.onclick=()=>{ST().figure=b.dataset.fig;save();renderFigSel();if(HAS_FIG())try{Figure.setModel(ST().figure);}catch(e){}});
 function renderSpotify(){
   const s=ST(),con=Music.connected();
   $('spStatus').textContent=con?'angemeldet':'nicht angemeldet';
@@ -1635,9 +2094,9 @@ function renderSong(el){
   const slot=el.dataset.slot,s=ST(),song=s[slot];
   const title=el.querySelector('label').outerHTML,sid=song?trackId(song.uri):null,be=sid?store.bpm[sid]:null;
   el.innerHTML=title+
-    (song?`<div class="row" style="margin-top:4px"><span style="flex:1;font-size:14px">${esc(song.name)} – ${esc(song.artist||'')} (${fmt(song.duration/1000)})</span><button class="small ghost" data-act="rm">entfernen</button></div>
+    (song?`<div class="row" style="margin-top:4px"><span style="flex:1;font-size:14px">${esc(song.name)} – ${esc(song.artist||'')} (${fmt(song.duration/1000)})</span><button class="txt" data-act="rm">entfernen</button></div>
       <label class="f" style="margin-top:6px">BPM${be&&be.bpm&&be.source!=='manual'?' ('+SRC_LABEL[be.source]+')':''}<input type="number" min="40" max="240" data-act="bpm" value="${be&&be.bpm?be.bpm:''}" placeholder="${be&&!be.bpm?'bei GetSongBPM nicht gefunden':'leer = tippen oder nachschlagen'}"></label>`:'')+
-    `<div class="row" style="margin-top:6px"><input type="text" placeholder="Lied suchen" data-act="q" style="flex:1"><button class="small" data-act="search">Suchen</button></div><div class="res"></div>`;
+    `<div class="row" style="margin-top:6px"><input type="text" placeholder="Lied suchen" data-act="q" style="flex:1"><button data-act="search">Suchen</button></div><div class="res"></div>`;
   el.querySelector('[data-act="search"]').onclick=async()=>{
     const q=el.querySelector('[data-act="q"]').value.trim();if(!q)return;
     const res=el.querySelector('.res');
@@ -1743,37 +2202,30 @@ function sessionText(s,html){
   return lines;
 }
 function renderHistory(){
-  const L=$('histList');L.innerHTML='';$('confirmDel').style.display='none';
-  setType('warm');$('metaL').textContent='';
-  if(!store.sessions.length){L.innerHTML='<div class="sess">Noch keine Einheit gespeichert.</div>';return;}
+  const L=$('histList');L.innerHTML='';$('confirmDel').hidden=true;
+  setType('warm');
+  if(!store.sessions.length){L.innerHTML='<p class="note" style="padding:1rem 0">Noch keine Einheit gespeichert.</p>';return;}
+  L.innerHTML=`<div class="sh">${store.sessions.length} Einheiten, neueste zuerst</div>`;
   [...store.sessions].reverse().forEach(s=>{
     const d=document.createElement('div');d.className='sess';
-    const right=s.aborted?`<span class="ab">abgebrochen</span>`:`<span>${s.plus} Plus</span>`;
-    d.innerHTML=`<div class="h"><span>${fmtDate(s.date)} · Tag ${s.day} · Woche ${s.week}</span>${right}</div><div class="d">${sessionText(s,true).join('<br>')}</div>`;
+    const right=s.aborted?`<span class="ab">abgebrochen</span>`:`<span class="pl">${s.plus} Plus</span>`;
+    d.innerHTML=`<div class="h"><b>${fmtDate(s.date)}</b>Tafel ${s.day} · Woche ${s.week} · ${right}</div><div class="d">${sessionText(s,true).join('<br>')}</div>`;
     L.appendChild(d);
   });
 }
 $('btnCopy').onclick=()=>{
-  const txt=store.sessions.map(s=>`${new Date(s.date).toLocaleDateString('de-DE')} Tag ${s.day} Woche ${s.week} (${s.aborted?abortText(s.aborted):s.plus+' Plus'})\n  `+sessionText(s,false).join('\n  ')).join('\n\n');
+  const txt=store.sessions.map(s=>`${new Date(s.date).toLocaleDateString('de-DE')} Tafel ${s.day} Woche ${s.week} (${s.aborted?abortText(s.aborted):s.plus+' Plus'})\n  `+sessionText(s,false).join('\n  ')).join('\n\n');
   try{navigator.clipboard.writeText(txt).then(()=>{$('btnCopy').textContent='Kopiert';setTimeout(()=>$('btnCopy').textContent='Protokoll kopieren',1500);}).catch(()=>{$('btnCopy').textContent='Kopieren nicht möglich';});}catch(e){$('btnCopy').textContent='Kopieren nicht möglich';}
 };
-$('btnDel').onclick=()=>{$('confirmDel').style.display='block';};
+$('btnDel').onclick=()=>{$('confirmDel').hidden=false;};
 $('btnDelYes').onclick=()=>{store.sessions=[];store.stages={};store.weights={};store.overrideWeek=null;store.cur=null;store.coachNote='';store.progDone=0;save();renderHistory();renderStart();};
-
-// ---------- Erklärungs-Panel ----------
-(function(){
-  let min=false;try{min=localStorage.getItem('hiit30.xpmin')==='1';}catch(e){}
-  const apply=()=>{$('explainPanel').classList.toggle('min',min);$('xpToggle').textContent=min?'einblenden':'ausblenden';};
-  apply();
-  $('xpHead').onclick=()=>{min=!min;try{localStorage.setItem('hiit30.xpmin',min?'1':'0');}catch(e){}apply();};
-})();
 
 // ---------- Planübersicht ----------
 (function(){
   const r=k=>{const e=EX[k];return `${e.range.join('–')}${e.unit==='s'?' s':''}${e.side?' '+e.side:''}`;};
   let h='';
   ['A','B'].forEach(d=>{
-    h+=`<h4>Tag ${d}</h4><ol>`+DAYS[d].map((p,i)=>`<li>${String.fromCharCode(65+i)}1 ${EX[p[0]].name} (${r(p[0])}) / ${String.fromCharCode(65+i)}2 ${EX[p[1]].name} (${r(p[1])})</li>`).join('')+'</ol>';
+    h+=`<h4>Tafel ${d}</h4><ol>`+DAYS[d].map((p,i)=>`<li>${String.fromCharCode(65+i)}1 ${EX[p[0]].name} (${r(p[0])}) / ${String.fromCharCode(65+i)}2 ${EX[p[1]].name} (${r(p[1])})</li>`).join('')+'</ol>';
   });
   h+='<h4>Leichtere Varianten</h4><ol>'+Object.entries(LIGHTER).map(([a,b])=>`<li>${EX[a].name} → ${EX[b].name} (${r(b)})</li>`).join('')+'</ol>';
   h+='<h4>Ablauf</h4><ol><li>Aufwärmen 4 × 60 s (oder Länge des Aufwärm-Lieds)</li><li>3 Paare, je 2–3 Runden, 25 s Wechsel</li><li>Finisher: 5 Thruster + 5 Burpees, AMRAP (ab Woche 2)</li><li>Ausklang 90 s</li></ol>';

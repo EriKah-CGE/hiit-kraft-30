@@ -1,0 +1,5 @@
+# Blender-Zwischenstände (werden von tools/blender/build_models.py erzeugt)
+tools/blender/*.blend
+tools/blender/*.blend1
+models/test-*.glb
+node_modules/
