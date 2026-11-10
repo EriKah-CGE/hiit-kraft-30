@@ -453,6 +453,11 @@ class Solver:
                 mz, _ = self.eval_minz()
                 P = dict(P); P['dz'] = P.get('dz', 0) - mz + ex.get('ground_gap', 0.0)
             basis, pos = self.apply(P)
+            if f == round(turn_t * FPS):
+                hm = (pos['thigh_l'] + pos['thigh_r']) / 2
+                v1 = pos['spine_03'] - hm; v2 = pos['head'] - pos['spine_03']
+                ang = lambda v: math.degrees(math.atan2(v.z, math.hypot(v.x, v.y)))
+                print('TORSO %-14s Becken-Brust %.0f Grad, Brust-Kopf %.0f Grad' % (name, ang(v1), ang(v2)))
             if f in (0, round(turn_t * FPS)):
                 self.poses[(name, f)] = {b: m.copy() for b, m in basis.items()}
             if f in sample_frames:
@@ -474,6 +479,8 @@ class Solver:
         meta = dict(dur=round(total, 3), frames=nfr, turn=round(turn_t, 3), db=ex.get('db', 'none'),
                     side=ex.get('side', 'r'), lying=bool(ex.get('lying')),
                     box=[bmin, bmax], minz=min(l[1] for l in lowest), clips=ex.get('clips'))
+        if ex.get('frame'):
+            meta['frame'] = ex['frame']
         print('BAKE %-14s %5.2fs %4d frames  minz %s' % (name, total, nfr, lowest))
         return rows, meta
 
@@ -859,7 +866,7 @@ def ex_rdl(B, S):
     def make(h):
         d = h['d']
         P = hinge(B, d, 70, 0, 0.23 * sc, B.stand_z(B.hipx * 0.95, 8), B.stand_z(B.hipx * 0.95, 20) - 0.035 * sc)
-        P['spine'] = (lerp(0, -7, d), 0, 0); P['neck'] = (lerp(0, 6, d), 0, 0)
+        P['spine'] = (lerp(0, -12, d), 0, 0); P['neck'] = (lerp(0, -4, d), 0, 0)
         for s in 'lr':
             P['leg_' + s] = stand_leg(B, s, x=B.hipx * 0.95, yaw=4)
             P['arm_' + s] = hang_arm_w(B, s, fwd=lerp(0.06, -0.02, d) * sc, out=0.0, palm=(0, 1, 0))
@@ -868,13 +875,17 @@ def ex_rdl(B, S):
         return P
     return dict(make=make, keys=K((1.4, {'d': 0.0}), (1.4, {'d': 1.0})), turn=1, db='both', side='r')
 
+# Rudern: Oberkörper etwa 35-40 Grad über der Waagerechten. Die Streckung gleicht die leichte Rundung der
+# MakeHuman-Ruhehaltung aus, damit die Linie Becken-Kopf neutral wirkt.
+ROW_PITCH, ROW_SPINE, ROW_NECK = 63, -12, -6
+
 @ex
 def ex_row(B, S):
     sc = B.height / 1.8
     def make(h):
         a = h['a']
-        P = hinge(B, 1.0, 66, 0, 0.20 * sc, 0, B.stand_z(B.hipx * 0.95, 24) - 0.03 * sc)
-        P['spine'] = (-5, 0, 0); P['neck'] = (6, 0, 0)
+        P = hinge(B, 1.0, ROW_PITCH, 0, 0.18 * sc, 0, B.stand_z(B.hipx * 0.95, 24) - 0.03 * sc)
+        P['spine'] = (ROW_SPINE, 0, 0); P['neck'] = (ROW_NECK, 0, 0)
         for s in 'lr':
             sg = sg_(s)
             P['leg_' + s] = stand_leg(B, s, x=B.hipx * 0.95, yaw=4)
@@ -885,7 +896,7 @@ def ex_row(B, S):
                              'pole': (tuple(lerp(Vector((0.3 * sg, 1, 0)), Vector((0.15 * sg, 1.0, -0.35)), a)), 't'),
                              'palm': ((-sg, 0, 0), 't'), 'grip': 1.0}
             P['_low_' + s] = low
-            P['clav_' + s] = (0, lerp(6, -14, a))
+            P['clav_' + s] = (lerp(0, -5, a), lerp(2, -16, a))
         # Untere Position: senkrecht unter der Schulter (Welt); obere im Rumpfrahmen -> über Probe in Welt umrechnen
         pos = S.probe(dict(P, arm_l=hang_arm_w(B, 'l'), arm_r=hang_arm_w(B, 'r')))
         Dm, _ = S.solve(dict(P, arm_l=hang_arm_w(B, 'l'), arm_r=hang_arm_w(B, 'r')))
@@ -907,7 +918,7 @@ def ex_row1(B, S):
     sc = B.height / 1.8
     def make(h):
         a = h['a']
-        P = dict(pos=('hipmid', (0, 0.06 * sc, 0.84 * sc)), prot=(48, 0, 0), spine=(-4, 0, 0), neck=(4, 0, 0))
+        P = dict(pos=('hipmid', (0, 0.06 * sc, 0.84 * sc)), prot=(60, 0, 0), spine=(ROW_SPINE, 0, 0), neck=(ROW_NECK, 0, 0))
         P['leg_l'] = {'ankle': (B.hipx * 1.0, -0.38 * sc, B.ankz), 'pole': (0.12, -1, 0), 'foot': ('w', 6, 0, 0)}
         P['leg_r'] = {'ankle': (-B.hipx * 1.0, 0.36 * sc, B.ankz), 'pole': (-0.1, -1, 0), 'foot': ('w', 8, 0, 0)}
         # linke Hand stützt sich auf dem vorderen Knie ab (Position aus der Probe)
@@ -924,7 +935,7 @@ def ex_row1(B, S):
         hi = el + V(0, 0, -B.FA * 0.97)
         P['arm_r'] = {'wrist': ('w', tuple(lerp(lo, hi, a))), 'pole': (tuple(lerp(V(-0.3, 1, 0), V(-0.25, 1.0, 0.1), a)), 't'),
                       'palm': ((1, 0, 0), 't'), 'grip': 1.0}
-        P['clav_r'] = (0, lerp(8, -14, a))
+        P['clav_r'] = (lerp(0, -5, a), lerp(2, -16, a))
         return P
     return dict(make=make, keys=K((0.9, {'a': 0.0}), (0.9, {'a': 1.0})), turn=1, db='r', side='r')
 
@@ -935,7 +946,7 @@ def ex_slrdl(B, S):
         d = h['d']
         pitch = lerp(0, 80, d)
         # Standbein links (unter dem Hüftgelenk), freies Bein rechts in Verlängerung des Rumpfes
-        P = dict(prot=(pitch, 0, 0), spine=(lerp(0, -6, d), 0, 0), neck=(lerp(0, 5, d), 0, 0))
+        P = dict(prot=(pitch, 0, 0), spine=(lerp(0, -12, d), 0, 0), neck=(lerp(0, -4, d), 0, 0))
         hz = lerp(B.stand_z(B.hipx * 0.6, 8), B.stand_z(B.hipx * 0.6, 22), d)
         P['pos'] = ('hip_l', (B.hipx * 0.95, lerp(0.0, 0.05 * sc, d), hz))
         P['leg_l'] = {'ankle': (B.hipx * 0.85, 0.0, B.ankz), 'pole': (0.12, -1, 0), 'foot': ('w', 4, 0, 0)}
@@ -949,35 +960,38 @@ def ex_slrdl(B, S):
 
 @ex
 def ex_burpee(B, S):
+    """Burpee ohne Sprung: Stand -> Hocke, Hände am Boden -> Füße nacheinander zurück in den Stütz (gerade Linie)
+    -> Füße nacheinander wieder vor -> Hocke -> Aufrichten."""
     sc = B.height / 1.8
-    pu = pushup_make(B, S, knees=False)
-    top = pu({'d': 0.0}); low = pu({'d': 1.0})
-    ptop = S.probe(top); plow = S.probe(low)
+    top = pushup_make(B, S, knees=False).top
+    ptop = S.probe(top)
     stand_hz = B.stand_z(B.hipx * 0.95, 4)
-    sq_hy, sq_hz, sq_pitch, sq_flex = 0.10 * sc, 0.42 * sc, 62, 25
+    sq_hy, sq_hz, sq_pitch, sq_flex = 0.08 * sc, 0.40 * sc, 55, 22
     hm = lambda p: (p['thigh_l'] + p['thigh_r']) / 2
-    pl_pitch_top = math.degrees(math.atan2(-top['pframe'][0][1], top['pframe'][0][2]))
-    pl_pitch_low = math.degrees(math.atan2(-low['pframe'][0][1], low['pframe'][0][2]))
+    # Stütz so verschieben, dass die Hände etwa 30 cm vor den Füßen im Stand liegen
+    hy0 = (top['arm_l']['wrist'][1][1] + top['arm_r']['wrist'][1][1]) / 2
+    shift = V(0, -0.32 * sc - hy0, 0)
+    hp_pl = hm(ptop) + shift
+    pl_pitch = math.degrees(math.atan2(-top['pframe'][0][1], top['pframe'][0][2]))
     fpitch = {s: ball_pitch(B, ptop['foot_' + s].z) for s in 'lr'}
     def make(h):
-        q, fl, fr, dd = h['q'], h['fl'], h['fr'], h['d']
+        q, fl, fr = h['q'], h['fl'], h['fr']
         fb = (fl + fr) / 2
-        hp_pl = lerp(hm(ptop), hm(plow), dd)
         hy = lerp(lerp(0.0, sq_hy, q), hp_pl.y, fb)
         hz = lerp(lerp(stand_hz, sq_hz, q), hp_pl.z, fb)
-        pitch = lerp(lerp(0, sq_pitch, q), lerp(pl_pitch_top, pl_pitch_low, dd), fb)
+        pitch = lerp(lerp(0, sq_pitch, q), pl_pitch, fb)
         P = dict(pos=('hipmid', (0, hy, hz)), prot=(pitch, 0, 0), spine=(lerp(sq_flex * q, 0, fb), 0, 0),
-                 neck=(lerp(-15 * q, 0, fb), 0, 0))
+                 neck=(lerp(-12 * q, -4, fb), 0, 0))
         for s, f in (('l', fl), ('r', fr)):
             sg = sg_(s)
             a_st = V(B.hipx * 0.95 * sg, 0.0, B.ankz)
-            a_pl = lerp(ptop['foot_' + s], plow['foot_' + s], dd)
-            lift = math.sin(math.pi * f) * 0.09 * sc
+            a_pl = ptop['foot_' + s] + shift
+            lift = math.sin(math.pi * f) * 0.07 * sc
             an = lerp(a_st, a_pl, f) + V(0, 0, lift)
             P['leg_' + s] = {'ankle': tuple(an), 'pole': (0.15 * sg, -1, 0), 'foot': ('w', lerp(6, 2, f), f * fpitch[s], 0)}
         for s in 'lr':
             sg = sg_(s)
-            floor_w = Vector(top['arm_' + s]['wrist'][1])
+            floor_w = Vector(top['arm_' + s]['wrist'][1]) + shift
             pole_top = Vector(top['arm_' + s]['pole'][0])
             if fb <= 0:
                 probe = S.probe(dict(P, arm_l=hang_arm(B, 'l'), arm_r=hang_arm(B, 'r')))
@@ -991,13 +1005,13 @@ def ex_burpee(B, S):
                              'palm': (tuple(lerp(V(-sg, 0, 0), V(0, 0, -1), e)), 'w'),
                              'hand_dir': (tuple(lerp(V(0, 0, -1), V(0.15 * sg, -1, 0), e)), 'w'), 'grip': lerp(0.2, -0.25, e)}
         return P
-    st = {'q': 0.0, 'fl': 0.0, 'fr': 0.0, 'd': 0.0}
-    sq = {'q': 1.0, 'fl': 0.0, 'fr': 0.0, 'd': 0.0}
-    keys = [(0, st), (0.6, sq),
-            (0.35, {'q': 1.0, 'fl': 1.0, 'fr': 0.0, 'd': 0.0}), (0.35, {'q': 1.0, 'fl': 1.0, 'fr': 1.0, 'd': 0.0}),
-            (0.55, {'q': 1.0, 'fl': 1.0, 'fr': 1.0, 'd': 1.0}), (0.55, {'q': 1.0, 'fl': 1.0, 'fr': 1.0, 'd': 0.0}),
-            (0.35, {'q': 1.0, 'fl': 1.0, 'fr': 0.0, 'd': 0.0}), (0.35, sq), (0.6, st)]
-    return dict(make=make, keys=keys, turn=4, side='r', ground=True)
+    st = {'q': 0.0, 'fl': 0.0, 'fr': 0.0}
+    sq = {'q': 1.0, 'fl': 0.0, 'fr': 0.0}
+    pl = {'q': 1.0, 'fl': 1.0, 'fr': 1.0}
+    keys = [(0, st), (0.7, sq),
+            (0.4, {'q': 1.0, 'fl': 1.0, 'fr': 0.0}), (0.4, pl), (0.5, pl),
+            (0.4, {'q': 1.0, 'fl': 0.0, 'fr': 1.0}), (0.4, sq), (0.7, st)]
+    return dict(make=make, keys=keys, turn=4, side='r', ground=True, frame='wide')
 
 @ex
 def ex_hipflex(B, S):
@@ -1070,8 +1084,9 @@ def ex_catcow(B, S):
         P = dict(pframe=(tuple(V(0, -1, 0)), tuple(V(0, 0, -1))), pos=('hipmid', (0, 0.0, hz)))
         P['prot'] = (0, 0, 0)
         P['pframe'] = (tuple(Rx(-12 * c) @ V(0, -1, 0)), tuple(Rx(-12 * c) @ V(0, 0, -1)))
-        P['spine'] = (28 * c, 0, 0)
-        P['neck'] = (25 * c, 0, 0)
+        # Katze: Rücken rund, Kopf folgt locker; Kuh: Bauch sinkt, Brustbein vor, Blick leicht nach vorn-oben
+        P['spine'] = (26 * c if c > 0 else 32 * c, 0, 0)
+        P['neck'] = (8 * c if c > 0 else 30 * c, 0, 0)
         for s in 'lr':
             sg = sg_(s)
             P['leg_' + s] = {'ankle_p': (0, B.S * 0.99, -B.T * 0.99), 'pole': (0.05 * sg, -1, 0), 'foot': ('rel', -55)}
@@ -1083,7 +1098,7 @@ def ex_catcow(B, S):
             P['arm_' + s] = {'wrist': ('w', (sh.x, sh.y, 0.048 * sc)), 'pole': ((0.2 * sg, 0, -1), 'w'), 'palm': ((0, 0, -1), 'w'),
                              'hand_dir': ((0.1 * sg, -1, 0), 'w'), 'grip': -0.25}
         return P
-    return dict(make=make, keys=K((1.6, {'c': 1.0}), (1.6, {'c': -1.0})), turn=0, side='r', lying=True, ground=True)
+    return dict(make=make, keys=K((1.6, {'c': 1.0}), (1.6, {'c': -1.0})), turn=1, side='r', lying=True, ground=True)
 
 @ex
 def ex_bridge2w(B, S):
@@ -1187,20 +1202,39 @@ def ex_deadbuglegs(B, S):
     keys = K((1.2, z), (1.2, {'el': 1.0, 'er': 0.0}), (1.2, z), (1.2, {'el': 0.0, 'er': 1.0}))
     return dict(make=deadbug_make(B, S, False), keys=keys, turn=1, side='r', lying=True, ground=True)
 
-def pushup_make(B, S, knees=False):
+def chest_point(S):
+    """Vorderster Punkt des Brustbeins (Ruhepose, etwa Höhe Brustwarzen), relativ zu spine_03."""
+    me = S.body.data
+    shz = S.h['upperarm_l'].z
+    best = None
+    for v in me.vertices:
+        c = v.co
+        if abs(c.x) < 0.03 and shz - 0.17 < c.z < shz - 0.07:
+            if best is None or c.y < best.y:
+                best = c.copy()
+    return best - S.h['spine_03']
+
+def pushup_make(B, S, knees=False, clearance=0.095):
+    """Liegestütz: Körper gerade (Kopf bis Ferse bzw. Knie), Hände unter den Schultern, Ellbogen etwa 45 Grad.
+    Oben Arme fast gestreckt (nicht überstreckt), unten Brustbein etwa eine Faust (clearance) über dem Boden."""
     sc = B.height / 1.8
     wz = 0.048 * sc
+    cp = chest_point(S)
+    shin_up = 18   # Knie-Variante: Unterschenkel flach nach hinten, um 18 Grad angehoben, Füße gestreckt
     def body(theta):
         th = theta * D
         up = V(0, -math.cos(th), math.sin(th))
         fr = V(0, -math.sin(th), -math.cos(th))
-        P = dict(pframe=(tuple(up), tuple(fr)), pos=('hipmid', (0, 0, 1.0)), spine=(0, 0, 0), neck=(0, 0, 0))
+        Dp = frame_from(up, fr)
+        P = dict(pframe=(tuple(up), tuple(fr)), pos=('hipmid', (0, 0, 1.0)), spine=(0, 0, 0), neck=(-4, 0, 0))
         for s in 'lr':
             sg = sg_(s)
             if knees:
-                # Oberschenkel in Linie, Knie gebeugt, Unterschenkel zeigen nach oben
-                P['leg_' + s] = leg_fk(B, s, 0, 95, abd=-1, foot=('rel', -30))
-                P['leg_' + s]['ankle_p'] = tuple(Vector(P['leg_' + s]['ankle_p']) + V(-0.03 * sg, 0, 0))
+                th_rest = (S.t['thigh_' + s] - S.h['thigh_' + s]).normalized() * B.T
+                shin = V(0, math.cos(shin_up * D), math.sin(shin_up * D)) * B.S
+                an_w = Dp @ th_rest + shin + V(-0.02 * sg, 0, 0)
+                P['leg_' + s] = {'ankle_p': tuple(Dp.transposed() @ an_w), 'pole': (0.05 * sg, -1, 0),
+                                 'foot': ('rel', -58), 'toes': 'follow'}
             else:
                 P['leg_' + s] = {'ankle_p': (-0.035 * sg, 0.0, -B.L * 0.997), 'pole': (0.05 * sg, -1, 0), 'foot': ('ball', 2), 'toes': 'flat'}
             P['arm_' + s] = hang_arm(B, s)
@@ -1209,22 +1243,25 @@ def pushup_make(B, S, knees=False):
     def shz(P):
         pos = S.probe(P)
         return (pos['upperarm_l'].z + pos['upperarm_r'].z) / 2
-    # Winkel für oben (Arme gestreckt) und unten (Brust knapp über dem Boden)
-    top_z = wz + B.ARM * 0.985 + 0.01 * sc
-    low_z = 0.19 * sc
+    def chz(P):
+        Dm, pos = S.solve(P)
+        return (pos['spine_03'] + Dm['spine_03'] @ cp).z
+    top_z = wz + B.ARM * 0.972
     th_top = S.bisect(lambda t: shz(body(t)) - top_z, 0, 60)
-    th_low = S.bisect(lambda t: shz(body(t)) - low_z, -5, 40)
-    Ptop = body(th_top)
-    ptop = S.probe(Ptop)
-    hands = {s: V(sg_(s) * (B.shx + 0.045 * sc), ptop['upperarm_' + s].y + 0.01 * sc, wz) for s in 'lr'}
-    def make(h):
-        d = h['d']
-        P = body(lerp(th_top, th_low, d))
+    ptop = S.probe(body(th_top))
+    hands = {s: V(sg_(s) * (B.shx + 0.04 * sc), ptop['upperarm_' + s].y + 0.01 * sc, wz) for s in 'lr'}
+    def full(theta):
+        P = body(theta)
         for s in 'lr':
             sg = sg_(s)
-            P['arm_' + s] = {'wrist': ('w', tuple(hands[s])), 'pole': ((0.42 * sg, 0.3, -1.0), 't'),
+            P['arm_' + s] = {'wrist': ('w', tuple(hands[s])), 'pole': ((0.72 * sg, 0.25, -0.72), 't'),
                              'palm': ((0, 0, -1), 'w'), 'hand_dir': ((0.15 * sg, -1, 0), 'w'), 'grip': -0.25}
         return P
+    th_low = S.bisect(lambda t: chz(full(t)) - clearance * sc, -5, th_top)
+    print('PUSHUP knees=%s theta top %.1f low %.1f' % (knees, th_top, th_low))
+    def make(h):
+        return full(lerp(th_top, th_low, h['d']))
+    make.top = full(th_top)
     return make
 
 @ex
