@@ -2,8 +2,14 @@
 
 30-Minuten-Heimtraining mit zwei Kurzhanteln (bis 15 kg): Timer, 3D-Figur zur Übungsausführung, Wiederholungs- und Gewichtsprotokoll mit Fortschrittsvergleich, Rückmeldung pro Satz, leichtere Varianten, Claude-Coach, Sprachsteuerung und Spotify.
 
-- `index.html` – App v7 (Tag A / Tag B, Einstiegswochen, Rückmeldung Leicht/Passt/Zu hart, Varianten, Abbruch mit Grund, Check-in, Verlauf, Einstellungen)
-- `rig.js` – 3D-Figur und Bewegungsposen inkl. Varianten (Three.js r128 von cdnjs)
+- `index.html` – App (Oberfläche im Anatomieatlas-Stil nach `design/DESIGN.md`; Tafel A / Tafel B, Einstiegswochen, Rückmeldung Leicht/Passt/Zu hart, Varianten, Abbruch mit Grund, Check-in, Protokoll, Einstellungen). Farben und Schriften stehen als CSS-Variablen in `:root` am Anfang des `<style>` (`--paper`, `--ink`, `--rule`, `--muscle`, `--muscle-support`, `--skin`, `--accent-text`, `--muted`, `--pressed`, `--f-display`, `--f-label`, `--f-text`)
+- `figure.js` – 3D-Figur: lädt `models/man.glb` bzw. `models/woman.glb` (GLTFLoader + DRACOLoader, Three.js r128), färbt die Muskeln je Übung, Kamera Seite/Vorne/Hinten, Zeitlupe, Beschriftung mit Hinweislinien
+- `exercises-anatomy.js` – Muskelgruppen und je Übung aktive/unterstützende Muskeln, Funktion und Formhinweise (A, B)
+- `models/` – die beiden Figuren (GLB mit Draco, je etwa 2 MB, alle Übungen als Animation)
+- `tools/blender/` – Skripte, die die Figuren in Blender erzeugen, animieren und exportieren
+- `rig.js` – einfache 3D-Figur aus Grundkörpern; Rückfall, wenn ein Modell nicht lädt (die Bildunterschrift zeigt dann den Fehler)
+- `design/` – verbindliche Designvorgabe und Entwürfe
+- `test/e2e.mjs` – Ende-zu-Ende-Test (Playwright), Screenshots in `test/screens/`
 - `coach.js` – Claude-API-Client (Plananpassung, Fragen im Training, Auswertung, Progressionscheck), ohne Schlüssel lokale Regeln
 - `voice.js` – Sprachsteuerung mit Aktivierungswort „Coach“ und Sprachausgabe (Browser oder ElevenLabs)
 - `spotify.js` – Spotify Web Playback SDK und Web API (PKCE, ohne Server)
@@ -37,7 +43,7 @@ Voraussetzung: Spotify Premium.
 4. Die Client-ID in die Einstellungen kopieren und „Bei Spotify anmelden“ drücken. Nach der Rückleitung steht dort „angemeldet“.
 5. „Playlists laden“ und eine Trainings-Playlist wählen. Optional Aufwärm-, Finisher- und Challenge-Lied suchen und auswählen, BPM eintragen, wenn die Figur im Takt laufen soll.
 
-Die Musik läuft im Browser-Tab („HIIT Kraft 30“ als Spotify-Gerät). Spotify-Fehler erscheinen als Zeile unter dem Timer, das Training läuft ohne Musik weiter.
+Die Musik läuft im Browser-Tab („HIIT Kraft 30“ als Spotify-Gerät). Spotify-Fehler erscheinen im Fuß der Trainingsansicht, das Training läuft ohne Musik weiter.
 
 ### Tempo (BPM) und Figur im Takt
 
@@ -89,6 +95,56 @@ In der App: Einstellungen → „Schlaf und Ruhewerte“ → Health-Server-URL u
 
 Für eine natürlichere Stimme unter https://elevenlabs.io einen API-Schlüssel anlegen, in den Einstellungen „Stimme: ElevenLabs“ wählen, Schlüssel und optional eine Voice-ID eintragen. Ohne gültigen Schlüssel spricht die Browserstimme.
 
+## 3D-Figuren
+
+Zwei Figuren, passend zu den späteren Profilen: Mann (180 cm, etwa 82 kg, sportlich) und Frau (etwa 166 cm, normale Statur). Bis es Profile gibt, ist der Mann Standard; umschalten in den Einstellungen unter „Figur“.
+
+- Körper: erzeugt mit [MPFB 2](https://static.makehumancommunity.org/mpfb.html) (MakeHuman-Erweiterung für Blender, Version 2.0.17, Blender 5.2). Das Plugin selbst steht unter GPL-3.0, die damit erzeugten MakeHuman-Körper (Basismesh, Formziele, Rig „game_engine“ mit Gewichten) sind CC0 und liegen nicht unter der GPL. Keine weiteren fremden Assets: Augen, Haarknoten und Hanteln sind im Skript gebaut.
+- Oberfläche: matte Haut `#EAC9A2`, eng anliegende Sportkleidung in Sepia (Mann Shorts, Frau Shorts und Sport-Top), ruhige geschlossene Augen, feine Tintenkontur (Hülle mit konstanter Pixelbreite im Shader).
+- Muskelmaske: Farbkanal `COLOR_0` je Fläche, R = Muskelgruppe (ID wie `MUSCLES` in `exercises-anatomy.js`, Wert/20), G = Kleidung, B = Körperseite (1 links, 0 rechts). Gruppen: Brust, vordere und seitliche Schulter, Trizeps, Bizeps, oberer Rücken, breiter Rückenmuskel, unterer Rücken, gerader und schräge Bauchmuskeln, Gesäß, Quadrizeps, hintere Oberschenkel, Adduktoren, Waden. Die Einteilung erfolgt im Skript über Knochengewichte, Höhe und Flächennormale und wird danach geglättet; sie ist eine Atlas-Näherung, keine exakte Anatomie.
+- Animationen: alle Übungen inklusive Varianten (bridge1 bridge2 bridge2w burpee chest deadbug deadbuglegs floorpress goblet hipflex kneepushup kniehebe lunge lungebw press pushup rdl row row1 sideplank sideplankknee slrdl splitsquat sqa squatbw thruster walk, dazu catcow für den zweiten Teil von „Hüftbrücke + Katze-Kuh“). Sie liegen hintereinander in einer Animation „all“ (24 Bilder/s); Start und Länge jeder Übung, Kamera-Rahmen, Hanteln und Umkehrpunkt stehen als JSON in den Extras des Rigs (`hiit`), `figure.js` schneidet daraus die Clips. Probesätze zeigen den Split Squat.
+- Beschriftung: Die Ankerpunkte der Muskeln sind Vertices nahe dem Schwerpunkt der Gruppe und werden über die Knochengewichte mitbewegt; Formhinweise hängen an Gelenken des Rigs. Liegt ein Muskel auf der abgewandten Seite, wird seine Beschriftung ausgeblendet.
+
+### Figuren neu bauen
+
+Voraussetzung: Blender 5.2 mit der MPFB-Erweiterung (über Edit → Preferences → Get Extensions → „MPFB“ installieren).
+
+```sh
+blender -b --python tools/blender/build_models.py -- man
+blender -b --python tools/blender/build_models.py -- woman
+```
+
+Das Skript baut Körper, Maske, Rig und alle Animationen, speichert `tools/blender/<figur>.blend` (nicht im Repo) und exportiert danach in einem frischen Blender-Prozess über `tools/blender/export_glb.py` nach `models/<figur>.glb` (in derselben Sitzung exportiert hat Blender 5.2 einzelne Übungen versetzt). Dauer je Figur etwa 6–8 Minuten.
+
+Nützliche Optionen:
+
+- `--only splitsquat,pushup` nur diese Übungen, Ausgabe nach `models/test-<figur>.glb` und `tools/blender/test-<figur>.blend`
+- `--preview <ordner> [--rest] [--res 360]` Kontrollbilder je Übung (Umkehrpunkt von Seite/Vorne/Hinten und Startpose) mit farbig markierten Muskelgruppen
+- `--noexport` nur bauen und speichern
+
+### Eine Übungsanimation ändern
+
+Die Bewegungen stehen in `tools/blender/poses.py`, je Übung eine Funktion `ex_<schlüssel>`. Sie beschreibt wenige Bewegungsparameter als Schlüsselbilder (z. B. `d` = Tiefe 0…1 mit Dauer in Sekunden) und eine Funktion `make(h)`, die daraus Ziele für den Solver baut: Lage des Beckens, Beugung von Wirbelsäule und Hals, Fußgelenk- und Handgelenkziele (IK) mit Pol-Richtungen für Knie und Ellbogen, Hand- und Fußstellung. Für jedes Einzelbild wird neu gelöst, daher bleiben Füße und Hände exakt am Boden. Vorgehen:
+
+1. Funktion in `poses.py` anpassen (z. B. Tiefe, Vorneigung, Dauer der Schlüsselbilder).
+2. Schnell prüfen: `blender -b --python tools/blender/build_models.py -- man --only <schlüssel> --preview vorschau/` und die Bilder ansehen. Das Protokoll zeigt je Übung `minz` (tiefster Punkt, sollte etwa 0 sein).
+3. Beide Figuren neu bauen (siehe oben) und `models/*.glb` committen.
+
+Von Hand in Blender: `tools/blender/man.blend` öffnen, in der Aktion „all“ den Bildbereich der Übung bearbeiten (Start steht in den Rig-Eigenschaften unter `hiit`), speichern und mit `blender -b tools/blender/man.blend --python tools/blender/export_glb.py -- models/man.glb` exportieren. Beim nächsten Lauf von `build_models.py` werden Handänderungen überschrieben; dauerhafte Änderungen gehören nach `poses.py`.
+
+Muskeln und Formhinweise einer Übung stehen in `exercises-anatomy.js` und brauchen keinen Neubau.
+
 ## Bedienung am PC
 
-Leertaste = Satz fertig / Fortsetzen, Pfeil hoch/runter = Wiederholungen ±1, Pfeil rechts = Weiter, Pfeil links = Zurück, P = Pause, T = Takt tippen. In Textfeldern sind die Tasten abgeschaltet.
+Leertaste = Training starten (Startbildschirm) / Satz fertig / Fortsetzen, Pfeil hoch/runter = Wiederholungen ±1, Pfeil rechts = Weiter, Pfeil links = Zurück, P = Pause, T = Takt tippen. In Textfeldern sind die Tasten abgeschaltet.
+
+Im Satz schaltet die Leiste unter der Figur die Ansicht (Seite, Vorne, Hinten) und die Zeitlupe (halbe Geschwindigkeit); die Wahl merkt sich der Browser unter `hiit30.view`. Im Wechsel verlängert „+15 s“ die Pause.
+
+## Tests
+
+```sh
+npm i playwright && npx playwright install chromium
+node test/e2e.mjs .
+```
+
+Prüft Start, Check-in, Sätze, Varianten, Abbruch, Protokoll, Einstellungen, Coach (gemockte API), Sprachbefehle und das Laden alter Daten in 1600×900 und 390×844. Kontaktbögen aller Übungen am Umkehrpunkt (beide Figuren, drei Ansichten) liegen in `test/screens/figuren/`, die Bildschirme in 1440×900 und 1920×1080 in `test/screens/`.
