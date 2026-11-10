@@ -373,11 +373,10 @@
   "k": "row",
   "v": "front",
   "when": "turn",
-  "labels": 3,
+  "labels": 4,
   "hidden": [
    "1 Breiter Rückenmuskel",
    "2 Oberer Rücken",
-   "3 Bizeps",
    "5 Hintere Oberschenkel"
   ],
   "clipped": []
@@ -688,10 +687,9 @@
   "k": "pushup",
   "v": "side",
   "when": "turn",
-  "labels": 3,
+  "labels": 4,
   "hidden": [
    "1 Brustmuskel",
-   "3 Vorderer Deltamuskel",
    "4 Rumpf"
   ],
   "clipped": [],
@@ -724,10 +722,9 @@
   "k": "kneepushup",
   "v": "side",
   "when": "turn",
-  "labels": 3,
+  "labels": 4,
   "hidden": [
    "1 Brustmuskel",
-   "3 Vorderer Deltamuskel",
    "4 Rumpf"
   ],
   "clipped": [],
@@ -846,6 +843,28 @@
   "clipped": []
  },
  {
+  "k": "pushup",
+  "v": "front",
+  "when": "start",
+  "labels": 5,
+  "hidden": [
+   "2 Trizeps"
+  ],
+  "clipped": []
+ },
+ {
+  "k": "pushup",
+  "v": "back",
+  "when": "start",
+  "labels": 3,
+  "hidden": [
+   "1 Brustmuskel",
+   "3 Vorderer Deltamuskel",
+   "4 Rumpf"
+  ],
+  "clipped": []
+ },
+ {
   "k": "kneepushup",
   "v": "side",
   "when": "start",
@@ -857,19 +876,25 @@
   "clipped": []
  },
  {
-  "k": "burpee",
-  "v": "side",
+  "k": "kneepushup",
+  "v": "front",
   "when": "start",
-  "labels": 7,
-  "hidden": [],
+  "labels": 5,
+  "hidden": [
+   "2 Trizeps"
+  ],
   "clipped": []
  },
  {
-  "k": "catcow",
-  "v": "side",
+  "k": "kneepushup",
+  "v": "back",
   "when": "start",
-  "labels": 0,
-  "hidden": [],
+  "labels": 3,
+  "hidden": [
+   "1 Brustmuskel",
+   "3 Vorderer Deltamuskel",
+   "4 Rumpf"
+  ],
   "clipped": []
  },
  {
@@ -881,31 +906,24 @@
   "clipped": []
  },
  {
-  "k": "row1",
-  "v": "side",
+  "k": "row",
+  "v": "front",
   "when": "start",
   "labels": 4,
   "hidden": [
+   "1 Breiter Rückenmuskel",
    "2 Oberer Rücken",
-   "3 Bizeps"
+   "5 Hintere Oberschenkel"
   ],
   "clipped": []
  },
  {
-  "k": "rdl",
-  "v": "side",
+  "k": "row",
+  "v": "back",
   "when": "start",
   "labels": 6,
-  "hidden": [],
-  "clipped": []
- },
- {
-  "k": "slrdl",
-  "v": "side",
-  "when": "start",
-  "labels": 5,
   "hidden": [
-   "1 Hintere Oberschenkel"
+   "3 Bizeps"
   ],
   "clipped": []
  }

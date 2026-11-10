@@ -1,6 +1,6 @@
 // Standbilder aller Übungen (Umkehrpunkt, Seite/Vorne/Hinten) plus Prüfbericht der Beschriftung.
 // Aufruf: node test/figuren.cjs <repo> <ausgabe> <man|woman> [breite höhe] [übungen] [--start k1,k2]
-//   --start: zusätzlich die Startpose (Zeit 0) dieser Übungen in der Seitenansicht.
+//   --start: zusätzlich die Startpose (Zeit 0) dieser Übungen in allen drei Ansichten (Dateien <figur>_start-<übung>-<ansicht>.png).
 // Bericht: <figur>-report.json mit sichtbaren/verdeckten/abgeschnittenen Beschriftungen und Ankerprüfung
 // (liegt der Anker jeder Muskel-Beschriftung in der Maskentextur auf der richtigen Muskelgruppe?).
 const { chromium } = require('playwright');
@@ -48,7 +48,7 @@ const server = http.createServer((q, r) => {
   const freeze = t => page.evaluate(t => { const d = Figure._debug(); d.M.mixer.stopAllAction(); const a = d.M.action; a.reset(); a.play(); a.paused = true; a.time = t; d.M.mixer.update(0); }, t);
   const shots = [];
   for (const k of keys) for (const v of ['side', 'front', 'back']) shots.push([k, v, 'turn']);
-  for (const k of START) shots.push([k, 'side', 'start']);
+  for (const k of START) for (const v of ['side', 'front', 'back']) shots.push([k, v, 'start']);
   for (const [k, v, when] of shots) {
     await page.evaluate(([k, v]) => { Figure.show(k); Figure.setView(v); }, [k, v]);
     await page.waitForTimeout(700);
@@ -75,7 +75,7 @@ const server = http.createServer((q, r) => {
     const entry = { k, v, when, labels: lab.filter(l => l.vis).length, hidden: lab.filter(l => !l.vis).map(l => l.t), clipped: lab.filter(l => l.vis && l.clip).map(l => l.t) };
     if (when === 'turn' && v === 'side') entry.anchors_wrong = anchors.filter(a => !a.ok);
     report.push(entry);
-    await host.screenshot({ path: path.join(OUT, `${MODEL}-${k}-${when === 'start' ? 'start' : v}.png`) });
+    await host.screenshot({ path: path.join(OUT, when === 'start' ? `${MODEL}_start-${k}-${v}.png` : `${MODEL}-${k}-${v}.png`) });
   }
   fs.writeFileSync(path.join(OUT, `${MODEL}-report.json`), JSON.stringify(report, null, 1));
   console.log('abgeschnitten', report.filter(r => r.clipped.length).map(r => r.k + '/' + r.v + ':' + r.clipped.join('|')).join('; ') || 'keine');
