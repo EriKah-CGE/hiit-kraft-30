@@ -3,3 +3,5 @@ tools/blender/*.blend
 tools/blender/*.blend1
 models/test-*.glb
 node_modules/
+tools/blender/out/
+tools/blender/__pycache__/

@@ -27,8 +27,9 @@ const Figure=(function(){
   const VS=`
     #include <common>
     #include <skinning_pars_vertex>
-    varying vec3 vN; varying vec3 vC;
+    varying vec3 vN; varying vec3 vC; varying vec2 vUv;
     void main(){
+      vUv=uv;
       #include <skinbase_vertex>
       #include <beginnormal_vertex>
       #include <skinnormal_vertex>
@@ -46,9 +47,11 @@ const Figure=(function(){
   const FS=`
     uniform vec3 uSkin,uActive,uSupport,uShorts,uTop,uEye,uHair;
     uniform float uL[16]; uniform float uR[16];
-    varying vec3 vN; varying vec3 vC;
-    void main(){
-      float id=floor(vC.r*20.0+0.5), cl=floor(vC.g*10.0+0.5), sd=vC.b;
+    uniform sampler2D uMask; uniform float uTexN, uUseMap;
+    varying vec3 vN; varying vec3 vC; varying vec2 vUv;
+    // Maske -> Farbe: Kleidung als Grund, arbeitende Muskeln färben auch Shirt und Shorts
+    vec3 shade(vec3 m){
+      float id=floor(m.r*20.0+0.5), cl=floor(m.g*10.0+0.5), sd=m.b;
       vec3 base=uSkin;
       if(cl>0.5&&cl<1.5)base=uShorts; else if(cl>1.5&&cl<2.5)base=uTop; else if(cl>2.5&&cl<3.5)base=uEye; else if(cl>3.5)base=uHair;
       float st=0.0;
@@ -59,6 +62,17 @@ const Figure=(function(){
         }
       }
       if(st>1.5)base=uActive; else if(st>0.5)base=uSupport;
+      return base;
+    }
+    void main(){
+      vec3 base;
+      if(uUseMap>0.5){
+        // vier Nachbartexel ohne Filter lesen, erst die Farben mischen: scharfe, aber geglättete Grenzen
+        vec2 p=vUv*uTexN-0.5, f=fract(p), t0=(floor(p)+0.5)/uTexN; float d=1.0/uTexN;
+        vec3 a=shade(texture2D(uMask,t0).rgb), b=shade(texture2D(uMask,t0+vec2(d,0.0)).rgb);
+        vec3 c=shade(texture2D(uMask,t0+vec2(0.0,d)).rgb), e=shade(texture2D(uMask,t0+vec2(d,d)).rgb);
+        base=mix(mix(a,b,f.x),mix(c,e,f.x),f.y);
+      } else base=shade(vC);
       vec3 n=normalize(vN);
       float k=0.70+0.22*max(dot(n,normalize(vec3(-0.35,0.55,0.75))),0.0)+0.08*max(dot(n,normalize(vec3(0.6,0.2,0.5))),0.0);
       k=mix(k,1.0,0.12);
@@ -88,9 +102,11 @@ const Figure=(function(){
   const VS_SOLID=`varying vec3 vN; void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
   const FS_SOLID=`uniform vec3 uC; varying vec3 vN; void main(){float k=0.72+0.28*max(dot(normalize(vN),normalize(vec3(-0.35,0.55,0.75))),0.0);gl_FragColor=vec4(uC*k,1.0);}`;
 
-  function bodyMat(){
+  function bodyMat(map){
+    if(map){map.magFilter=map.minFilter=THREE.NearestFilter;map.generateMipmaps=false;map.encoding=THREE.LinearEncoding;map.flipY=false;map.needsUpdate=true;}
     const u={uSkin:{value:col('--skin','#EAC9A2')},uActive:{value:col('--muscle','#B23A1E')},uSupport:{value:col('--muscle-support','#E3A57C')},
-      uShorts:{value:new THREE.Color('#7D6249')},uTop:{value:new THREE.Color('#8A6A4E')},uEye:{value:new THREE.Color('#C9A27C')},uHair:{value:new THREE.Color('#5A3E2B')},
+      uMask:{value:map||null},uTexN:{value:(map&&map.image&&map.image.width)||2048},uUseMap:{value:map?1:0},
+      uShorts:{value:col('--cloth-shorts','#7D6249')},uTop:{value:col('--cloth-top','#C9AF88')},uEye:{value:new THREE.Color('#C9A27C')},uHair:{value:new THREE.Color('#5A3E2B')},
       uL:{value:new Array(16).fill(0)},uR:{value:new Array(16).fill(0)}};
     return new THREE.ShaderMaterial({uniforms:u,vertexShader:VS,fragmentShader:FS,skinning:true,vertexColors:true});
   }
@@ -172,7 +188,7 @@ const Figure=(function(){
     });
     if(!body)throw new Error('kein Körper im Modell');
     if(!meta)throw new Error('Modell ohne Übungsdaten');
-    body.material=bodyMat();body.frustumCulled=false;
+    body.material=bodyMat(body.material&&body.material.map);body.frustumCulled=false;
     const ol=new THREE.SkinnedMesh(body.geometry,outlineMat());
     ol.bind(body.skeleton,body.bindMatrix);ol.frustumCulled=false;ol.renderOrder=-1;
     body.parent.add(ol);ol.position.copy(body.position);ol.quaternion.copy(body.quaternion);ol.scale.copy(body.scale);
@@ -287,7 +303,9 @@ const Figure=(function(){
     // Figur nimmt etwa 58 % der Breite ein, Rest für Beschriftungen
     // stehend: Figur in der Mitte (Beschriftung links/rechts); liegend: Figur unten, Beschriftung darüber
     const lying=!!me.lying;
-    const fw=lying?0.84:0.44,fh=lying?0.42:0.88;
+    // breit (Burpee: Stand und Stütz in einer Schleife): Figur darf mehr Breite nehmen, damit sie normal groß bleibt
+    const wide=me.frame==='wide'&&Math.abs(dir.x)>0.5;
+    const fw=lying?0.84:(wide?0.58:0.44),fh=lying?0.42:0.88;
     const dSpan=Math.abs(dir.x)>0.5?(mx[0]-mn[0]):(mx[2]-mn[2]);
     const needH=Math.max(hSpan/fh,(wSpan/fw)/camera.aspect,0.9);
     const dist=(needH/2)/Math.tan(camera.fov*Math.PI/360)+dSpan/2;

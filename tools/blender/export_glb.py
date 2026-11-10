@@ -26,12 +26,12 @@ kw = dict(filepath=os.path.abspath(out), export_format='GLB', use_selection=True
           export_apply=False, export_yup=True,
           export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=7,
           export_draco_position_quantization=14, export_draco_normal_quantization=10,
-          export_draco_texcoord_quantization=12, export_draco_color_quantization=10,
+          export_draco_texcoord_quantization=14, export_draco_color_quantization=10,
           export_draco_generic_quantization=12,
           export_animations=True, export_animation_mode='ACTIVE_ACTIONS', export_anim_single_armature=True,
           export_frame_range=False, export_force_sampling=True, export_optimize_animation_size=True,
           export_def_bones=True, export_extras=True, export_skins=True, export_morph=False,
-          export_materials='EXPORT', export_texcoords=False, export_normals=True)
+          export_materials='EXPORT', export_image_format='AUTO', export_texcoords=True, export_normals=True)
 props = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
 for k in list(kw):
     if k not in props:
