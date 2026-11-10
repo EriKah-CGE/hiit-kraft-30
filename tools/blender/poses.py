@@ -343,6 +343,43 @@ class Solver:
         ev.to_mesh_clear()
         return mn, box
 
+    def region(self, name):
+        """Vertex-Indizes eines Körperbereichs in Ruhepose (wie tools/blender/measure.py)."""
+        import numpy as np
+        if not hasattr(self, '_regions'):
+            self._regions = {}
+        if name in self._regions:
+            return self._regions[name]
+        me = self.body.data
+        co = np.array([v.co for v in me.vertices])
+        vg = {g.index: g.name for g in self.body.vertex_groups}
+        dom = np.array([(vg.get(max(v.groups, key=lambda g: g.weight).group, '') if len(v.groups) else '') for v in me.vertices])
+        x, y, z = co[:, 0], co[:, 1], co[:, 2]
+        h = self.h
+        if name == 'chest':
+            torso = np.isin(dom, ['spine_01', 'spine_02', 'spine_03', 'clavicle_l', 'clavicle_r', 'pelvis'])
+            shz = h['upperarm_l'].z
+            m = torso & (np.abs(x) < 0.12) & (z > shz - 0.24) & (z < shz - 0.02) & (y < h['spine_03'].y - 0.06)
+        else:
+            raise ValueError(name)
+        self._regions[name] = np.flatnonzero(m)
+        return self._regions[name]
+
+    def clearance(self, P, idx):
+        """Höhe des tiefsten Punkts eines Bereichs über dem tiefsten Punkt des ganzen Körpers (= Boden nach 'ground')."""
+        import numpy as np
+        self.apply(P)
+        bpy.context.view_layer.update()
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = self.body.evaluated_get(dg)
+        me = ev.to_mesh()
+        co = np.empty(len(me.vertices) * 3, dtype=np.float32)
+        me.vertices.foreach_get('co', co)
+        ev.to_mesh_clear()
+        mw = np.array(self.body.matrix_world)
+        z = co.reshape(-1, 3) @ mw[2, :3] + mw[2, 3]
+        return float(z[idx].min() - z.min())
+
     def probe(self, P):
         Dm, pos = self.solve(P)
         return pos
@@ -877,7 +914,8 @@ def ex_rdl(B, S):
 
 # Rudern: Oberkörper etwa 35-40 Grad über der Waagerechten. Die Streckung gleicht die leichte Rundung der
 # MakeHuman-Ruhehaltung aus, damit die Linie Becken-Kopf neutral wirkt.
-ROW_PITCH, ROW_SPINE, ROW_NECK = 63, -12, -6
+ROW_PITCH, ROW_SPINE, ROW_NECK = 68, -18, 8
+ROW1_SPINE, ROW1_NECK = -12, -6          # einarmiges Rudern (Referenz, unverändert)
 
 @ex
 def ex_row(B, S):
@@ -896,7 +934,8 @@ def ex_row(B, S):
                              'pole': (tuple(lerp(Vector((0.3 * sg, 1, 0)), Vector((0.15 * sg, 1.0, -0.35)), a)), 't'),
                              'palm': ((-sg, 0, 0), 't'), 'grip': 1.0}
             P['_low_' + s] = low
-            P['clav_' + s] = (lerp(0, -5, a), lerp(2, -16, a))
+            # Schulterblätter: unten nicht nach vorn gezogen, beim Zug nach hinten-unten
+            P['clav_' + s] = (lerp(-4, -8, a), lerp(-5, -16, a))
         # Untere Position: senkrecht unter der Schulter (Welt); obere im Rumpfrahmen -> über Probe in Welt umrechnen
         pos = S.probe(dict(P, arm_l=hang_arm_w(B, 'l'), arm_r=hang_arm_w(B, 'r')))
         Dm, _ = S.solve(dict(P, arm_l=hang_arm_w(B, 'l'), arm_r=hang_arm_w(B, 'r')))
@@ -918,7 +957,7 @@ def ex_row1(B, S):
     sc = B.height / 1.8
     def make(h):
         a = h['a']
-        P = dict(pos=('hipmid', (0, 0.06 * sc, 0.84 * sc)), prot=(60, 0, 0), spine=(ROW_SPINE, 0, 0), neck=(ROW_NECK, 0, 0))
+        P = dict(pos=('hipmid', (0, 0.06 * sc, 0.84 * sc)), prot=(60, 0, 0), spine=(ROW1_SPINE, 0, 0), neck=(ROW1_NECK, 0, 0))
         P['leg_l'] = {'ankle': (B.hipx * 1.0, -0.38 * sc, B.ankz), 'pole': (0.12, -1, 0), 'foot': ('w', 6, 0, 0)}
         P['leg_r'] = {'ankle': (-B.hipx * 1.0, 0.36 * sc, B.ankz), 'pole': (-0.1, -1, 0), 'foot': ('w', 8, 0, 0)}
         # linke Hand stützt sich auf dem vorderen Knie ab (Position aus der Probe)
@@ -958,12 +997,40 @@ def ex_slrdl(B, S):
         return P
     return dict(make=make, keys=K((1.4, {'d': 0.0}), (1.4, {'d': 1.0})), turn=1, db='both', side='l')
 
+def burpee_plank(B, S):
+    """Stützposition des Burpees (eigene Berechnung, unabhängig von der Liegestütz-Schleife)."""
+    sc = B.height / 1.8
+    wz = 0.048 * sc
+    def body(theta):
+        th = theta * D
+        up = V(0, -math.cos(th), math.sin(th))
+        fr = V(0, -math.sin(th), -math.cos(th))
+        P = dict(pframe=(tuple(up), tuple(fr)), pos=('hipmid', (0, 0, 1.0)), spine=(0, 0, 0), neck=(-4, 0, 0))
+        for s in 'lr':
+            sg = sg_(s)
+            P['leg_' + s] = {'ankle_p': (-0.035 * sg, 0.0, -B.L * 0.997), 'pole': (0.05 * sg, -1, 0), 'foot': ('ball', 2), 'toes': 'flat'}
+            P['arm_' + s] = hang_arm(B, s)
+        P['anchor'] = ('balls', B.ballz + 0.004)
+        return P
+    def shz(P):
+        pos = S.probe(P)
+        return (pos['upperarm_l'].z + pos['upperarm_r'].z) / 2
+    th_top = S.bisect(lambda t: shz(body(t)) - (wz + B.ARM * 0.972), 0, 60)
+    ptop = S.probe(body(th_top))
+    P = body(th_top)
+    for s in 'lr':
+        sg = sg_(s)
+        hand = V(sg * (B.shx + 0.04 * sc), ptop['upperarm_' + s].y + 0.01 * sc, wz)
+        P['arm_' + s] = {'wrist': ('w', tuple(hand)), 'pole': ((0.72 * sg, 0.25, -0.72), 't'),
+                         'palm': ((0, 0, -1), 'w'), 'hand_dir': ((0.15 * sg, -1, 0), 'w'), 'grip': -0.25}
+    return P
+
 @ex
 def ex_burpee(B, S):
     """Burpee ohne Sprung: Stand -> Hocke, Hände am Boden -> Füße nacheinander zurück in den Stütz (gerade Linie)
     -> Füße nacheinander wieder vor -> Hocke -> Aufrichten."""
     sc = B.height / 1.8
-    top = pushup_make(B, S, knees=False).top
+    top = burpee_plank(B, S)
     ptop = S.probe(top)
     stand_hz = B.stand_z(B.hipx * 0.95, 4)
     sq_hy, sq_hz, sq_pitch, sq_flex = 0.08 * sc, 0.40 * sc, 55, 22
@@ -1202,25 +1269,18 @@ def ex_deadbuglegs(B, S):
     keys = K((1.2, z), (1.2, {'el': 1.0, 'er': 0.0}), (1.2, z), (1.2, {'el': 0.0, 'er': 1.0}))
     return dict(make=deadbug_make(B, S, False), keys=keys, turn=1, side='r', lying=True, ground=True)
 
-def chest_point(S):
-    """Vorderster Punkt des Brustbeins (Ruhepose, etwa Höhe Brustwarzen), relativ zu spine_03."""
-    me = S.body.data
-    shz = S.h['upperarm_l'].z
-    best = None
-    for v in me.vertices:
-        c = v.co
-        if abs(c.x) < 0.03 and shz - 0.17 < c.z < shz - 0.07:
-            if best is None or c.y < best.y:
-                best = c.copy()
-    return best - S.h['spine_03']
-
-def pushup_make(B, S, knees=False, clearance=0.095):
-    """Liegestütz: Körper gerade (Kopf bis Ferse bzw. Knie), Hände unter den Schultern, Ellbogen etwa 45 Grad.
-    Oben Arme fast gestreckt (nicht überstreckt), unten Brustbein etwa eine Faust (clearance) über dem Boden."""
+def pushup_make(B, S, knees=False, clearance=0.10):
+    """Liegestütz: Körper gerade (Kopf bis Ferse bzw. Knie), Ellbogen etwa 45 Grad vom Körper.
+    Unten: tiefster Punkt der Brust `clearance` (eine Faust) über dem Boden, gemessen am verformten Netz,
+    Unterarme annähernd senkrecht (Hand liegt unter dem Ellbogen). Daraus ergibt sich die Handposition.
+    Oben: Arme gestreckt, aber nicht durchgedrückt (Abstand Schulter-Hand 99,6 % der Armlänge),
+    Schulterblätter leicht nach vorn geschoben statt eingesunken."""
     sc = B.height / 1.8
     wz = 0.048 * sc
-    cp = chest_point(S)
     shin_up = 18   # Knie-Variante: Unterschenkel flach nach hinten, um 18 Grad angehoben, Füße gestreckt
+    tilt = 8       # Unterarm unten: Hand liegt 8 Grad vor der Senkrechten unter dem Ellbogen
+    abd = 45       # Oberarm unten: 45 Grad vom Rumpf nach außen
+    chest_idx = S.region('chest')
     def body(theta):
         th = theta * D
         up = V(0, -math.cos(th), math.sin(th))
@@ -1240,28 +1300,51 @@ def pushup_make(B, S, knees=False, clearance=0.095):
             P['arm_' + s] = hang_arm(B, s)
         P['anchor'] = ('knees', 0.055 * sc) if knees else ('balls', B.ballz + 0.004)
         return P
-    def shz(P):
+    def shoulders(P):
         pos = S.probe(P)
-        return (pos['upperarm_l'].z + pos['upperarm_r'].z) / 2
-    def chz(P):
-        Dm, pos = S.solve(P)
-        return (pos['spine_03'] + Dm['spine_03'] @ cp).z
-    top_z = wz + B.ARM * 0.972
-    th_top = S.bisect(lambda t: shz(body(t)) - top_z, 0, 60)
-    ptop = S.probe(body(th_top))
-    hands = {s: V(sg_(s) * (B.shx + 0.04 * sc), ptop['upperarm_' + s].y + 0.01 * sc, wz) for s in 'lr'}
-    def full(theta):
+        return {s: pos['upperarm_' + s] for s in 'lr'}
+    def elbow_dir(s):
+        sg = sg_(s)
+        return V(sg * math.sin(abd * D), math.cos(abd * D), 0)   # außen und Richtung Füße (+Y)
+    def full(theta, hands, d=1.0):
         P = body(theta)
         for s in 'lr':
             sg = sg_(s)
-            P['arm_' + s] = {'wrist': ('w', tuple(hands[s])), 'pole': ((0.72 * sg, 0.25, -0.72), 't'),
+            pole = elbow_dir(s) + V(0, 0, 0.5)
+            P['arm_' + s] = {'wrist': ('w', tuple(hands[s])), 'pole': (tuple(pole), 'w'),
                              'palm': ((0, 0, -1), 'w'), 'hand_dir': ((0.15 * sg, -1, 0), 'w'), 'grip': -0.25}
+            # oben Schulterblätter leicht vor (nicht eingesunken), unten zurück
+            P['clav_' + s] = (0, lerp(4, -6, d))
         return P
-    th_low = S.bisect(lambda t: chz(full(t)) - clearance * sc, -5, th_top)
-    print('PUSHUP knees=%s theta top %.1f low %.1f' % (knees, th_top, th_low))
+    def hands_for(theta, hands):
+        """Hände so legen, dass bei Winkel theta der Unterarm annähernd senkrecht unter dem Ellbogen steht."""
+        sh = shoulders(full(theta, hands))
+        out = {}
+        for s in 'lr':
+            ez = wz + B.FA * math.cos(tilt * D)
+            dz = ez - sh[s].z
+            dh = math.sqrt(max(1e-6, B.UA ** 2 - dz ** 2))
+            E = sh[s] + elbow_dir(s) * dh + V(0, 0, dz)
+            out[s] = V(E.x, E.y - B.FA * math.sin(tilt * D), wz)
+        return out
+    # Startwert: Hände unter den Schultern bei 15 Grad
+    sh0 = shoulders(body(15))
+    hands = {s: V(sh0[s].x + sg_(s) * 0.04 * sc, sh0[s].y, wz) for s in 'lr'}
+    th_low = 5.0
+    for it in range(3):
+        th_low = S.bisect(lambda t: S.clearance(full(t, hands), chest_idx) - clearance * sc, -5, 40, it=22)
+        hands = hands_for(th_low, hands)
+    th_low = S.bisect(lambda t: S.clearance(full(t, hands), chest_idx) - clearance * sc, -5, 40, it=22)
+    # oben: Arme gestreckt ohne Durchdrücken
+    def reach(t):
+        sh = shoulders(full(t, hands, 0.0))
+        return max((sh[s] - hands[s]).length for s in 'lr') - 0.996 * B.ARM
+    th_top = S.bisect(reach, th_low, 60)
+    print('PUSHUP knees=%s theta top %.1f low %.1f, Brust unten %.3f m' % (
+        knees, th_top, th_low, S.clearance(full(th_low, hands), chest_idx)))
     def make(h):
-        return full(lerp(th_top, th_low, h['d']))
-    make.top = full(th_top)
+        return full(lerp(th_top, th_low, h['d']), hands, h['d'])
+    make.top = full(th_top, hands, 0.0)
     return make
 
 @ex

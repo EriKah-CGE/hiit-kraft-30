@@ -128,7 +128,10 @@ Die Bewegungen stehen in `tools/blender/poses.py`, je Übung eine Funktion `ex_<
 
 1. Funktion in `poses.py` anpassen (z. B. Tiefe, Vorneigung, Dauer der Schlüsselbilder).
 2. Schnell prüfen: `blender -b --python tools/blender/build_models.py -- man --only <schlüssel> --preview vorschau/` und die Bilder ansehen. Das Protokoll zeigt je Übung `minz` (tiefster Punkt, sollte etwa 0 sein).
-3. Beide Figuren neu bauen (siehe oben) und `models/*.glb` committen.
+3. Messen: `blender -b tools/blender/test-man.blend --python tools/blender/measure.py -- <schlüssel>,<schlüssel>` misst am verformten Netz in Startpose und am Umkehrpunkt: Abstand von Brust, Becken, Oberschenkeln und Knien zum Boden, Rumpfwinkel zur Waagerechten, Krümmung von Brust- und Halswirbelsäule auf der Rückenmittellinie, Unterarm- und Ellbogenwinkel, Abspreizen des Oberarms und den Blickpunkt auf dem Boden.
+4. Beide Figuren neu bauen (siehe oben) und `models/*.glb` committen.
+
+Liegestütz (`pushup_make`): Die Tiefe ergibt sich aus dem Abstand der Brust zum Boden (eine Faust, 10 cm), gemessen am verformten Netz. Die Handposition wird daraus so berechnet, dass der Unterarm unten annähernd senkrecht unter dem Ellbogen steht; oben sind die Arme gestreckt, ohne durchgedrückt zu sein. Rudern: Rücken- und Nackenwerte stehen als `ROW_PITCH`, `ROW_SPINE`, `ROW_NECK` (beidarmig) und `ROW1_SPINE`, `ROW1_NECK` (einarmig) oben bei den Ruder-Übungen.
 
 Von Hand in Blender: `tools/blender/man.blend` öffnen, in der Aktion „all“ den Bildbereich der Übung bearbeiten (Start steht in den Rig-Eigenschaften unter `hiit`), speichern und mit `blender -b tools/blender/man.blend --python tools/blender/export_glb.py -- models/man.glb` exportieren. Beim nächsten Lauf von `build_models.py` werden Handänderungen überschrieben; dauerhafte Änderungen gehören nach `poses.py`.
 
@@ -152,8 +155,11 @@ Prüft Start, Check-in, Sätze, Varianten, Abbruch, Protokoll, Einstellungen, Co
 Kontaktbögen neu erzeugen (Playwright, Python mit Pillow):
 
 ```
-node test/figuren.cjs . out/fig man 1440 900 "" --start pushup,kneepushup,burpee,catcow,row,row1,rdl,slrdl
+node test/figuren.cjs . out/fig man 1440 900 "" --start pushup,kneepushup,row
 python test/sheet.py out/fig "man-*-side.png" test/screens/figuren/mann-side.png 6
+python test/sheet.py out/fig "man_start-*.png" test/screens/figuren/mann-start.png 3
 ```
+
+`--start` nimmt die Startpose der genannten Übungen in allen drei Ansichten auf (`<figur>_start-<übung>-<ansicht>.png`).
 
 `figuren.cjs` schreibt zusätzlich `<figur>-report.json`: sichtbare, verdeckte und abgeschnittene Beschriftungen je Ansicht und die Ankerprüfung (liegt jeder Beschriftungsanker in der Maske auf seiner Muskelgruppe).
