@@ -32,9 +32,19 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 #figHint{font-size:12px;color:var(--mute);margin-top:-2px}
 #time{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent);transition:color .3s}
 #time:empty{display:none}
+#timeRow{display:flex;align-items:center;justify-content:center;gap:20px}
+#hrBox{display:none;flex-direction:column;align-items:center;line-height:1;--z:var(--mute)}
+#hrBox.on{display:flex}
+#hrVal{font-size:48px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--z);transition:color .3s}
+#hrZone{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--z);margin-top:5px}
 #lines{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--mute);text-align:center}
 #lines div:empty{display:none}
 #target{font-size:15px;color:var(--fg);text-align:center}
+#bpmRow{display:none;align-items:center;justify-content:center;gap:10px;margin-top:2px}
+#bpmRow.on{display:flex}
+#bpmVal{font-variant-numeric:tabular-nums}
+#bpmSrc a,.set a{color:var(--rest);text-decoration:none}
+#bpmSrc{font-size:12px}
 #wbox{display:none;align-items:center;gap:10px}
 #wbox.on{display:flex}
 .wb{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;background:#2a2f37;color:var(--fg);border:0;padding:0}
@@ -146,7 +156,10 @@ summary::-webkit-details-marker{display:none}
   .wb{width:52px;height:52px;font-size:28px}
   #wval{font-size:24px;min-width:150px}
   #last{grid-area:last;font-size:18px}
-  #time{grid-area:time;font-size:120px}
+  #timeRow{grid-area:time;gap:32px}
+  #time{font-size:120px}
+  #hrVal{font-size:80px}
+  #hrZone{font-size:15px}
   #lines{grid-area:lines;font-size:15px}
   #repBox{grid-area:reps;gap:24px}
   .rb{width:88px;height:88px;font-size:44px}
@@ -217,6 +230,7 @@ summary::-webkit-details-marker{display:none}
       </div>
       <p class="line" id="lightInfo"></p>
     </div>
+    <div class="card" id="healthCard" style="display:none"><h3>Erholung</h3><p class="say" id="healthNight"></p><p class="line" id="healthTrend"></p></div>
     <div class="card" id="coachCard" style="display:none"><h3>Coach</h3><p class="say" id="coachNote"></p></div>
     <div class="card" id="painCard" style="display:none"><h3>Hinweis Schmerz</h3><p class="say" id="painText"></p><div class="row" id="painRow"></div></div>
     <div class="card" id="progCard" style="display:none">
@@ -234,6 +248,7 @@ summary::-webkit-details-marker{display:none}
       <div class="row"><input type="text" id="ciText" placeholder="Sonst noch was? (optional)" style="flex:1"></div>
     </div>
     <p class="line err" id="startErr" style="display:none"></p>
+    <div class="row" id="hrStartRow" style="margin-top:0;display:none"><button id="btnHrStart">Watch verbinden</button><span class="line" id="hrStartLine" style="margin:0"></span></div>
     <button id="btnStartSession" class="primary big">Einheit starten</button>
     <button id="btnResume" class="big" style="display:none">Angefangene Einheit fortsetzen</button>
     <div class="row" style="margin-top:0"><button id="btnHistory" style="flex:1">Verlauf und Protokoll</button><button id="btnSettings" style="flex:1">Einstellungen</button></div>
@@ -260,8 +275,8 @@ summary::-webkit-details-marker{display:none}
     <div id="target"></div>
     <div id="wbox"><button class="wb" id="wMinus">−</button><span id="wval"></span><button class="wb" id="wPlus">+</button></div>
     <div id="last"></div>
-    <div id="time"></div>
-    <div id="lines"><div id="voiceLine"></div><div id="musicLine"></div></div>
+    <div id="timeRow"><div id="time"></div><div id="hrBox"><div id="hrVal"></div><div id="hrZone"></div></div></div>
+    <div id="lines"><div id="hrWait"></div><div id="hrLine"></div><div id="voiceLine"></div><div id="musicLine"></div><div id="bpmRow"><span id="bpmVal"></span><button class="small" id="btnTap">Takt tippen</button></div><div id="bpmSrc"></div></div>
     <div id="repBox"><button class="rb" id="rMinus">−</button><div id="reps">0</div><button class="rb" id="rPlus">+</button></div>
     <div id="feelBox"><button data-f="leicht">Leicht</button><button data-f="passt">Passt</button><button data-f="hart">Zu hart</button></div>
     <div id="hardPanel"></div>
@@ -302,6 +317,24 @@ summary::-webkit-details-marker{display:none}
       <div class="row"><button type="button" id="ttsTest">Stimme testen</button> <span class="line" id="ttsTestOut"></span></div>
     </div>
     <div class="card">
+      <h3>Apple Watch</h3>
+      <label class="t"><input type="checkbox" data-s="hrOn"> Live-Puls verwenden</label>
+      <p class="line">Auf der Watch die App HeartBLE starten und das Senden einschalten, dann hier verbinden. Geht nur in Chrome oder Edge (PC, Mac, Android), nicht in Safari und nicht auf dem iPhone. Die Geräteauswahl öffnet sich nur nach einem Klick, nach dem Neuladen der Seite also neu verbinden.</p>
+      <div class="row"><button class="small" id="btnHrConnect">Pulsgurt / Watch verbinden</button><button class="small ghost" id="btnHrDisconnect">Trennen</button><span class="line" id="hrStatus" style="margin:0"></span></div>
+      <label class="f">Ruhepuls<input type="number" min="30" max="120" data-s="hrRest" id="inHrRest"></label>
+      <label class="f">Maximalpuls (Vorgabe 220 − 34 = 186)<input type="number" min="120" max="230" data-s="hrMax"></label>
+      <p class="line" id="hrZonesLine"></p>
+      <label class="t"><input type="checkbox" data-s="hrPause"> Wechsel nach Puls</label>
+      <p class="line">Der Wechsel endet frühestens nach 15 s und spätestens nach 60 s, dazwischen, sobald der Puls unter 70 % des Maximalpulses fällt. Ohne Puls wie bisher 25 s.</p>
+    </div>
+    <div class="card">
+      <h3>Schlaf und Ruhewerte</h3>
+      <p class="line" style="margin-top:0">Ein iPhone-Kurzbefehl schickt jeden Morgen Schlaf, Ruhepuls, HRV, Schritte und aktive Energie an einen eigenen Server (Cloudflare Worker). Daraus füllt die App den Check-in vor und passt den Plan an. Anleitung: <a href="https://github.com/EriKah-CGE/hiit-kraft-30/blob/main/docs/kurzbefehl.md" target="_blank" rel="noopener">Kurzbefehl einrichten</a>.</p>
+      <label class="f">Health-Server-URL<input type="text" data-s="healthUrl" autocomplete="off"></label>
+      <label class="f">Health-Token<input type="password" data-s="healthToken" autocomplete="off"></label>
+      <div class="row"><button class="small" id="btnHealthTest">Verbindung testen</button><span class="line" id="healthTestLine" style="margin:0"></span></div>
+    </div>
+    <div class="card">
       <h3>Spotify</h3>
       <p class="line" style="margin-top:0">Spotify Premium nötig. In der Spotify-Entwicklerkonsole muss als Redirect-URI exakt diese Adresse eingetragen sein:<br><code id="spRedirect"></code></p>
       <label class="f">Client-ID<input type="text" data-s="spClientId" autocomplete="off"></label>
@@ -315,6 +348,14 @@ summary::-webkit-details-marker{display:none}
       <label class="t"><input type="checkbox" data-s="newTrackPerPair"> Neues Lied je Paar</label>
       <label class="t"><input type="checkbox" data-s="challenge"> Song-Challenge Liegestütze am Ende (ab Woche 2)</label>
       <label class="f">Grundlautstärke <span id="volVal"></span><input type="range" min="0" max="1" step="0.05" data-s="volume"></label>
+    </div>
+    <div class="card">
+      <h3>Tempo (BPM)</h3>
+      <p class="line" style="margin-top:0">Ist das Tempo des laufenden Lieds bekannt, bewegt sich die Figur in den Sätzen im Takt: eine Wiederholung dauert 4 Schläge, bei Stufe 1 (Tempo) so viele Schläge, dass etwa 3 s runter und 1 s hoch herauskommen. Im Training lässt sich das Tempo mit „Takt tippen“ unter dem Timer oder der Taste T bestimmen.</p>
+      <label class="f">GetSongBPM-Schlüssel<input type="password" data-s="gsbKey" autocomplete="off"></label>
+      <p class="line">Schlägt das Tempo neuer Titel beim Liedwechsel automatisch nach, einmal pro Titel. Den kostenlosen Schlüssel gibt es unter <a href="https://getsongbpm.com/api" target="_blank" rel="noopener">getsongbpm.com/api</a>; als Website diese Adresse angeben, auf der der verlangte Rücklink steht: <code id="gsbSite"></code>. Getippte und hier eingetragene Werte haben Vorrang vor nachgeschlagenen.</p>
+      <p class="line">BPM-Daten von <a href="https://getsongbpm.com" target="_blank" rel="noopener">GetSongBPM.com</a></p>
+      <div class="row"><span class="line" id="bpmInfo" style="margin:0"></span><button class="small" id="btnBpmRetry">Nicht gefundene erneut suchen</button></div>
     </div>
   </div>
   <div class="controls"><button id="btnSetBack" class="primary">Fertig</button></div>
@@ -351,6 +392,9 @@ summary::-webkit-details-marker{display:none}
 <script src="coach.js"></script>
 <script src="voice.js"></script>
 <script src="spotify.js"></script>
+<script src="bpm.js"></script>
+<script src="hr.js"></script>
+<script src="health.js"></script>
 <script>
 // ---------- Übungen ----------
 const EX={
@@ -464,15 +508,26 @@ const EXPLAIN=[
 
 // ---------- Speicher ----------
 const KEY='hiit30.v2';
-const DEF_SETTINGS={apiKey:'',model:'claude-sonnet-5-5',checkin:true,voice:false,announce:true,tts:'browser',elKey:'',elVoice:'',spClientId:'',playlist:null,songWarm:null,songFin:null,songChal:null,newTrackPerPair:false,challenge:false,volume:.8};
+// Vorgabe für den eigenen Health-Worker (Cloudflare), überschreibbar in den Einstellungen
+const HEALTH_URL_DEFAULT='';
+const DEF_SETTINGS={apiKey:'',model:'claude-sonnet-5-5',checkin:true,voice:false,announce:true,tts:'browser',elKey:'',elVoice:'',spClientId:'',playlist:null,songWarm:null,songFin:null,songChal:null,newTrackPerPair:false,challenge:false,volume:.8,gsbKey:'',hrOn:false,hrRest:'',hrMax:186,hrPause:false,hrDevice:'',healthUrl:HEALTH_URL_DEFAULT,healthToken:''};
 let firstRun=false;
-let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null,settings:{},spTok:null,coachNote:'',progDone:0};
+let store={sessions:[],stages:{},weights:{},overrideWeek:null,cur:null,settings:{},spTok:null,coachNote:'',progDone:0,bpm:{},health:null};
 try{const s=localStorage.getItem(KEY);if(s)store=Object.assign(store,JSON.parse(s));else firstRun=true;}catch(e){}
 if(!Array.isArray(store.sessions))store.sessions=[];
 if(!store.weights)store.weights={};
 if(!store.stages)store.stages={};
 store.settings=Object.assign({},DEF_SETTINGS,store.settings||{});
 store.progDone=store.progDone||0;
+// Tempo je Spotify-Track-ID: {bpm, source:'tap'|'db'|'manual', name, artist}; bpm null = bei GetSongBPM nicht gefunden
+if(!store.bpm||typeof store.bpm!=='object')store.bpm={};
+const trackId=uri=>String(uri||'').split(':').pop()||null;
+['songWarm','songFin','songChal'].forEach(k=>{
+  const so=store.settings[k];if(!so||!('bpm' in so))return;
+  const id=trackId(so.uri);
+  if(id&&+so.bpm>0&&!(store.bpm[id]&&store.bpm[id].bpm))store.bpm[id]={bpm:Math.round(+so.bpm),source:'manual',name:so.name||'',artist:so.artist||''};
+  delete so.bpm;
+});
 store.sessions.forEach(s=>{s.sets=s.sets||{};s.stage=s.stage||{};s.wts=s.wts||{};s.feel=s.feel||{};s.swaps=s.swaps||{};if(s.plus==null)s.plus=0;});
 const ST=()=>store.settings;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
@@ -499,6 +554,7 @@ function applyConfig(){
   Coach.configure({apiKey:s.apiKey,model:s.model||'claude-sonnet-5-5'});
   Voice.configure({tts:s.tts,elKey:s.elKey,elVoice:s.elVoice});
   Music.configure({clientId:s.spClientId,baseVolume:+s.volume});
+  Health.configure({url:s.healthUrl||'',token:s.healthToken||''});
 }
 Voice.configure({onStatus:t=>{$('voiceLine').textContent='Sprachsteuerung: '+t;}});
 Voice.on({onCommand:(cmd,n)=>voiceCommand(cmd,n)});
@@ -506,8 +562,9 @@ Music.configure({
   onTokens:t=>{store.spTok=t;save();},
   onState:st=>{
     $('musicLine').textContent=st&&st.name?'Musik: '+st.name+(st.artist?' – '+st.artist:''):'';
-    const s=ST(),song=[s.songWarm,s.songFin,s.songChal].find(x=>x&&x.bpm&&st&&st.id&&x.uri===('spotify:track:'+st.id));
-    if(typeof Rig!=='undefined')Rig.setCycle(song?4*60/song.bpm:null);
+    const id=st&&st.id||null;
+    if(id!==curTrack.id){curTrack={id,name:st&&st.name||'',artist:st&&st.artist||''};Tempo.resetTap();tapN=0;bpmErr='';if(id)autoBpm(curTrack);}
+    renderBpm();updateCycle();
   }
 });
 if(store.spTok)Music.setTokens(store.spTok);
@@ -569,7 +626,7 @@ function rebuild(){
   steps=buildSteps(S);
   const i=resolveIdx(ord),changed=steps[i].ord!==ord;
   idx=i;S.curOrd=steps[i].ord;save();
-  if(changed){remaining=steps[i].dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;if(steps[i].kind==='set')setStart=Date.now();render();enterStep(true);}
+  if(changed){RT.hrRest=false;remaining=steps[i].dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;if(steps[i].kind==='set')setStart=Date.now();render();enterStep(true);}
   else render();
 }
 
@@ -581,6 +638,7 @@ function compactSession(s){
   if(s.challenge)o.challenge=s.challenge.reps;
   if(s.light)o.light=true;
   if(s.checkin)o.checkin=s.checkin;
+  const hr=hrSummary(s);if(hr)o.hr=hr;
   return o;
 }
 function lastN(n){return store.sessions.slice(-n).map(compactSession);}
@@ -601,7 +659,7 @@ async function beginSession(){
       try{adj=await Promise.race([Coach.planAdjust(planCtx()),new Promise((_,rej)=>setTimeout(()=>rej(new Error('Zeitüberschreitung')),25000))]);}
       catch(e){err='Coach nicht erreichbar ('+e.message+'). Plan unverändert.';}
       btn.disabled=false;btn.textContent='Einheit starten';
-    } else adj=Coach.localAdjust(S.checkin);
+    } else adj=Coach.localAdjust(S.checkin,healthSum());
     if(adj){applyAdjust(adj);say=adj.say||'';S.adjust=adj;}
   }
   // vom Startbildschirm übernommene Varianten (Schmerz-Hinweis)
@@ -630,7 +688,7 @@ function planCtx(){
     checkin:S.checkin,lastSessions:lastN(3),
     exercises:origKeys(day).map(k=>({key:k,name:EX[k].name,range:EX[k].range,lighter:LIGHTER[k]||null})),
     weights:Object.fromEntries(origKeys(day).filter(k=>WT[k]).map(k=>[k,wtDefault(k,S.week)])),
-    stages:store.stages,notes:store.coachNote||''};
+    stages:store.stages,notes:store.coachNote||'',health:healthCtx()};
 }
 function applyAdjust(a){
   const P=S.plan;
@@ -670,7 +728,7 @@ function stopExtras(){
   $('voiceLine').textContent='';
   if(RT.music)Music.pause().catch(()=>{});
   RT.music=false;
-  if(typeof Rig!=='undefined')Rig.setCycle(null);
+  curTrack={id:null,name:'',artist:''};tapN=0;renderBpm();updateCycle();
 }
 
 // ---------- Rendering ----------
@@ -717,6 +775,8 @@ function render(){
   $('coachRow').style.display=s.kind==='end'?'none':'';
   $('btnAbort').style.display=s.kind==='end'?'none':'';
   $('phase').textContent=s.kind==='rest'?'Wechsel · '+fmt(remaining):stepPhase(s);
+  if(!(s.kind==='rest'&&RT.hrRest))$('hrWait').textContent='';
+  renderHr();
 
   if(s.kind==='timed'){
     const ex=EX[s.ex];
@@ -775,6 +835,7 @@ function render(){
     $('mainBtn').textContent='Speichern und schließen';$('skip').style.display='none';
     renderSummary();
   }
+  updateCycle();
 }
 
 function renderSet(s){
@@ -934,9 +995,11 @@ function loop(){
   accum();
   const s=steps[idx];
   updateClock();
+  hrSample();
   if(s.kind==='end'){pause();return;}
   if(s.kind==='set')return;
   remaining=(endAt-performance.now())/1000;
+  if(s.kind==='rest'&&RT.hrRest&&hrRestCheck())return;
   const sec=Math.ceil(remaining);
   if(sec<=3&&sec>0&&sec!==lastBeep){lastBeep=sec;beep(1000,90,.35);}
   if(remaining<=0){advance(true);return;}
@@ -958,6 +1021,9 @@ function goTo(i,auto){
   idx=i;S.idx=idx;S.curOrd=steps[idx].ord;save();
   const n=steps[idx];
   remaining=n.dur||0;endAt=performance.now()+remaining*1000;lastBeep=-1;hardOpen=false;RT.repFor=null;
+  RT.hrRest=n.kind==='rest'&&!!ST().hrPause&&HR.current()!=null;
+  if(RT.hrRest){remaining=HR_REST_MAX;endAt=performance.now()+remaining*1000;}
+  if(prevStep&&prevStep.kind==='finisher'&&n.kind!=='finisher'&&S.hrRecov==null)RT.finEndT=Math.floor((S.activeMs||0)/1000);
   if(auto)switchSound(n.kind);
   if(n.kind==='set')setStart=Date.now();
   if(n.kind==='end')pause();
@@ -1047,7 +1113,8 @@ function askCtx(){
   return {step:stepPhase(s),stepKind:s.kind,
     exercise:k&&EX[k]?{key:k,name:EX[k].name,range:EX[k].range||null,lighter:LIGHTER[k]||null}:null,
     set:s.kind==='set'?s.setIndex+1:null,reps:k?(S.sets[k]||[]):[],current:repVal,
-    feel:k?(S.feel[k]||[]):[],weights:S.wts,plan:S.plan,checkin:S.checkin,remainingMin:Math.round(restEstimate()/60)};
+    feel:k?(S.feel[k]||[]):[],weights:S.wts,plan:S.plan,checkin:S.checkin,remainingMin:Math.round(restEstimate()/60),
+    hr:hrCtx()};
 }
 async function askCoach(text,fromVoice){
   text=(text||'').trim();if(!text||!S)return;
@@ -1164,7 +1231,7 @@ async function musicInit(){
     const ok=await Music.connect();
     if(!S)return;
     if(!ok){$('musicLine').textContent='Spotify-Player nicht bereit (Premium und Anmeldung prüfen)';return;}
-    RT.music=true;$('musicLine').textContent='';
+    RT.music=true;$('musicLine').textContent='';renderBpm();
     Music.setBase(+s.volume);
     const cur=steps[idx];
     if(cur.type==='warm'&&s.songWarm&&S.plan.warmSec){await Music.playTracks([s.songWarm.uri]);RT.playlistPending=true;}
@@ -1186,6 +1253,212 @@ function musicStep(s,prevStep,init){
   if(s.kind==='challenge'&&set.songChal&&!RT.chalPlayed){RT.chalPlayed=1;RT.afterSong=true;mcall(Music.playTracks([set.songChal.uri]));}
   if(s.type==='cool'&&s.kind==='timed'&&RT.afterSong){RT.afterSong=false;if(set.playlist)mcall(Music.playContext(set.playlist.uri));}
 }
+
+// ---------- Puls (Web Bluetooth) ----------
+const HR_REST_MIN=15,HR_REST_MAX=60;
+const ZONE_COL=['','#8aa4c8','#4cc38a','#f4b942','#f08a3e','#e4572e'];
+let hrStatus='';
+function hrRestVal(){const v=+ST().hrRest;if(v>=30&&v<=120)return v;const h=healthSum(),r=h&&h.last.restingHr;return r>=30&&r<=120?Math.round(r):60;}
+function hrMaxVal(){const v=+ST().hrMax;return v>=120&&v<=230?v:186;}
+// Karvonen: Anteil an der Herzfrequenzreserve, Zone 1 unter 60 %, Zone 2 ab 60 %, … Zone 5 ab 90 %
+function hrZone(b){const r=hrRestVal(),m=hrMaxVal(),p=(b-r)/Math.max(1,m-r);return Math.max(1,Math.min(5,Math.floor(p*10+1e-9)-4));}
+function zoneFrom(z){const r=hrRestVal(),m=hrMaxVal();return Math.round(r+(m-r)*(z+4)/10);}
+function hrRestThr(){return Math.round(hrMaxVal()*.7);}
+function renderHr(){
+  const b=S?HR.current():null,box=$('hrBox');
+  box.classList.toggle('on',b!=null);
+  if(b==null)return;
+  const z=hrZone(b);box.style.setProperty('--z',ZONE_COL[z]);
+  $('hrVal').textContent=b;$('hrZone').textContent='Puls · Zone '+z;
+}
+// jede Sekunde aktiver Zeit ein Wert; Satz-, Finisher- und Challenge-Werte laufend als Durchschnitt und Maximum
+function hrSample(){
+  const b=HR.current();if(b==null||!S)return;
+  const t=Math.floor((S.activeMs||0)/1000);
+  if(t===RT.hrT)return;RT.hrT=t;
+  (S.hr=S.hr||[]).push([t,b]);
+  const s=steps[idx];let key=null,i=0;
+  if(s.kind==='set'){key=exOf(s);i=s.setIndex;}
+  else if(s.kind==='finisher')key='finisher';
+  else if(s.kind==='challenge')key='challenge';
+  if(key){
+    S.hrSets=S.hrSets||{};const arr=S.hrSets[key]=S.hrSets[key]||[];
+    const e=arr[i]||{avg:0,max:0,n:0},n=e.n+1;
+    arr[i]={avg:Math.round((e.avg*e.n+b)/n),max:Math.max(e.max,b),n};
+  }
+  if(RT.finEndT!=null&&S.hrRecov==null&&b<120){S.hrRecov=t-RT.finEndT;RT.finEndT=null;}
+}
+// Wechsel nach Puls: true, wenn der Schritt beendet wurde
+function hrRestCheck(){
+  const el=HR_REST_MAX-remaining,b=HR.current(),thr=hrRestThr();
+  if(el>=HR_REST_MIN&&(b!=null?b<thr:el>=REST_SEC)){advance(true);return true;}
+  $('hrWait').textContent=el<HR_REST_MIN?`Wechsel nach Puls, frühestens in ${Math.ceil(HR_REST_MIN-el)} s`:(b!=null?`wartet auf Puls < ${thr}`:`kein Puls, Wechsel endet nach ${REST_SEC} s`);
+  return false;
+}
+function hrSummary(s){
+  if(!s||!s.hr||!s.hr.length)return null;
+  const v=s.hr.map(x=>x[1]);
+  const o={avg:Math.round(v.reduce((a,b)=>a+b,0)/v.length),max:v.reduce((a,b)=>Math.max(a,b),0)};
+  const hs=s.hrSets||{},sets={};
+  for(const k in hs){if(k==='finisher'||k==='challenge')continue;sets[k]=hs[k].map(x=>x?[x.avg,x.max]:null);}
+  if(Object.keys(sets).length)o.sets=sets;
+  if(hs.finisher&&hs.finisher[0])o.finisherMax=hs.finisher[0].max;
+  if(hs.challenge&&hs.challenge[0])o.challengeMax=hs.challenge[0].max;
+  if(s.hrRecov!=null)o.recovery120=s.hrRecov;
+  return o;
+}
+function hrCtx(){
+  const b=HR.current(),sum=hrSummary(S);
+  if(b==null&&!sum)return null;
+  return Object.assign({now:b,zone:b!=null?hrZone(b):null,restingHr:hrRestVal(),maxHr:hrMaxVal()},sum||{});
+}
+HR.on({
+  onBpm:()=>{if(S)renderHr();},
+  onStatus:t=>{
+    hrStatus=t;
+    const lost=!/^verbunden|^getrennt$/.test(t);
+    $('hrLine').textContent=S&&lost?'Puls: '+t:'';
+    if(!lost)$('hrLine').textContent='';
+    if(S)renderHr();
+    if($('viewSettings').classList.contains('active'))renderHrSettings();
+    if($('viewStart').classList.contains('active'))renderHrStart();
+  }
+});
+async function hrConnect(lineEl){
+  lineEl.textContent='Gerät wählen …';lineEl.classList.remove('err');
+  try{const n=await HR.connect();ST().hrDevice=n;save();lineEl.textContent='verbunden: '+n;}
+  catch(e){lineEl.textContent=e&&e.name==='NotFoundError'?'Kein Gerät gewählt.':(e&&e.message||String(e));lineEl.classList.add('err');}
+}
+function renderHrSettings(){
+  const con=HR.connected(),dn=ST().hrDevice;
+  $('hrStatus').classList.remove('err');
+  $('hrStatus').textContent=!HR.supported()?'Dieser Browser kann kein Web Bluetooth (Chrome oder Edge verwenden).':con?'verbunden: '+HR.deviceName():(dn?'nicht verbunden (zuletzt '+dn+')':'nicht verbunden');
+  $('btnHrDisconnect').style.display=con?'':'none';
+  $('btnHrConnect').disabled=!HR.supported();
+  const h=healthSum(),r=h&&h.last.restingHr;
+  $('inHrRest').placeholder=r?'aus Health: '+Math.round(r):'leer = 60';
+  $('hrZonesLine').textContent=`Zonen nach Karvonen (Ruhepuls ${hrRestVal()}, max ${hrMaxVal()}): Zone 2 ab ${zoneFrom(2)}, Zone 3 ab ${zoneFrom(3)}, Zone 4 ab ${zoneFrom(4)}, Zone 5 ab ${zoneFrom(5)}. Wechsel nach Puls bei unter ${hrRestThr()}.`;
+}
+function renderHrStart(){
+  const show=!!ST().hrOn&&!HR.connected();
+  $('hrStartRow').style.display=show?'':'none';
+  if(!show)return;
+  $('btnHrStart').style.display=HR.supported()?'':'none';
+  if(!HR.supported())$('hrStartLine').textContent='Live-Puls: Web Bluetooth fehlt in diesem Browser (Chrome oder Edge verwenden).';
+  else if(!$('hrStartLine').textContent)$('hrStartLine').textContent=ST().hrDevice?'zuletzt '+ST().hrDevice:'';
+}
+$('btnHrConnect').onclick=async()=>{await hrConnect($('hrStatus'));renderHrSettings();};
+$('btnHrDisconnect').onclick=()=>{HR.disconnect();renderHrSettings();};
+$('btnHrStart').onclick=async()=>{await hrConnect($('hrStartLine'));renderHrStart();};
+
+// ---------- Schlaf und Ruhewerte (Health-Worker) ----------
+let healthTry=0,healthErr='';
+function healthSum(){return Health.summarize(store.health&&store.health.days);}
+async function loadHealth(force){
+  if(!Health.ready())return;
+  if(!force&&Date.now()-healthTry<10*60e3)return;
+  healthTry=Date.now();
+  try{const days=await Health.days(8);store.health={at:Date.now(),days};healthErr='';save();}
+  catch(e){healthErr=e.message;}
+  if($('viewStart').classList.contains('active'))renderStart();
+}
+const fmtH=h=>{const m=Math.round(h*60);return Math.floor(m/60)+':'+String(m%60).padStart(2,'0');};
+const r0=v=>Math.round(v);
+function healthCtx(){
+  const h=healthSum();if(!h)return null;
+  const L=h.last,A=h.avg7,o={date:L.date,lastNight:{}};
+  ['sleepHours','restingHr','hrv','steps','activeKcal'].forEach(k=>{if(L[k]!=null)o.lastNight[k]=L[k];});
+  if(A.n){o.avg7={};['restingHr','hrv','sleepHours'].forEach(k=>{if(A[k]!=null)o.avg7[k]=Math.round(A[k]*10)/10;});o.avg7.days=A.n;}
+  return o;
+}
+function renderHealth(){
+  const h=healthSum();
+  $('healthCard').style.display=h?'':'none';
+  if(!h)return;
+  const L=h.last,A=h.avg7,parts=[];
+  if(L.sleepHours!=null)parts.push(fmtH(L.sleepHours)+' h Schlaf');
+  if(L.restingHr!=null)parts.push('Ruhepuls '+r0(L.restingHr));
+  if(L.hrv!=null)parts.push('HRV '+r0(L.hrv));
+  $('healthNight').textContent='Letzte Nacht: '+(parts.join(' · ')||'keine Werte');
+  const tr=[],sg=v=>(v>0?'+':v<0?'−':'±')+Math.abs(v);
+  if(A.n&&L.restingHr!=null&&A.restingHr!=null)tr.push(`Ruhepuls ${sg(r0(L.restingHr-A.restingHr))}`);
+  if(A.n&&L.hrv!=null&&A.hrv!=null)tr.push(`HRV ${sg(r0(L.hrv-A.hrv))} ms`);
+  let t=tr.length?`Gegenüber dem ${A.n}-Tage-Mittel: ${tr.join(' · ')}.`:'';
+  const rhUp=L.restingHr!=null&&A.restingHr!=null&&L.restingHr-A.restingHr>=5,hrvDown=L.hrv!=null&&A.hrv&&L.hrv<=A.hrv*.85;
+  if(rhUp||hrvDown)t+=` ${rhUp?'Ruhepuls deutlich erhöht':'HRV deutlich niedriger'}: heute leichter trainieren.`;
+  const sc=Health.sleepScale(L.sleepHours);
+  if(sc&&!ci.sleepManual){ci.sleep=sc;t+=` Schlaf im Check-in auf ${sc} gesetzt.`;}
+  $('healthTrend').textContent=t.trim();
+}
+$('btnHealthTest').onclick=async()=>{
+  const l=$('healthTestLine');l.classList.remove('err');
+  if(!Health.ready()){l.textContent='URL und Token eintragen.';l.classList.add('err');return;}
+  l.textContent='Teste …';
+  try{const d=await Health.latest();l.textContent=d?`Verbindung steht, letzte Daten vom ${d.date}.`:'Verbindung steht, noch keine Daten.';loadHealth(true);}
+  catch(e){l.textContent=e.message;l.classList.add('err');}
+};
+
+// ---------- Tempo (BPM) ----------
+const SRC_LABEL={tap:'getippt',manual:'eingetragen',db:'GetSongBPM'};
+const GSB_LINK='BPM-Daten von <a href="https://getsongbpm.com" target="_blank" rel="noopener">GetSongBPM.com</a>';
+let curTrack={id:null,name:'',artist:''},tapN=0,tapTimer=null,bpmErr='',bpmPending=null,cycleSet=null;
+const bpmTried=new Set();
+function bpmOf(id){const e=id&&store.bpm[id];return e&&e.bpm>0?e.bpm:null;}
+// Nachschlagen nur ohne vorhandenen Eintrag; "nicht gefunden" wird gespeichert, Fehler nicht (nächster Seitenaufruf versucht es wieder)
+async function autoBpm(t){
+  const key=(ST().gsbKey||'').trim();
+  if(!key||!t||!t.id||store.bpm[t.id]||bpmTried.has(t.id))return;
+  bpmTried.add(t.id);bpmPending=t.id;renderBpm();
+  try{
+    const bpm=await Tempo.lookup(key,t.name,t.artist);
+    const e=store.bpm[t.id];
+    if(!e||e.source==='db'){store.bpm[t.id]={bpm:bpm||null,source:'db',name:t.name||'',artist:t.artist||''};save();}
+  }catch(e){if(curTrack.id===t.id)bpmErr='GetSongBPM: '+(e&&e.message||e);}
+  if(bpmPending===t.id)bpmPending=null;
+  renderBpm();updateCycle();
+}
+function tapBeat(){
+  if(!curTrack.id)return;
+  const r=Tempo.tap(performance.now());tapN=r.n;bpmErr='';
+  if(r.bpm){store.bpm[curTrack.id]={bpm:r.bpm,source:'tap',name:curTrack.name,artist:curTrack.artist};save();updateCycle();}
+  clearTimeout(tapTimer);tapTimer=setTimeout(()=>{tapN=0;renderBpm();},2600);
+  renderBpm();
+}
+function renderBpm(){
+  const on=!!(S&&RT.music&&curTrack.id);
+  $('bpmRow').classList.toggle('on',on);
+  $('bpmSrc').innerHTML=on&&(ST().gsbKey||'').trim()?GSB_LINK:'';
+  if(!on)return;
+  const e=store.bpm[curTrack.id];let t;
+  if(tapN>0&&tapN<4)t=`Takt: ${tapN} von 4 Schlägen`;
+  else if(e&&e.bpm)t=`${e.bpm} BPM (${SRC_LABEL[e.source]||e.source})`;
+  else if(bpmPending===curTrack.id)t='BPM werden gesucht …';
+  else if(bpmErr)t=bpmErr;
+  else if(e)t='BPM bei GetSongBPM nicht gefunden';
+  else t='BPM unbekannt';
+  $('bpmVal').textContent=t;
+}
+// Figur im Takt: Dauer einer Wiederholung aus der BPM des laufenden Lieds, nur in Sätzen
+function updateCycle(){
+  let c=null;
+  if(S&&steps.length&&RT.music){
+    const s=steps[idx],bpm=bpmOf(curTrack.id);
+    if(s&&s.kind==='set'&&bpm){
+      const beat=60/bpm,k=exOf(s);
+      c=(S.stage[k]||0)===1?(Math.max(1,Math.round(3/beat))+Math.max(1,Math.round(1/beat)))*beat:4*beat;
+    }
+  }
+  if(c!==cycleSet){cycleSet=c;if(typeof Rig!=='undefined')Rig.setCycle(c);}
+}
+function renderBpmInfo(){
+  const v=Object.values(store.bpm),n=v.filter(e=>e&&e.bpm).length,miss=v.filter(e=>e&&!e.bpm).length;
+  $('bpmInfo').textContent=`${n} Titel mit Tempo gespeichert${miss?', '+miss+' nicht gefunden':''}.`;
+  $('btnBpmRetry').style.display=miss?'':'none';
+}
+$('btnBpmRetry').onclick=()=>{for(const id in store.bpm)if(!store.bpm[id]||!store.bpm[id].bpm)delete store.bpm[id];bpmTried.clear();save();renderBpmInfo();document.querySelectorAll('.song').forEach(renderSong);};
+// pointerdown statt click: genauerer Zeitpunkt des Schlags
+$('btnTap').addEventListener('pointerdown',e=>{e.preventDefault();tapBeat();});
+$('btnTap').addEventListener('click',e=>{e.preventDefault();$('btnTap').blur();});
 
 // ---------- Buttons ----------
 $('mainBtn').addEventListener('click',()=>{
@@ -1229,6 +1502,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight'){$('skip').click();}
   else if(e.key==='ArrowLeft'){$('prev').click();}
   else if(e.key==='p'||e.key==='P'){if(s.kind!=='end')running?pause():start();}
+  else if(e.key==='t'||e.key==='T'){if($('bpmRow').classList.contains('on'))tapBeat();else handled=false;}
   else handled=false;
   if(handled){e.preventDefault();if(document.activeElement&&document.activeElement.tagName==='BUTTON')document.activeElement.blur();}
 });
@@ -1240,7 +1514,7 @@ function chipRow(el,vals,labels,cur,onSel){
 }
 function renderCheckin(){
   const on=ST().checkin;$('checkinCard').style.display=on?'':'none';if(!on)return;
-  chipRow($('ciSleep'),[1,2,3,4,5],['1','2','3','4','5'],ci.sleep,v=>{ci.sleep=v;renderCheckin();});
+  chipRow($('ciSleep'),[1,2,3,4,5],['1','2','3','4','5'],ci.sleep,v=>{ci.sleep=v;ci.sleepManual=true;renderCheckin();});
   chipRow($('ciSore'),[0,1,2],['keiner','leicht','stark'],ci.sore,v=>{ci.sore=v;renderCheckin();});
   chipRow($('ciEnergy'),[1,2,3,4,5],['1','2','3','4','5'],ci.energy,v=>{ci.energy=v;renderCheckin();});
   chipRow($('ciTime'),[15,20,30],['15 min','20 min','30 min'],ci.time,v=>{ci.time=v;renderCheckin();});
@@ -1288,8 +1562,11 @@ function renderStart(){
       $('painSwap').onclick=()=>{if(sel.swaps[o]===v)delete sel.swaps[o];else sel.swaps[o]=v;renderStart();};
     }
   }
+  renderHealth();
+  renderHrStart();
   renderProg();
   renderCheckin();
+  loadHealth(false);
 }
 $('chipA').onclick=()=>{sel.day='A';sel.dayManual=true;sel.swaps={};renderStart();};
 $('chipB').onclick=()=>{sel.day='B';sel.dayManual=true;sel.swaps={};renderStart();};
@@ -1342,8 +1619,8 @@ function renderSettings(){
   document.querySelectorAll('[data-s]').forEach(el=>{const k=el.dataset.s;if(el.type==='checkbox')el.checked=!!s[k];else el.value=s[k]==null?'':s[k];});
   $('volVal').textContent=Math.round(s.volume*100)+' %';
   $('voiceSupport').textContent=Voice.supported()?'':'Dieser Browser unterstützt keine Spracherkennung (Chrome oder Edge verwenden).';
-  $('spRedirect').textContent=Music.redirectUri();
-  renderSpotify();
+  $('spRedirect').textContent=Music.redirectUri();$('gsbSite').textContent=Music.redirectUri();
+  renderSpotify();renderBpmInfo();renderHrSettings();
 }
 function renderSpotify(){
   const s=ST(),con=Music.connected();
@@ -1356,10 +1633,10 @@ function renderSpotify(){
 }
 function renderSong(el){
   const slot=el.dataset.slot,s=ST(),song=s[slot];
-  const title=el.querySelector('label').outerHTML;
+  const title=el.querySelector('label').outerHTML,sid=song?trackId(song.uri):null,be=sid?store.bpm[sid]:null;
   el.innerHTML=title+
     (song?`<div class="row" style="margin-top:4px"><span style="flex:1;font-size:14px">${esc(song.name)} – ${esc(song.artist||'')} (${fmt(song.duration/1000)})</span><button class="small ghost" data-act="rm">entfernen</button></div>
-      <label class="f" style="margin-top:6px">BPM (optional, Bewegungstakt der Figur)<input type="number" min="40" max="240" data-act="bpm" value="${song.bpm||''}"></label>`:'')+
+      <label class="f" style="margin-top:6px">BPM${be&&be.bpm&&be.source!=='manual'?' ('+SRC_LABEL[be.source]+')':''}<input type="number" min="40" max="240" data-act="bpm" value="${be&&be.bpm?be.bpm:''}" placeholder="${be&&!be.bpm?'bei GetSongBPM nicht gefunden':'leer = tippen oder nachschlagen'}"></label>`:'')+
     `<div class="row" style="margin-top:6px"><input type="text" placeholder="Lied suchen" data-act="q" style="flex:1"><button class="small" data-act="search">Suchen</button></div><div class="res"></div>`;
   el.querySelector('[data-act="search"]').onclick=async()=>{
     const q=el.querySelector('[data-act="q"]').value.trim();if(!q)return;
@@ -1369,12 +1646,22 @@ function renderSong(el){
     try{
       const items=await Music.search(q);
       res.innerHTML=items.length?'':'<span class="line">Keine Treffer.</span>';
-      items.forEach(t=>{const b=document.createElement('button');b.textContent=`${t.name} – ${t.artist} (${fmt(t.duration/1000)})`;b.onclick=()=>{ST()[slot]={uri:t.uri,name:t.name,artist:t.artist,duration:t.duration,bpm:null};save();renderSong(el);};res.appendChild(b);});
+      items.forEach(t=>{const b=document.createElement('button');b.textContent=`${t.name} – ${t.artist} (${fmt(t.duration/1000)})`;b.onclick=()=>{ST()[slot]={uri:t.uri,name:t.name,artist:t.artist,duration:t.duration};save();renderSong(el);autoBpm({id:t.id,name:t.name,artist:t.artist}).then(()=>{renderSong(el);renderBpmInfo();});};res.appendChild(b);});
     }catch(e){res.innerHTML=`<span class="line err">Spotify: ${esc(e.message)}</span>`;}
   };
   el.querySelector('[data-act="q"]').addEventListener('keydown',e=>{if(e.key==='Enter')el.querySelector('[data-act="search"]').click();});
   const rm=el.querySelector('[data-act="rm"]');if(rm)rm.onclick=()=>{ST()[slot]=null;save();renderSong(el);};
-  const bpm=el.querySelector('[data-act="bpm"]');if(bpm)bpm.oninput=()=>{const v=+bpm.value;ST()[slot].bpm=v>=40&&v<=240?v:null;save();};
+  const bpm=el.querySelector('[data-act="bpm"]');
+  if(bpm){
+    bpm.oninput=()=>{
+      const v=+bpm.value;
+      if(v>=40&&v<=240)store.bpm[sid]={bpm:Math.round(v),source:'manual',name:song.name||'',artist:song.artist||''};
+      else if(!bpm.value.trim())delete store.bpm[sid];
+      else return;
+      save();renderBpm();updateCycle();
+    };
+    bpm.onchange=()=>{renderSong(el);renderBpmInfo();};
+  }
 }
 document.querySelectorAll('[data-s]').forEach(el=>{
   const ev=el.type==='checkbox'||el.tagName==='SELECT'?'change':'input';
@@ -1384,6 +1671,9 @@ document.querySelectorAll('[data-s]').forEach(el=>{
     else if(el.type==='range'){s[k]=+el.value;$('volVal').textContent=Math.round(s[k]*100)+' %';Music.setBase(s[k]);}
     else s[k]=el.value.trim();
     if(k==='model'&&!s.model)s.model='';
+    if(k==='gsbKey'){bpmTried.clear();bpmErr='';}
+    if(k==='healthUrl'||k==='healthToken')healthTry=0;
+    if(k==='hrRest'||k==='hrMax'||k==='hrOn')renderHrSettings();
     save();applyConfig();
   });
 });
@@ -1446,6 +1736,8 @@ function sessionText(s,html){
   if(s.plan&&(s.plan.weightDelta||s.plan.rirShift||(s.plan.skipPairs||[]).length))extra.push(`Plan: ${s.plan.rounds} Runden${s.plan.weightDelta?', '+num(s.plan.weightDelta)+' kg':''}${s.plan.rirShift?', +'+s.plan.rirShift+' Reserve':''}${(s.plan.skipPairs||[]).length?', ohne Paar '+s.plan.skipPairs.join(', '):''}`);
   if(s.activeMs)extra.push('Dauer '+fmt(s.activeMs/1000));
   if(extra.length)lines.push(extra.join(' · '));
+  const hr=hrSummary(s);
+  if(hr)lines.push(`Puls: Ø ${hr.avg} · max ${hr.max}${hr.finisherMax?' · Finisher max '+hr.finisherMax:''}${hr.challengeMax?' · Challenge max '+hr.challengeMax:''}${hr.recovery120!=null?' · unter 120 nach '+fmt(hr.recovery120):''}`);
   if(s.aborted)lines.push((html?'<em>':'')+'A'+abortText(s.aborted,html).slice(1)+(html?'</em>':''));
   if(s.coachSay)lines.push('Coach: '+(html?esc(s.coachSay):s.coachSay));
   return lines;

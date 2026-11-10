@@ -1,0 +1,10 @@
+name = "hiit-kraft-30-health"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# KV-Namespace für Tageswerte ("day:JJJJ-MM-TT") und "latest"
+[[kv_namespaces]]
+binding = "HEALTH"
+id = "KV_ID_EINTRAGEN"
+
+# Secret, nicht hier eintragen:  npx wrangler secret put HEALTH_TOKEN

@@ -9,6 +9,7 @@ const Coach=(function(){
   const SYSTEM=`Du bist der Trainings-Coach in der App "HIIT Kraft 30". Nutzer: Mann, 34, 180 cm, 82 kg, früher viel Sport, Wiedereinsteiger, trainiert zu Hause im Wohnzimmer mit zwei verstellbaren Kurzhanteln (max. 15 kg je Hantel), 3x pro Woche, ca. 30 Minuten. Ziele: Muskelaufbau, schnell messbare Fortschritte, Motivation. Er will keine Standard-Ausreden und kein Aufgeben, sondern konkrete Anpassungen.
 Plan: Tag A und Tag B, je 3 Übungspaare, 2-3 Runden, Sätze nach Wiederholungsbereich bis zur angegebenen Reserve, 25 s Wechsel, Finisher-AMRAP (5 Thruster + 5 Burpees). Progression: erst Wiederholungen, dann Gewicht +2,5 kg, bei 15 kg dann Stufen (3 s exzentrisch, 1,5er, Rest-Pause).
 Sicherheit: Bei Schmerz (stechend, Gelenk, Wirbelsäule) immer die Übung tauschen oder streichen, nie durchziehen lassen. Bei Rückenbeschwerden einbeiniges Kreuzheben und vorgebeugtes Rudern vermeiden (Alternative: Hüftbrücke, einarmiges Rudern abgestützt, Dead Bug).
+Pulsdaten (bpm von Apple Watch oder Gurt: aktueller Puls, Durchschnitt und Maximum je Satz, Erholungszeit nach dem Finisher bis unter 120) und Ruhewerte (Ruhepuls, HRV, Schlaf) sind Hinweise auf Belastung und Erholung: hohe Satzmaxima und langsame Erholung bedeuten hohe Belastung, schnelle Erholung spricht für Reserven. Nutze sie nur zur Trainingssteuerung, nie als medizinische Diagnose; bei auffälligen Werten mit Beschwerden zum Arzt raten statt zu deuten.
 Antworte knapp, direkt, auf Deutsch, ohne Floskeln, ohne Emojis. "say"-Texte werden vorgelesen: maximal 2 kurze Sätze, keine Listen, keine Zahlen in Klammern.
 Gib deine Antwort immer über das Tool "antwort" zurück.`;
 
@@ -54,7 +55,7 @@ Gib deine Antwort immer über das Tool "antwort" zurück.`;
   // Antwort: {say, rounds, weightDelta, rirShift, finisher, finisherSec, swaps:{orig:neu}, skipPairs:[n]}
   async function planAdjust(ctx){
     const prompt=`Check-in vor der Einheit und aktueller Plan. Passe den Plan an den Zustand an und begründe in einem Satz.
-Regeln: rounds 2 oder 3. weightDelta nur -5, -2.5 oder 0 (gilt für alle Hantelübungen). rirShift 0 oder 1 (mehr Reserve). finisher true/false, finisherSec 120 oder 180. swaps nur aus den erlaubten Varianten (Feld "lighter" je Übung). skipPairs: Paarnummern 1-3, die entfallen (nur bei Zeitmangel oder Beschwerden). Bei Zeit 15 min: rounds 2 und finisher false. Bei 20 min: rounds 2. Bei starkem Muskelkater oder Energie unter 3: weightDelta -2.5 und rirShift 1. Wenn alles gut ist: nichts ändern und kurz motivieren.
+Regeln: rounds 2 oder 3. weightDelta nur -5, -2.5 oder 0 (gilt für alle Hantelübungen). rirShift 0 oder 1 (mehr Reserve). finisher true/false, finisherSec 120 oder 180. swaps nur aus den erlaubten Varianten (Feld "lighter" je Übung). skipPairs: Paarnummern 1-3, die entfallen (nur bei Zeitmangel oder Beschwerden). Bei Zeit 15 min: rounds 2 und finisher false. Bei 20 min: rounds 2. Bei starkem Muskelkater oder Energie unter 3: weightDelta -2.5 und rirShift 1. Feld "health": letzte Nacht (Schlaf, Ruhepuls, HRV) und das Mittel der 7 Tage davor. Deutlich erhöhter Ruhepuls (etwa 5 Schläge oder mehr über dem Mittel) oder deutlich niedrigere HRV (etwa 15 % oder mehr unter dem Mittel) heißt leichter trainieren: weightDelta -2.5 und rirShift 1. Wenn alles gut ist: nichts ändern und kurz motivieren.
 Antwortformat: {"say":"...","rounds":3,"weightDelta":0,"rirShift":0,"finisher":true,"finisherSec":180,"swaps":{},"skipPairs":[]}
 Daten:
 ${JSON.stringify(ctx)}`;
@@ -117,12 +118,19 @@ Einheiten: ${JSON.stringify(sessions)}`;
   }
 
   // ---- Lokale Regeln ohne Key ----
-  function localAdjust(ci){
+  // health: {last:{restingHr,hrv,sleepHours}, avg7:{restingHr,hrv}} oder null
+  function localAdjust(ci,health){
     const out={say:'',rounds:null,weightDelta:0,rirShift:0,finisher:null,finisherSec:null,swaps:{},skipPairs:[]};
     const msgs=[];
     if(ci.time===15){out.rounds=2;out.finisher=false;msgs.push('Kurze Einheit: 2 Runden, kein Finisher.');}
     else if(ci.time===20){out.rounds=2;msgs.push('20 Minuten: 2 Runden pro Paar.');}
     if(ci.sore>=2||ci.energy<=2){out.weightDelta=-2.5;out.rirShift=1;msgs.push('Heute 2,5 kg weniger und mehr Reserve.');}
+    if(health&&health.last&&health.avg7&&out.weightDelta===0){
+      const L=health.last,A=health.avg7;
+      const rhUp=L.restingHr!=null&&A.restingHr!=null&&L.restingHr-A.restingHr>=5;
+      const hrvDown=L.hrv!=null&&A.hrv&&L.hrv<=A.hrv*.85;
+      if(rhUp||hrvDown){out.weightDelta=-2.5;out.rirShift=1;msgs.push((rhUp?'Ruhepuls erhöht':'HRV niedrig')+': heute 2,5 kg weniger und mehr Reserve.');}
+    }
     if(ci.sleep<=2&&out.finisher!==false){out.finisherSec=120;msgs.push('Finisher nur 2 Minuten.');}
     out.say=msgs.length?msgs.join(' '):'Alles im grünen Bereich, Plan wie vorgesehen.';
     return out;
